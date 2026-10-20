@@ -943,6 +943,9 @@
     }
     /* ========================================= */
 
+    .stats-subtab-pane { display: none; }
+    .stats-subtab-pane.active { display: block; }
+
     .menu-toggle {
       display: none; background: var(--color-naranja); border: none; color: #fff;
       font-size: 28px; padding: 6px 14px; border-radius: 30px; margin-bottom: 15px;
@@ -1302,7 +1305,7 @@
         </li>
       </ul>
 
-      <div class="tab-content" id="statsTabContent">
+      <div class="stats-tab-content" id="statsTabContent">
         <!-- Pestaña 1: Resumen Visual -->
         <div class="stats-subtab-pane active show" id="pane-resumen" role="tabpanel" aria-labelledby="btn-tab-resumen">
           <div class="stats-chart-row">
@@ -4079,13 +4082,17 @@
       }
     }
     function setupTabs() {
-      document.querySelectorAll('.nav-item').forEach(btn => {
+      // Solo escuchar los nav-item del menú lateral, no los de las sub-pestañas
+      document.querySelectorAll('.sidebar .nav .nav-item').forEach(btn => {
         btn.addEventListener('click', () => {
-          document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.sidebar .nav .nav-item').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           const tab = btn.dataset.tab;
-          document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-          document.getElementById(`tab-${tab}`).classList.add('active');
+          document.querySelectorAll('.main > .tab-content').forEach(el => el.classList.remove('active'));
+          const targetTab = document.getElementById(`tab-${tab}`);
+          if (targetTab) {
+            targetTab.classList.add('active');
+          }
           if (tab === 'dashboard') refreshDashboard();
           else if (tab === 'stats') refreshStats();
           document.getElementById('sidebar').classList.remove('open');
