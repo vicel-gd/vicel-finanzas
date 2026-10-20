@@ -946,6 +946,23 @@
     .stats-subtab-pane { display: none; }
     .stats-subtab-pane.active { display: block; }
 
+    /* ============ WIZARD INTERCAMBIO ============ */
+    .intercambio-step { display: none; }
+    .intercambio-step.active { display: block; }
+    #intercambioSummaryText {
+      background-color: #fffdf6;
+      border: 2px dashed var(--color-naranja);
+      border-radius: 20px;
+      padding: 20px;
+      font-size: 16px;
+      line-height: 1.5;
+      text-align: center;
+    }
+    #intercambioSummaryText strong {
+      color: var(--color-naranja);
+    }
+    /* ========================================= */
+
     .menu-toggle {
       display: none; background: var(--color-naranja); border: none; color: #fff;
       font-size: 28px; padding: 6px 14px; border-radius: 30px; margin-bottom: 15px;
@@ -1498,31 +1515,42 @@
         </div>
         <div class="modal-body">
           <form id="intercambioForm">
-            <div class="row">
-              <div class="col-md-6 mb-3"><label>Fecha</label><input type="date" id="intercambioDate" class="form-control" required /></div>
-              <div class="col-md-6 mb-3"><label>Monto</label><input type="number" id="intercambioAmount" class="form-control" step="0.01" required /></div>
+            <!-- Paso 1 -->
+            <div id="step-1-intercambio" class="intercambio-step active">
+              <h6 class="mb-3 text-naranja">Paso 1: ¿De dónde sale el dinero?</h6>
+              <div class="row">
+                <div class="col-md-6 mb-3"><label>Fecha</label><input type="date" id="intercambioDate" class="form-control" required /></div>
+                <div class="col-md-6 mb-3"><label>Monto</label><input type="number" id="intercambioAmount" class="form-control" step="0.01" required /></div>
+              </div>
+              <div class="mb-3"><label>Categoría A</label><select id="intercambioCatA" class="form-select" required></select></div>
+              <div class="mb-3"><label>Cuenta A</label><select id="intercambioCuentaA" class="form-select" required></select></div>
             </div>
-            <hr />
-            <h6>Lado A</h6>
-            <div class="row">
-              <div class="col-md-6 mb-3"><label>Categoría A</label><select id="intercambioCatA" class="form-select" required></select></div>
-              <div class="col-md-6 mb-3"><label>Cuenta A</label><select id="intercambioCuentaA" class="form-select" required></select></div>
+
+            <!-- Paso 2 -->
+            <div id="step-2-intercambio" class="intercambio-step">
+              <h6 class="mb-3 text-naranja">Paso 2: ¿A dónde entra el dinero?</h6>
+              <div class="mb-3"><label>Categoría B</label><select id="intercambioCatB" class="form-select" required></select></div>
+              <div class="mb-3"><label>Cuenta B</label><select id="intercambioCuentaB" class="form-select" required></select></div>
+              <div class="mb-3"><label>Descripción (opcional)</label><input type="text" id="intercambioDesc" class="form-control" placeholder="Ej: INTERCAMBIO PC ↔ UNIVERSIDAD" /></div>
             </div>
-            <hr />
-            <h6>Lado B</h6>
-            <div class="row">
-              <div class="col-md-6 mb-3"><label>Categoría B</label><select id="intercambioCatB" class="form-select" required></select></div>
-              <div class="col-md-6 mb-3"><label>Cuenta B</label><select id="intercambioCuentaB" class="form-select" required></select></div>
-            </div>
-            <div class="mb-3"><label>Descripción (opcional)</label><input type="text" id="intercambioDesc" class="form-control" placeholder="Ej: INTERCAMBIO PC ↔ UNIVERSIDAD" /></div>
-            <div class="mb-2 text-white-50" style="font-size:13px;">
-              <i class="bi bi-info-circle"></i> Se crearán 4 movimientos: sale de A (Cuenta A), entra a B (Cuenta A), sale de B (Cuenta B) y entra a A (Cuenta B).
+
+            <!-- Paso 3 -->
+            <div id="step-3-intercambio" class="intercambio-step">
+              <h6 class="mb-3 text-naranja">Paso 3: Resumen del intercambio</h6>
+              <div class="alert alert-info" id="intercambioSummaryText">
+                <!-- Text will be injected here -->
+              </div>
+              <p class="text-muted small mb-0"><i class="bi bi-info-circle"></i> Se crearán 4 movimientos internos para mantener la consistencia de tus saldos.</p>
             </div>
           </form>
         </div>
-        <div class="modal-footer">
-          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button class="btn btn-primary" style="background:var(--color-naranja);border:none;" onclick="saveIntercambio()">Guardar</button>
+        <div class="modal-footer justify-content-between">
+          <button class="btn btn-secondary" id="btn-intercambio-atras" onclick="prevIntercambioStep()" style="display: none;">Atrás</button>
+          <div>
+            <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button class="btn btn-primary" id="btn-intercambio-siguiente" onclick="nextIntercambioStep()" style="background:var(--color-naranja);border:none;">Siguiente</button>
+            <button class="btn btn-primary" id="btn-intercambio-guardar" onclick="saveIntercambio()" style="background:var(--color-naranja);border:none; display: none;">Confirmar</button>
+          </div>
         </div>
       </div>
     </div>
@@ -1779,6 +1807,9 @@
 
     // Estado de privacidad
     let privacyMode = false;
+
+    // Estado del Wizard de Intercambio
+    let currentIntercambioStep = 1;
 
     const defaultCategories = ['Ocio', 'Pasaje', 'Comida', 'Alquiler', 'Aseo personal'];
     const DEFAULT_ACCOUNT_COLOR = '#888888';
@@ -3346,13 +3377,88 @@
         });
       });
     }
+
+    function updateIntercambioUI() {
+      // Ocultar todos los pasos
+      document.querySelectorAll('.intercambio-step').forEach(step => step.classList.remove('active'));
+      // Mostrar el paso actual
+      const currentStepEl = document.getElementById(`step-${currentIntercambioStep}-intercambio`);
+      if (currentStepEl) currentStepEl.classList.add('active');
+
+      // Configurar botones
+      const btnAtras = document.getElementById('btn-intercambio-atras');
+      const btnSiguiente = document.getElementById('btn-intercambio-siguiente');
+      const btnGuardar = document.getElementById('btn-intercambio-guardar');
+
+      if (currentIntercambioStep === 1) {
+        btnAtras.style.display = 'none';
+        btnSiguiente.style.display = 'inline-block';
+        btnGuardar.style.display = 'none';
+      } else if (currentIntercambioStep === 2) {
+        btnAtras.style.display = 'inline-block';
+        btnSiguiente.style.display = 'inline-block';
+        btnGuardar.style.display = 'none';
+      } else if (currentIntercambioStep === 3) {
+        btnAtras.style.display = 'inline-block';
+        btnSiguiente.style.display = 'none';
+        btnGuardar.style.display = 'inline-block';
+      }
+    }
+
+    function nextIntercambioStep() {
+      if (currentIntercambioStep === 1) {
+        // Validar paso 1
+        const date = document.getElementById('intercambioDate').value;
+        const amount = parseFloat(document.getElementById('intercambioAmount').value);
+        const catA = document.getElementById('intercambioCatA').value;
+        const accA = document.getElementById('intercambioCuentaA').value;
+        if (!date || isNaN(amount) || amount <= 0 || !catA || !accA) {
+          alert('Por favor, completa todos los campos del Paso 1 correctamente.'); return;
+        }
+        currentIntercambioStep = 2;
+      } else if (currentIntercambioStep === 2) {
+        // Validar paso 2
+        const catB = document.getElementById('intercambioCatB').value;
+        const accB = document.getElementById('intercambioCuentaB').value;
+        if (!catB || !accB) {
+          alert('Por favor, selecciona la Categoría y Cuenta de destino (Paso 2).'); return;
+        }
+
+        // Generar Resumen
+        const amount = parseFloat(document.getElementById('intercambioAmount').value).toFixed(2).replace('.', ',');
+        const catAName = document.getElementById('intercambioCatA').options[document.getElementById('intercambioCatA').selectedIndex].text.split(' —')[0];
+        const catBName = document.getElementById('intercambioCatB').options[document.getElementById('intercambioCatB').selectedIndex].text.split(' —')[0];
+        const accAName = document.getElementById('intercambioCuentaA').value;
+        const accBName = document.getElementById('intercambioCuentaB').value;
+
+        document.getElementById('intercambioSummaryText').innerHTML = `
+          Moverás <strong>$${amount}</strong> desde<br>
+          <strong>${catAName} / ${accAName}</strong><br>
+          hacia<br>
+          <strong>${catBName} / ${accBName}</strong>
+        `;
+        currentIntercambioStep = 3;
+      }
+      updateIntercambioUI();
+    }
+
+    function prevIntercambioStep() {
+      if (currentIntercambioStep > 1) {
+        currentIntercambioStep--;
+        updateIntercambioUI();
+      }
+    }
+
     function openAddIntercambio() {
       document.getElementById('intercambioForm').reset();
       document.getElementById('intercambioDate').value = getTodayLocal();
+      currentIntercambioStep = 1;
+      updateIntercambioUI();
       refreshIntercambioDropdowns().then(() => {
         new bootstrap.Modal(document.getElementById('intercambioModal')).show();
       });
     }
+
     async function saveIntercambio() {
       const fecha = document.getElementById('intercambioDate').value;
       const monto = parseFloat(document.getElementById('intercambioAmount').value);
@@ -3361,18 +3467,22 @@
       const catBId = parseInt(document.getElementById('intercambioCatB').value);
       const cuentaB = document.getElementById('intercambioCuentaB').value;
       const desc = document.getElementById('intercambioDesc').value.trim();
-      if (!fecha || isNaN(monto) || monto <= 0) { alert('Completa la fecha y el monto (mayor a 0).'); return; }
+      
+      if (!fecha || isNaN(monto) || monto <= 0) { alert('Revisa la fecha y el monto.'); return; }
       if (isNaN(catAId) || isNaN(catBId)) { alert('Selecciona ambas categorías.'); return; }
       if (!cuentaA || !cuentaB) { alert('Selecciona ambas cuentas.'); return; }
       if (catAId === catBId && cuentaA === cuentaB) { alert('Los lados A y B son iguales, no hay intercambio.'); return; }
+      
       const grupoId = `intercambio_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
       const descFinal = desc || 'INTERCAMBIO';
+      
       await db.movements.bulkAdd([
         { fecha, categoriaId: catAId, monto: -monto, descripcion: descFinal, cuenta: cuentaA, grupoId },
         { fecha, categoriaId: catBId, monto: monto, descripcion: descFinal, cuenta: cuentaA, grupoId },
         { fecha, categoriaId: catBId, monto: -monto, descripcion: descFinal, cuenta: cuentaB, grupoId },
         { fecha, categoriaId: catAId, monto: monto, descripcion: descFinal, cuenta: cuentaB, grupoId }
       ]);
+      
       expandedGroups.add(grupoId);
       bootstrap.Modal.getInstance(document.getElementById('intercambioModal')).hide();
       await refreshAll(); scheduleSync();
