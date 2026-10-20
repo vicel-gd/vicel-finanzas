@@ -1404,7 +1404,11 @@
               <label>Categoría</label>
               <select id="movementCategory" class="form-select" required></select>
             </div>
-            <div class="mb-3"><label>Monto</label><input type="number" id="movementAmount" class="form-control" step="0.01" required /></div>
+            <div class="mb-3">
+              <label>Monto</label>
+              <input type="number" id="movementAmount" class="form-control" step="0.01" required />
+              <small id="amountFeedback" class="text-muted mt-1 d-block" style="font-size: 12px; font-weight: 500;"></small>
+            </div>
             <div class="mb-3">
               <label>Tipo</label>
               <div>
@@ -1424,7 +1428,7 @@
         </div>
         <div class="modal-footer">
           <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button class="btn btn-primary" style="background:var(--color-naranja);border:none;" onclick="saveMovement()">Guardar</button>
+          <button class="btn btn-primary" id="btn-save-movement" style="background:var(--color-naranja);border:none;" onclick="saveMovement()">Guardar</button>
         </div>
       </div>
     </div>
@@ -1500,7 +1504,7 @@
         </div>
         <div class="modal-footer">
           <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button class="btn btn-primary" style="background:var(--color-naranja);border:none;" onclick="saveRedondeo()">Guardar</button>
+          <button class="btn btn-primary" id="btn-save-redondeo" style="background:var(--color-naranja);border:none;" onclick="saveRedondeo()">Guardar</button>
         </div>
       </div>
     </div>
@@ -1579,7 +1583,7 @@
         </div>
         <div class="modal-footer">
           <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button class="btn btn-primary" style="background:var(--color-naranja);border:none;" onclick="saveLoan()">Guardar</button>
+          <button class="btn btn-primary" id="btn-save-loan" style="background:var(--color-naranja);border:none;" onclick="saveLoan()">Guardar</button>
         </div>
       </div>
     </div>
@@ -1651,7 +1655,7 @@
         </div>
         <div class="modal-footer">
           <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button class="btn btn-primary" style="background:var(--color-naranja);border:none;" onclick="saveGoal()">Guardar</button>
+          <button class="btn btn-primary" id="btn-save-goal" style="background:var(--color-naranja);border:none;" onclick="saveGoal()">Guardar</button>
         </div>
       </div>
     </div>
@@ -1672,7 +1676,7 @@
         </div>
         <div class="modal-footer">
           <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button class="btn btn-primary" style="background:var(--color-naranja);border:none;" onclick="saveCategory()">Guardar</button>
+          <button class="btn btn-primary" id="btn-save-category" style="background:var(--color-naranja);border:none;" onclick="saveCategory()">Guardar</button>
         </div>
       </div>
     </div>
@@ -1694,7 +1698,7 @@
         </div>
         <div class="modal-footer">
           <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button class="btn btn-primary" style="background:var(--color-naranja);border:none;" onclick="saveAccount()">Guardar</button>
+          <button class="btn btn-primary" id="btn-save-account" style="background:var(--color-naranja);border:none;" onclick="saveAccount()">Guardar</button>
         </div>
       </div>
     </div>
@@ -2268,6 +2272,20 @@
 
         setupFormSubmissions();
 
+        // Listeners para el Feedback en tiempo real
+        document.getElementById('movementAmount').addEventListener('input', updateMovementFeedback);
+        document.querySelectorAll('input[name="movementType"]').forEach(radio => {
+            radio.addEventListener('change', updateMovementFeedback);
+        });
+        document.querySelectorAll('#intercambioForm input, #intercambioForm select').forEach(el => {
+            el.addEventListener('change', checkIntercambioStepValidity);
+            el.addEventListener('input', checkIntercambioStepValidity);
+        });
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('input', checkFormValidity);
+            form.addEventListener('change', checkFormValidity);
+        });
+
         document.getElementById('btnLoginLanding').addEventListener('click', () => {
           try { loginWithGoogle(); }
           catch (e) { console.error('Error en login:', e); alert('Error al iniciar sesión con Google.'); }
@@ -2290,6 +2308,86 @@
         alert('Error al inicializar la aplicación.');
       }
     });
+
+    /* ================== VALIDACIÓN EN TIEMPO REAL ================== */
+    function checkFormValidity() {
+      // Movimiento
+      const movForm = document.getElementById('movementForm');
+      const movBtn = document.getElementById('btn-save-movement');
+      if (movForm && movBtn) {
+        const amount = parseFloat(document.getElementById('movementAmount').value);
+        movBtn.disabled = !(movForm.checkValidity() && amount > 0);
+      }
+
+      // Préstamo
+      const loanForm = document.getElementById('loanForm');
+      const loanBtn = document.getElementById('btn-save-loan');
+      if (loanForm && loanBtn) {
+        const amount = parseFloat(document.getElementById('loanAmount').value);
+        loanBtn.disabled = !(loanForm.checkValidity() && amount > 0);
+      }
+
+      // Meta
+      const goalForm = document.getElementById('goalForm');
+      const goalBtn = document.getElementById('btn-save-goal');
+      if (goalForm && goalBtn) {
+        const amount = parseFloat(document.getElementById('goalTotal').value);
+        goalBtn.disabled = !(goalForm.checkValidity() && amount > 0);
+      }
+
+      // Redondeo
+      const redondeoForm = document.getElementById('redondeoForm');
+      const redondeoBtn = document.getElementById('btn-save-redondeo');
+      if (redondeoForm && redondeoBtn) {
+        const amount = parseFloat(document.getElementById('redondeoAmount').value);
+        redondeoBtn.disabled = !(redondeoForm.checkValidity() && amount > 0);
+      }
+
+      // Categoría
+      const catForm = document.getElementById('categoryForm');
+      const catBtn = document.getElementById('btn-save-category');
+      if (catForm && catBtn) {
+          catBtn.disabled = !catForm.checkValidity();
+      }
+
+      // Cuenta
+      const accForm = document.getElementById('accountForm');
+      const accBtn = document.getElementById('btn-save-account');
+      if (accForm && accBtn) {
+          accBtn.disabled = !accForm.checkValidity();
+      }
+    }
+
+    function checkIntercambioStepValidity() {
+      const btnSiguiente = document.getElementById('btn-intercambio-siguiente');
+      if (currentIntercambioStep === 1) {
+        const date = document.getElementById('intercambioDate').value;
+        const amount = parseFloat(document.getElementById('intercambioAmount').value);
+        const catA = document.getElementById('intercambioCatA').value;
+        const accA = document.getElementById('intercambioCuentaA').value;
+        btnSiguiente.disabled = !(date && amount > 0 && catA && accA);
+      } else if (currentIntercambioStep === 2) {
+        const catB = document.getElementById('intercambioCatB').value;
+        const accB = document.getElementById('intercambioCuentaB').value;
+        btnSiguiente.disabled = !(catB && accB);
+      }
+    }
+
+    function updateMovementFeedback() {
+      const amountInput = document.getElementById('movementAmount');
+      const feedbackEl = document.getElementById('amountFeedback');
+      const type = document.querySelector('input[name="movementType"]:checked').value;
+      const amount = parseFloat(amountInput.value);
+
+      if (amount > 0) {
+        const sign = type === 'egreso' ? '-' : '+';
+        feedbackEl.innerHTML = `Se guardará como: <strong>${sign}${formatCurrency(amount)}</strong>`;
+      } else {
+        feedbackEl.innerHTML = '';
+      }
+      checkFormValidity();
+    }
+    /* ================== FIN VALIDACIÓN ================== */
 
     async function loadDefaultData() {
       const catCount = await db.categories.count();
@@ -3187,6 +3285,7 @@
       document.getElementById('movementDate').value = getTodayLocal();
       refreshCategoriesDropdown();
       refreshAccountsDropdown('movementAccount');
+      checkFormValidity();
       new bootstrap.Modal(document.getElementById('movementModal')).show();
     }
     async function editMovement(id) {
@@ -3204,6 +3303,7 @@
       renderCselLabel(document.getElementById('movementCategory'));
       await refreshAccountsDropdown('movementAccount');
       document.getElementById('movementAccount').value = m.cuenta || '';
+      updateMovementFeedback();
       new bootstrap.Modal(document.getElementById('movementModal')).show();
     }
     async function saveMovement() {
@@ -3314,6 +3414,7 @@
       document.getElementById('redondeoDate').value = getTodayLocal();
       refreshRedondeoCategoryDropdowns();
       refreshAccountsDropdown('redondeoAccount').then(() => {
+        checkFormValidity();
         new bootstrap.Modal(document.getElementById('redondeoModal')).show();
       });
     }
@@ -3394,10 +3495,12 @@
         btnAtras.style.display = 'none';
         btnSiguiente.style.display = 'inline-block';
         btnGuardar.style.display = 'none';
+        checkIntercambioStepValidity();
       } else if (currentIntercambioStep === 2) {
         btnAtras.style.display = 'inline-block';
         btnSiguiente.style.display = 'inline-block';
         btnGuardar.style.display = 'none';
+        checkIntercambioStepValidity();
       } else if (currentIntercambioStep === 3) {
         btnAtras.style.display = 'inline-block';
         btnSiguiente.style.display = 'none';
@@ -3407,23 +3510,8 @@
 
     function nextIntercambioStep() {
       if (currentIntercambioStep === 1) {
-        // Validar paso 1
-        const date = document.getElementById('intercambioDate').value;
-        const amount = parseFloat(document.getElementById('intercambioAmount').value);
-        const catA = document.getElementById('intercambioCatA').value;
-        const accA = document.getElementById('intercambioCuentaA').value;
-        if (!date || isNaN(amount) || amount <= 0 || !catA || !accA) {
-          alert('Por favor, completa todos los campos del Paso 1 correctamente.'); return;
-        }
         currentIntercambioStep = 2;
       } else if (currentIntercambioStep === 2) {
-        // Validar paso 2
-        const catB = document.getElementById('intercambioCatB').value;
-        const accB = document.getElementById('intercambioCuentaB').value;
-        if (!catB || !accB) {
-          alert('Por favor, selecciona la Categoría y Cuenta de destino (Paso 2).'); return;
-        }
-
         // Generar Resumen
         const amount = parseFloat(document.getElementById('intercambioAmount').value).toFixed(2).replace('.', ',');
         const catAName = document.getElementById('intercambioCatA').options[document.getElementById('intercambioCatA').selectedIndex].text.split(' —')[0];
@@ -3455,6 +3543,7 @@
       currentIntercambioStep = 1;
       updateIntercambioUI();
       refreshIntercambioDropdowns().then(() => {
+        checkIntercambioStepValidity();
         new bootstrap.Modal(document.getElementById('intercambioModal')).show();
       });
     }
@@ -3769,6 +3858,7 @@
       document.getElementById('loanDate').value = getTodayLocal();
       refreshCategoriesDropdownForLoan();
       refreshAccountsDropdownForLoan();
+      checkFormValidity();
       new bootstrap.Modal(document.getElementById('loanModal')).show();
     }
     async function refreshCategoriesDropdownForLoan() {
@@ -3950,6 +4040,7 @@
       document.getElementById('editGoalId').value = '';
       document.getElementById('goalModalTitle').textContent = 'Nueva Meta';
       refreshCategoriesDropdown();
+      checkFormValidity();
       new bootstrap.Modal(document.getElementById('goalModal')).show();
     }
     async function editGoal(id) {
@@ -3961,6 +4052,7 @@
       document.getElementById('goalTotal').value = goal.costoTotal;
       await refreshCategoriesDropdown();
       document.getElementById('goalCategory').value = goal.categoriaAnclaId || '';
+      checkFormValidity();
       new bootstrap.Modal(document.getElementById('goalModal')).show();
     }
     async function saveGoal() {
@@ -4047,6 +4139,7 @@
       document.getElementById('categoryForm').reset();
       document.getElementById('categoryEditId').value = '';
       document.getElementById('categoryModalTitle').textContent = 'Nueva Categoría';
+      checkFormValidity();
       new bootstrap.Modal(document.getElementById('categoryModal')).show();
     }
     async function editCategory(id) {
@@ -4055,6 +4148,7 @@
       document.getElementById('categoryName').value = cat.nombre;
       document.getElementById('categoryEditId').value = cat.id;
       document.getElementById('categoryModalTitle').textContent = 'Editar Categoría';
+      checkFormValidity();
       new bootstrap.Modal(document.getElementById('categoryModal')).show();
     }
     async function saveCategory() {
@@ -4129,6 +4223,7 @@
       document.getElementById('accountEditId').value = '';
       document.getElementById('accountColor').value = DEFAULT_ACCOUNT_COLOR;
       document.getElementById('accountModalTitle').textContent = 'Nueva Cuenta';
+      checkFormValidity();
       new bootstrap.Modal(document.getElementById('accountModal')).show();
     }
     async function editAccount(id) {
@@ -4138,6 +4233,7 @@
       document.getElementById('accountColor').value = acc.color || DEFAULT_ACCOUNT_COLOR;
       document.getElementById('accountEditId').value = acc.id;
       document.getElementById('accountModalTitle').textContent = 'Editar Cuenta';
+      checkFormValidity();
       new bootstrap.Modal(document.getElementById('accountModal')).show();
     }
     async function saveAccount() {
