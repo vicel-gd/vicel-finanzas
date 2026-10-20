@@ -66,8 +66,8 @@
     /* ============ BOTÓN DE PRIVACIDAD ============ */
     .privacy-toggle-btn {
       position: fixed;
-      top: 16px;
-      right: 16px;
+      bottom: 24px; /* <--- CAMBIO: Movido abajo */
+      right: 24px;
       z-index: 2500;
       background: var(--color-naranja);
       color: #fff;
@@ -80,7 +80,7 @@
       justify-content: center;
       cursor: pointer;
       font-size: 22px;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.45);
       transition: 0.2s;
     }
     .privacy-toggle-btn:hover {
@@ -91,14 +91,15 @@
     .privacy-toggle-btn.active {
       background: var(--color-oscuro);
       color: var(--color-naranja);
+      border: 2px solid var(--color-naranja);
     }
     .privacy-toggle-btn.active:hover {
       background: #000;
     }
     @media (max-width: 992px) {
       .privacy-toggle-btn {
-        top: 12px;
-        right: 12px;
+        bottom: 20px;
+        right: 20px;
         width: 42px;
         height: 42px;
         font-size: 20px;
@@ -106,8 +107,8 @@
     }
     @media (max-width: 576px) {
       .privacy-toggle-btn {
-        top: 10px;
-        right: 10px;
+        bottom: 16px;
+        right: 16px;
         width: 40px;
         height: 40px;
         font-size: 18px;
@@ -312,14 +313,9 @@
     }
     .custom-dropdown-menu .dropdown-item i { font-size: 18px; }
     
-    .custom-dropdown-menu .item-dividido i { color: #1fe21f; }
-    .custom-dropdown-menu .item-dividido:hover { color: #1fe21f; }
-    
-    .custom-dropdown-menu .item-redondeo i { color: #1f81e2; }
-    .custom-dropdown-menu .item-redondeo:hover { color: #1f81e2; }
-    
-    .custom-dropdown-menu .item-intercambio i { color: #845ec2; }
-    .custom-dropdown-menu .item-intercambio:hover { color: #845ec2; }
+    .icon-dividido { color: #1fe21f !important; }
+    .icon-redondeo { color: #1f81e2 !important; }
+    .icon-intercambio { color: #845ec2 !important; }
     /* =============================================== */
 
     .person-total-card {
@@ -1140,17 +1136,17 @@
             <ul class="dropdown-menu dropdown-menu-end custom-dropdown-menu">
               <li>
                 <button class="dropdown-item" onclick="openAddSplitMovement()">
-                  <i class="bi bi-distribute-horizontal item-dividido"></i> Dividido
+                  <i class="bi bi-distribute-horizontal icon-dividido"></i> Dividido
                 </button>
               </li>
               <li>
                 <button class="dropdown-item" onclick="openAddRedondeo()">
-                  <i class="bi bi-arrow-left-right item-redondeo"></i> Redondeo
+                  <i class="bi bi-arrow-left-right icon-redondeo"></i> Redondeo
                 </button>
               </li>
               <li>
                 <button class="dropdown-item" onclick="openAddIntercambio()">
-                  <i class="bi bi-shuffle item-intercambio"></i> Intercambiar
+                  <i class="bi bi-shuffle icon-intercambio"></i> Intercambiar
                 </button>
               </li>
             </ul>
