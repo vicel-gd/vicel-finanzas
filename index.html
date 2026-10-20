@@ -1304,7 +1304,7 @@
 
       <div class="tab-content" id="statsTabContent">
         <!-- Pestaña 1: Resumen Visual -->
-        <div class="tab-pane fade show active" id="pane-resumen" role="tabpanel" aria-labelledby="btn-tab-resumen">
+        <div class="stats-subtab-pane active show" id="pane-resumen" role="tabpanel" aria-labelledby="btn-tab-resumen">
           <div class="stats-chart-row">
             <div class="stats-chart-container">
               <div class="stats-chart-title">Gastos por categoría</div>
@@ -1318,14 +1318,14 @@
         </div>
 
         <!-- Pestaña 2: Ranking de Categorías -->
-        <div class="tab-pane fade" id="pane-ranking" role="tabpanel" aria-labelledby="btn-tab-ranking">
+        <div class="stats-subtab-pane" id="pane-ranking" role="tabpanel" aria-labelledby="btn-tab-ranking">
           <div class="stats-section">
             <div id="statsCategoryBars"></div>
           </div>
         </div>
 
         <!-- Pestaña 3: Top 5 Gastos -->
-        <div class="tab-pane fade" id="pane-top5" role="tabpanel" aria-labelledby="btn-tab-top5">
+        <div class="stats-subtab-pane" id="pane-top5" role="tabpanel" aria-labelledby="btn-tab-top5">
           <div class="stats-section">
             <div id="statsTop5"></div>
           </div>
@@ -2203,11 +2203,29 @@
           document.getElementById('sidebarOverlay').classList.remove('active');
         });
 
-        // Event listener para redimensionar gráficos al cambiar de pestaña en Estadísticas
+        // Lógica manual para las pestañas de Estadísticas
         document.querySelectorAll('#statsTabs button').forEach(tabBtn => {
-          tabBtn.addEventListener('shown.bs.tab', (e) => {
-            // Si el target es el resumen visual (donde están los canvas), forzamos resize
-            if (e.target.getAttribute('data-bs-target') === '#pane-resumen') {
+          tabBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            // 1. Quitar 'active' de todos los botones
+            document.querySelectorAll('#statsTabs button').forEach(btn => btn.classList.remove('active'));
+            // 2. Poner 'active' al botón clickeado
+            tabBtn.classList.add('active');
+
+            // 3. Ocultar todos los paneles
+            document.querySelectorAll('.stats-subtab-pane').forEach(pane => {
+              pane.classList.remove('show', 'active');
+            });
+
+            // 4. Mostrar el panel correspondiente
+            const targetId = tabBtn.getAttribute('data-bs-target');
+            const targetPane = document.querySelector(targetId);
+            if (targetPane) {
+              targetPane.classList.add('show', 'active');
+            }
+
+            // 5. Si el target es el resumen visual, forzamos resize de los gráficos
+            if (targetId === '#pane-resumen') {
               if (statsChartDonaInstance) statsChartDonaInstance.resize();
               if (statsChartDiasInstance) statsChartDiasInstance.resize();
             }
