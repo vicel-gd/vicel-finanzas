@@ -272,12 +272,6 @@
       display: inline-flex; align-items: center; gap: 8px;
     }
     .btn-primary-custom:hover { background: var(--color-naranja-hover); color: #fff; }
-    .btn-primary-custom.btn-dividido-custom { background: #1fe21f; }
-    .btn-primary-custom.btn-dividido-custom:hover { background: #0eb30e; }
-    .btn-primary-custom.btn-redondeo-custom { background: #1f81e2; }
-    .btn-primary-custom.btn-redondeo-custom:hover { background: #0e61b3; }
-    .btn-primary-custom.btn-intercambio-custom { background: #845ec2; }
-    .btn-primary-custom.btn-intercambio-custom:hover { background: #6b46a8; }
     .btn-danger-custom {
       background: #dc3545; border: none; border-radius: 60px; padding: 10px 24px;
       font-weight: 700; color: #fff; transition: 0.2s; font-size: 16px;
@@ -285,6 +279,48 @@
     }
     .btn-danger-custom:hover { background: #b02a37; color: #fff; }
     .warning-text { color: #fff7e0 !important; opacity: 0.85; }
+
+    /* ============ NUEVO MENÚ DE ACCIONES ============ */
+    .btn-action-secondary {
+      background: transparent; color: #ccc;
+      border: 1px solid #555; border-radius: 60px;
+      padding: 9px 16px; font-weight: 700; font-size: 16px;
+      transition: 0.2s; display: inline-flex; align-items: center; justify-content: center;
+      cursor: pointer;
+    }
+    .btn-action-secondary:hover,
+    .btn-action-secondary[aria-expanded="true"] {
+      background: #333; color: #fff; border-color: #777;
+    }
+    
+    .custom-dropdown-menu {
+      background: #2a2a2a;
+      border: 1px solid #444;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      padding: 8px;
+      min-width: 200px;
+    }
+    .custom-dropdown-menu .dropdown-item {
+      border-radius: 12px; padding: 10px 16px;
+      font-weight: 600; color: #fff;
+      display: flex; align-items: center; gap: 10px;
+      transition: background 0.15s;
+    }
+    .custom-dropdown-menu .dropdown-item:hover {
+      background: #3a3a3a;
+    }
+    .custom-dropdown-menu .dropdown-item i { font-size: 18px; }
+    
+    .custom-dropdown-menu .item-dividido i { color: #1fe21f; }
+    .custom-dropdown-menu .item-dividido:hover { color: #1fe21f; }
+    
+    .custom-dropdown-menu .item-redondeo i { color: #1f81e2; }
+    .custom-dropdown-menu .item-redondeo:hover { color: #1f81e2; }
+    
+    .custom-dropdown-menu .item-intercambio i { color: #845ec2; }
+    .custom-dropdown-menu .item-intercambio:hover { color: #845ec2; }
+    /* =============================================== */
 
     .person-total-card {
       background: var(--color-crema);
@@ -1094,11 +1130,31 @@
     <div id="tab-movements" class="tab-content">
       <div class="section-header">
         <h2>Movimientos</h2>
-        <div class="d-flex gap-2 flex-wrap">
+        <div class="d-flex gap-2 align-items-center flex-wrap">
           <button class="btn-primary-custom" onclick="openAddMovement()"><i class="bi bi-plus-lg"></i> Nuevo</button>
-          <button class="btn-primary-custom btn-dividido-custom" onclick="openAddSplitMovement()"><i class="bi bi-distribute-horizontal"></i> Dividido</button>
-          <button class="btn-primary-custom btn-redondeo-custom" onclick="openAddRedondeo()"><i class="bi bi-arrow-left-right"></i> Redondeo</button>
-          <button class="btn-primary-custom btn-intercambio-custom" onclick="openAddIntercambio()"><i class="bi bi-shuffle"></i> Intercambiar</button>
+          
+          <div class="dropdown">
+            <button class="btn-action-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-three-dots-vertical"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end custom-dropdown-menu">
+              <li>
+                <button class="dropdown-item" onclick="openAddSplitMovement()">
+                  <i class="bi bi-distribute-horizontal item-dividido"></i> Dividido
+                </button>
+              </li>
+              <li>
+                <button class="dropdown-item" onclick="openAddRedondeo()">
+                  <i class="bi bi-arrow-left-right item-redondeo"></i> Redondeo
+                </button>
+              </li>
+              <li>
+                <button class="dropdown-item" onclick="openAddIntercambio()">
+                  <i class="bi bi-shuffle item-intercambio"></i> Intercambiar
+                </button>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
       <div class="filter-grid">
