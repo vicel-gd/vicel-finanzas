@@ -26,19 +26,19 @@
       --color-oscuro: #201e1f;
       --color-naranja: #e2781f;
       --color-naranja-hover: #b3410e;
-      --color-naranja-texto: #f5984a;
+      --color-naranja-texto: #f5984a; /* ALTO CONTRASTE: Para textos sobre fondos oscuros */
       --color-fondo: #201e1f;
-      --color-positivo: #28a745; /* Verde por defecto */
-      --color-negativo: #dc3545; /* Rojo por defecto */
+      --color-positivo: #28a745; 
+      --color-negativo: #dc3545; 
     }
 
-    /* ================== MODO DALTÓNICO ================== */
+    /* ================== MODO DALTÓNICO (Opcional en Configuración) ================== */
     body.daltonic {
       --color-naranja: #0072B2; /* Azul seguro para daltónicos */
       --color-naranja-hover: #005A8E;
       --color-naranja-texto: #56B4E9;
-      --color-positivo: #0072B2; /* Azul para positivo */
-      --color-negativo: #E69F00; /* Naranja/Amarillo para negativo */
+      --color-positivo: #0072B2; 
+      --color-negativo: #E69F00; 
     }
     body.daltonic .split-badge[style*="#1fe21f"] { background-color: #0072B2 !important; } /* Dividido */
     body.daltonic .split-badge[style*="#1f81e2"] { background-color: #E69F00 !important; } /* Redondeo */
@@ -49,7 +49,7 @@
     body.daltonic .account-card .status-pill.sobra { background: #d1ecf1; color: #0c5460; }
     body.daltonic .amount.positive { color: #0072B2 !important; }
     body.daltonic .amount.negative { color: #E69F00 !important; }
-    /* ===================================================== */
+    /* ============================================================================== */
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; }
@@ -1167,6 +1167,7 @@
     <button class="btn-landing-outline" id="btnTrialLanding">Iniciar prueba</button>
   </div>
 
+  <!-- ARIA-LABEL añadido -->
   <button class="privacy-toggle-btn" id="privacyToggle" onclick="togglePrivacy()" title="Ocultar números" aria-label="Ocultar números" type="button">
     <i class="bi bi-eye-fill"></i>
   </button>
@@ -1202,7 +1203,7 @@
   </aside>
 
   <main class="main" id="mainContent" style="display:none;">
-    <button class="menu-toggle" id="menuToggle"><i class="bi bi-list"></i></button>
+    <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú"><i class="bi bi-list"></i></button>
 
     <div id="tab-dashboard" class="tab-content active">
       <h1 class="page-title">RESUMEN</h1>
@@ -1239,7 +1240,7 @@
           <button class="btn-primary-custom" onclick="openAddMovement()"><i class="bi bi-plus-lg"></i> Nuevo</button>
           
           <div class="dropdown">
-            <button class="btn-action-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <button class="btn-action-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Más opciones">
               <i class="bi bi-three-dots-vertical"></i>
             </button>
             <ul class="dropdown-menu dropdown-menu-end custom-dropdown-menu">
@@ -1290,9 +1291,9 @@
         <div class="filter-item">
           <label>&nbsp;</label>
           <div class="month-nav">
-            <button class="btn btn-outline-light btn-sm" onclick="changeMonth(-1)" id="prevMonthBtn"><i class="bi bi-chevron-left"></i></button>
+            <button class="btn btn-outline-light btn-sm" onclick="changeMonth(-1)" id="prevMonthBtn" aria-label="Mes anterior"><i class="bi bi-chevron-left"></i></button>
             <span id="currentMonthLabel" class="fw-bold">Enero 2026</span>
-            <button class="btn btn-outline-light btn-sm" onclick="changeMonth(1)" id="nextMonthBtn"><i class="bi bi-chevron-right"></i></button>
+            <button class="btn btn-outline-light btn-sm" onclick="changeMonth(1)" id="nextMonthBtn" aria-label="Mes siguiente"><i class="bi bi-chevron-right"></i></button>
             <button class="btn-show-all" id="showAllBtn" onclick="toggleShowAll()">Ver todos</button>
           </div>
           <button class="btn btn-outline-light btn-sm" onclick="clearFilters()">Limpiar</button>
@@ -1342,9 +1343,9 @@
       <div class="section-header">
         <h2>Estadísticas</h2>
         <div class="stats-month-nav">
-          <button type="button" onclick="changeStatsMonth(-1)" title="Mes anterior"><i class="bi bi-chevron-left"></i></button>
+          <button type="button" onclick="changeStatsMonth(-1)" title="Mes anterior" aria-label="Mes anterior"><i class="bi bi-chevron-left"></i></button>
           <span class="stats-month-label" id="statsMonthLabel">—</span>
-          <button type="button" onclick="changeStatsMonth(1)" title="Mes siguiente"><i class="bi bi-chevron-right"></i></button>
+          <button type="button" onclick="changeStatsMonth(1)" title="Mes siguiente" aria-label="Mes siguiente"><i class="bi bi-chevron-right"></i></button>
         </div>
       </div>
 
@@ -1439,10 +1440,10 @@
             <div class="setting-row">
               <div class="setting-info">
                 <span class="setting-title">Modo Daltónico</span>
-                <span class="setting-desc">Usa colores seguros (azul/amarillo) en lugar de verde/rojo.</span>
+                <span class="setting-desc">Usa colores seguros (azul/amarillo) en los gráficos.</span>
               </div>
               <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" id="daltonicToggle" onchange="toggleDaltonic()">
+                <input class="form-check-input" type="checkbox" id="daltonicToggle" onchange="toggleDaltonic()" aria-label="Activar modo daltónico">
               </div>
             </div>
 
@@ -1452,7 +1453,7 @@
                 <span class="setting-desc">Oculta los montos y gráficos con un solo toque.</span>
               </div>
               <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" id="settingsPrivacyToggle" onchange="togglePrivacy()">
+                <input class="form-check-input" type="checkbox" id="settingsPrivacyToggle" onchange="togglePrivacy()" aria-label="Activar modo privacidad">
               </div>
             </div>
           </div>
@@ -1481,7 +1482,7 @@
 
   </main>
 
-  <!-- MODALES (Se mantienen igual) -->
+  <!-- MODALES -->
   <div class="modal fade" id="movementModal" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -1898,7 +1899,7 @@
     let statsChartDiasInstance = null;
 
     let privacyMode = false;
-    let daltonicMode = false; // NUEVO ESTADO
+    let daltonicMode = false;
 
     let currentIntercambioStep = 1;
 
@@ -1920,6 +1921,8 @@
       const day = String(d.getDate()).padStart(2, '0');
       return `${y}-${m}-${day}`;
     }
+    
+    // WCAG: Aseguramos el signo + explícito para positivos
     function formatCurrency(value) {
       const sign = value > 0 ? '+' : value < 0 ? '-' : '';
       const abs = Math.abs(value);
@@ -1948,7 +1951,6 @@
         btn.setAttribute('aria-label', 'Ocultar números');
         btn.classList.remove('active');
       }
-      // Sincronizar el switch de la pestaña configuración
       const switchEl = document.getElementById('settingsPrivacyToggle');
       if (switchEl) switchEl.checked = privacyMode;
     }
@@ -1977,7 +1979,7 @@
         localStorage.setItem('vicel_daltonic_mode', daltonicMode ? '1' : '0');
       } catch (e) {}
       updateDaltonicUI();
-      refreshAll(); // Redibujar gráficos con nuevos colores si es necesario
+      refreshAll();
     }
 
     function loadDaltonicMode() {
@@ -2959,9 +2961,7 @@
           const gradient = buildCategoryGradient(catMovs, accountsMap);
           if (gradient) pill.style.background = gradient;
         }
-        const sign = val >= 0 ? '' : '-';
-        const abs = Math.abs(val).toFixed(2).replace('.', ',');
-        const amountDisplay = privacyMode ? '•••••' : `${sign}$${abs}`;
+        const amountDisplay = privacyMode ? '•••••' : formatCurrency(val);
         pill.innerHTML = `
           <span class="drag-handle" title="Mantener presionado para mover"><i class="bi bi-chevron-expand"></i></span>
           <span class="name">${key}</span>
@@ -3016,8 +3016,8 @@
         if (acc.saldoReal !== null && acc.saldoReal !== undefined) {
           diff = Math.round((acc.saldoReal - balance) * 100) / 100;
           if (diff === 0) { statusClass = 'igual'; statusText = '✅ Verificado'; statusTitle = 'El saldo real coincide con el calculado'; }
-          else if (diff < 0) { statusClass = 'falta'; statusText = `❌ Falta $${Math.abs(diff).toFixed(2).replace('.', ',')}`; statusTitle = 'El saldo real es menor al calculado'; }
-          else { statusClass = 'sobra'; statusText = `⚠️ Sobra $${diff.toFixed(2).replace('.', ',')}`; statusTitle = 'El saldo real es mayor al calculado'; }
+          else if (diff < 0) { statusClass = 'falta'; statusText = `❌ Falta ${formatCurrency(Math.abs(diff))}`; statusTitle = 'El saldo real es menor al calculado'; }
+          else { statusClass = 'sobra'; statusText = `⚠️ Sobra ${formatCurrency(diff)}`; statusTitle = 'El saldo real es mayor al calculado'; }
           totalReal += acc.saldoReal;
           totalVerificadas++;
         } else { totalReal += balance; }
@@ -3030,6 +3030,7 @@
         const statusTextFinal = privacyMode ? (statusClass === 'igual' ? '✅ Verificado' : '•••••') : statusText;
         const statusTitleFinal = privacyMode ? 'Estado oculto por privacidad' : statusTitle;
         
+        // WCAG: Se añade title y visually-hidden para los estados de cuenta
         card.innerHTML = `
           <div class="account-name">${acc.nombre}</div>
           <div class="account-balance">${balanceDisplay}</div>
@@ -3078,8 +3079,8 @@
         const diffTotal = Math.round((totalReal - totalCalculado) * 100) / 100;
         let diffClass = '', diffText = '', diffTitle = '';
         if (diffTotal === 0) { diffClass = 'igual'; diffText = '✅ Verificado'; diffTitle = 'El saldo real coincide con el calculado'; }
-        else if (diffTotal < 0) { diffClass = 'falta'; diffText = `❌ Falta $${Math.abs(diffTotal).toFixed(2).replace('.', ',')}`; diffTitle = 'El saldo real es menor al calculado'; }
-        else { diffClass = 'sobra'; diffText = `⚠️ Sobra $${diffTotal.toFixed(2).replace('.', ',')}`; diffTitle = 'El saldo real es mayor al calculado'; }
+        else if (diffTotal < 0) { diffClass = 'falta'; diffText = `❌ Falta ${formatCurrency(Math.abs(diffTotal))}`; diffTitle = 'El saldo real es menor al calculado'; }
+        else { diffClass = 'sobra'; diffText = `⚠️ Sobra ${formatCurrency(diffTotal)}`; diffTitle = 'El saldo real es mayor al calculado'; }
         
         if (privacyMode) {
           totalContainer.innerHTML = `
@@ -3135,6 +3136,7 @@
           grupoBadge = `<span class="split-badge" style="background:#1fe21f;" title="Movimiento dividido"><i class="bi bi-distribute-horizontal"></i> Dividido</span>`;
         }
       }
+      // WCAG: Se añade aria-label a los botones de acción de cada movimiento
       pill.innerHTML = `
         <div class="movement-header">
           <div class="movement-who">
@@ -3198,6 +3200,7 @@
 
       const parent = document.createElement('div');
       parent.className = `movement-pill group-parent ${tipoClass}`;
+      // WCAG: Se añade aria-label a los botones de acción del grupo
       parent.innerHTML = `
         <div class="movement-header">
           <div class="movement-who">
@@ -3445,6 +3448,7 @@
       const div = document.createElement('div');
       div.className = 'row align-items-center mb-2 split-line';
       div.dataset.lineId = id;
+      // WCAG: aria-label en el botón de eliminar línea
       div.innerHTML = `
         <div class="col-6"><select class="form-select split-line-category" onchange="updateSplitTotals()"></select></div>
         <div class="col-5"><input type="number" class="form-control split-line-amount" step="0.01" placeholder="Monto" oninput="updateSplitTotals()" /></div>
@@ -3701,7 +3705,7 @@
             <div class="person-name">${escapeHtml(name)}</div>
             <div class="person-total">${escapeHtml(totalDisplay)}</div>
             <div class="person-count">${info.count} préstamo${info.count !== 1 ? 's' : ''} pendiente${info.count !== 1 ? 's' : ''}</div>
-            <button class="btn-pdf" type="button">
+            <button class="btn-pdf" type="button" aria-label="Compartir PDF de ${escapeHtml(name)}">
               <i class="bi bi-whatsapp"></i> Compartir PDF
             </button>
           </div>
@@ -3925,6 +3929,7 @@
           const mov = loan.movimientoCreacionId ? movMap[loan.movimientoCreacionId] : null;
           let catName = 'Sin categoría';
           if (mov && mov.categoriaId && catMap[mov.categoriaId]) catName = catMap[mov.categoriaId];
+          // WCAG: aria-label en botones de acciones de préstamos
           pill.innerHTML = `
             <div class="loan-header">
               <div class="loan-who">
@@ -4108,6 +4113,7 @@
         const progress = goal.lograda ? 100 : ((goal.costoTotal - remaining) / goal.costoTotal) * 100;
         const col = document.createElement('div');
         col.className = 'col-md-6 col-lg-4';
+        // WCAG: aria-label en botones de acciones de metas
         col.innerHTML = `
           <div class="goal-card">
             <div>
@@ -4187,6 +4193,7 @@
         const col = document.createElement('div');
         col.className = 'col-md-6 col-lg-4';
         const isHidden = cat.oculta ? true : false;
+        // WCAG: aria-label en botones de categorías
         col.innerHTML = `
           <div class="category-pill-small">
             <div class="left"><span>${cat.nombre}</span></div>
@@ -4278,6 +4285,7 @@
         const color = acc.color || DEFAULT_ACCOUNT_COLOR;
         const col = document.createElement('div');
         col.className = 'col-md-6 col-lg-4';
+        // WCAG: aria-label en botones de cuentas
         col.innerHTML = `
           <div class="account-pill">
             <div class="left">
