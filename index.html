@@ -28,7 +28,29 @@
       --color-naranja-hover: #b3410e;
       --color-naranja-texto: #f5984a;
       --color-fondo: #201e1f;
+      --color-positivo: #28a745; /* Verde por defecto */
+      --color-negativo: #dc3545; /* Rojo por defecto */
     }
+
+    /* ================== MODO DALTÓNICO ================== */
+    body.daltonic {
+      --color-naranja: #0072B2; /* Azul seguro para daltónicos */
+      --color-naranja-hover: #005A8E;
+      --color-naranja-texto: #56B4E9;
+      --color-positivo: #0072B2; /* Azul para positivo */
+      --color-negativo: #E69F00; /* Naranja/Amarillo para negativo */
+    }
+    body.daltonic .split-badge[style*="#1fe21f"] { background-color: #0072B2 !important; } /* Dividido */
+    body.daltonic .split-badge[style*="#1f81e2"] { background-color: #E69F00 !important; } /* Redondeo */
+    body.daltonic .stats-card.ingresado .stats-value { color: #0072B2 !important; }
+    body.daltonic .stats-card.gastado .stats-value { color: #E69F00 !important; }
+    body.daltonic .account-card .status-pill.igual { background: #cce5ff; color: #004085; }
+    body.daltonic .account-card .status-pill.falta { background: #fff3cd; color: #856404; }
+    body.daltonic .account-card .status-pill.sobra { background: #d1ecf1; color: #0c5460; }
+    body.daltonic .amount.positive { color: #0072B2 !important; }
+    body.daltonic .amount.negative { color: #E69F00 !important; }
+    /* ===================================================== */
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; }
     body {
@@ -118,7 +140,6 @@
       }
     }
 
-    /* Placeholder del gráfico cuando modo privacidad */
     .chart-privacy-placeholder {
       position: absolute;
       inset: 0;
@@ -284,7 +305,7 @@
     .btn-danger-custom:hover { background: #b02a37; color: #fff; }
     .warning-text { color: #fff7e0 !important; opacity: 0.85; }
 
-    /* ============ NUEVO MENÚ DE ACCIONES ============ */
+    /* ============ MENÚ DE ACCIONES ============ */
     .btn-action-secondary {
       background: transparent; color: #ccc;
       border: 1px solid #555; border-radius: 60px;
@@ -319,7 +340,6 @@
     .icon-dividido { color: #1fe21f !important; }
     .icon-redondeo { color: #1f81e2 !important; }
     .icon-intercambio { color: #845ec2 !important; }
-    /* =============================================== */
 
     .person-total-card {
       background: var(--color-crema);
@@ -578,6 +598,39 @@
     }
     .category-pill-small .actions .vis-toggle:hover { color: var(--color-naranja); }
     .category-pill-small .actions .vis-toggle.hidden { color: #b0ad9a; }
+
+    /* ================== CONFIGURACIÓN ================== */
+    .settings-card {
+      background: var(--color-crema);
+      border-radius: 30px;
+      padding: 24px 28px;
+      color: var(--color-oscuro);
+      margin-bottom: 20px;
+    }
+    .settings-card h5 {
+      font-size: 16px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--color-naranja);
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+      border-bottom: 2px solid rgba(0,0,0,0.05);
+      padding-bottom: 8px;
+    }
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .setting-row:last-child { border-bottom: none; }
+    .setting-row .setting-info { display: flex; flex-direction: column; gap: 4px; }
+    .setting-row .setting-title { font-weight: 600; font-size: 16px; }
+    .setting-row .setting-desc { font-size: 12px; color: #6c6b5e; }
+    .form-check-input:checked { background-color: var(--color-naranja); border-color: var(--color-naranja); }
+    .form-switch .form-check-input { width: 3em; height: 1.5em; cursor: pointer; }
+    /* ==================================================== */
 
     .modal-content { background: var(--color-crema); color: var(--color-oscuro); border-radius: 40px; border: none; }
     .modal-header { border-bottom: 2px solid #d4d0c0; padding: 20px 28px; }
@@ -1096,6 +1149,10 @@
       .sidebar { width: 260px; padding: 16px; }
       .sidebar .nav .nav-item { font-size: 14px; padding: 10px 14px; gap: 10px; }
       .sidebar .nav .nav-item i { font-size: 18px; width: 20px; }
+      
+      .settings-card { padding: 16px 20px; }
+      .setting-row { padding: 10px 0; }
+      .setting-row .setting-title { font-size: 14px; }
     }
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: var(--color-oscuro); }
@@ -1136,6 +1193,8 @@
       <button class="nav-item" data-tab="goals"><i class="bi bi-bullseye"></i> Metas</button>
       <button class="nav-item" data-tab="stats"><i class="bi bi-bar-chart-line"></i> Estadísticas</button>
       <button class="nav-item" data-tab="categories"><i class="bi bi-tags"></i> Categorías</button>
+      <!-- NUEVO BOTÓN DE CONFIGURACIÓN -->
+      <button class="nav-item" data-tab="settings"><i class="bi bi-gear"></i> Configuración</button>
     </nav>
     <div class="logout-container" id="logoutContainer" style="display:none;">
       <button class="btn-google-logout" onclick="logout()">Cerrar sesión</button>
@@ -1312,7 +1371,6 @@
         <i class="bi bi-info-circle"></i> Cargando comparación...
       </div>
 
-      <!-- Nuevo sistema de pestañas para Estadísticas -->
       <ul class="nav nav-tabs custom-stats-tabs" id="statsTabs" role="tablist">
         <li class="nav-item" role="presentation">
           <button class="nav-link active" id="btn-tab-resumen" data-bs-toggle="tab" data-bs-target="#pane-resumen" type="button" role="tab" aria-controls="pane-resumen" aria-selected="true">Resumen Visual</button>
@@ -1326,7 +1384,6 @@
       </ul>
 
       <div class="stats-tab-content" id="statsTabContent">
-        <!-- Pestaña 1: Resumen Visual -->
         <div class="stats-subtab-pane active show" id="pane-resumen" role="tabpanel" aria-labelledby="btn-tab-resumen">
           <div class="stats-chart-row">
             <div class="stats-chart-container">
@@ -1340,14 +1397,12 @@
           </div>
         </div>
 
-        <!-- Pestaña 2: Ranking de Categorías -->
         <div class="stats-subtab-pane" id="pane-ranking" role="tabpanel" aria-labelledby="btn-tab-ranking">
           <div class="stats-section">
             <div id="statsCategoryBars"></div>
           </div>
         </div>
 
-        <!-- Pestaña 3: Top 5 Gastos -->
         <div class="stats-subtab-pane" id="pane-top5" role="tabpanel" aria-labelledby="btn-tab-top5">
           <div class="stats-section">
             <div id="statsTop5"></div>
@@ -1368,30 +1423,65 @@
         <button class="btn-primary-custom" onclick="openAddAccount()"><i class="bi bi-plus-lg"></i> Nuevo</button>
       </div>
       <div id="accountsList" class="row g-2"></div>
+    </div>
 
-      <div class="section-header mt-4 pt-3 border-top border-secondary">
-        <h2>Respaldo de datos</h2>
+    <!-- ================== NUEVA PESTAÑA: CONFIGURACIÓN ================== -->
+    <div id="tab-settings" class="tab-content">
+      <div class="section-header">
+        <h2>Configuración</h2>
       </div>
-      <div class="mt-3">
-        <div class="d-flex gap-2 flex-wrap">
-          <button class="btn-primary-custom" onclick="exportData()"><i class="bi bi-download"></i> Exportar datos</button>
-          <button class="btn-primary-custom" onclick="document.getElementById('importFileInput').click()"><i class="bi bi-upload"></i> Importar datos</button>
-          <input type="file" id="importFileInput" accept="application/json,.json" style="display:none" onchange="importData(event)" />
+
+      <div class="row g-4">
+        <div class="col-lg-6">
+          <div class="settings-card">
+            <h5><i class="bi bi-universal-access"></i> Accesibilidad y Privacidad</h5>
+            
+            <div class="setting-row">
+              <div class="setting-info">
+                <span class="setting-title">Modo Daltónico</span>
+                <span class="setting-desc">Usa colores seguros (azul/amarillo) en lugar de verde/rojo.</span>
+              </div>
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="daltonicToggle" onchange="toggleDaltonic()">
+              </div>
+            </div>
+
+            <div class="setting-row">
+              <div class="setting-info">
+                <span class="setting-title">Modo Privacidad</span>
+                <span class="setting-desc">Oculta los montos y gráficos con un solo toque.</span>
+              </div>
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="settingsPrivacyToggle" onchange="togglePrivacy()">
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <h5><i class="bi bi-database"></i> Respaldo de datos</h5>
+            <p class="text-muted small mb-3">Descarga un archivo con todos tus movimientos, préstamos, metas, categorías y cuentas. Podrás restaurarlo más adelante con "Importar datos".</p>
+            <div class="d-flex gap-2 flex-wrap">
+              <button class="btn-primary-custom" onclick="exportData()"><i class="bi bi-download"></i> Exportar</button>
+              <button class="btn-primary-custom" onclick="document.getElementById('importFileInput').click()"><i class="bi bi-upload"></i> Importar</button>
+              <input type="file" id="importFileInput" accept="application/json,.json" style="display:none" onchange="importData(event)" />
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <h5><i class="bi bi-exclamation-triangle"></i> Zona de peligro</h5>
+            <p class="text-muted small mb-3">Esta acción borrará todos los movimientos, préstamos y metas. No se puede deshacer.</p>
+            <button class="btn-danger-custom" onclick="resetAllData()">
+              <i class="bi bi-trash"></i> Reiniciar todos los datos
+            </button>
+          </div>
         </div>
-        <p class="text-muted small mt-2 warning-text">
-          Descarga un archivo con todos tus movimientos, préstamos, metas, categorías y cuentas. Podrás restaurarlo más adelante con "Importar datos", por ejemplo si cambias de navegador o borras los datos del sitio por accidente.
-        </p>
-      </div>
-
-      <div class="mt-4 pt-3 border-top border-secondary">
-        <button class="btn-danger-custom" onclick="resetAllData()">
-          <i class="bi bi-exclamation-triangle"></i> Reiniciar todos los datos
-        </button>
-        <p class="text-muted small mt-2 warning-text">Esta acción borrará todos los movimientos, préstamos y metas. No se puede deshacer.</p>
       </div>
     </div>
+    <!-- =================================================================== -->
+
   </main>
 
+  <!-- MODALES (Se mantienen igual) -->
   <div class="modal fade" id="movementModal" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -1522,7 +1612,6 @@
         </div>
         <div class="modal-body">
           <form id="intercambioForm">
-            <!-- Paso 1 -->
             <div id="step-1-intercambio" class="intercambio-step active">
               <h6 class="mb-3 text-naranja">Paso 1: ¿De dónde sale el dinero?</h6>
               <div class="row">
@@ -1533,7 +1622,6 @@
               <div class="mb-3"><label>Cuenta A</label><select id="intercambioCuentaA" class="form-select" required></select></div>
             </div>
 
-            <!-- Paso 2 -->
             <div id="step-2-intercambio" class="intercambio-step">
               <h6 class="mb-3 text-naranja">Paso 2: ¿A dónde entra el dinero?</h6>
               <div class="mb-3"><label>Categoría B</label><select id="intercambioCatB" class="form-select" required></select></div>
@@ -1541,11 +1629,9 @@
               <div class="mb-3"><label>Descripción (opcional)</label><input type="text" id="intercambioDesc" class="form-control" placeholder="Ej: INTERCAMBIO PC ↔ UNIVERSIDAD" /></div>
             </div>
 
-            <!-- Paso 3 -->
             <div id="step-3-intercambio" class="intercambio-step">
               <h6 class="mb-3 text-naranja">Paso 3: Resumen del intercambio</h6>
               <div class="alert alert-info" id="intercambioSummaryText">
-                <!-- Text will be injected here -->
               </div>
               <p class="text-muted small mb-0"><i class="bi bi-info-circle"></i> Se crearán 4 movimientos internos para mantener la consistencia de tus saldos.</p>
             </div>
@@ -1806,16 +1892,14 @@
     const expandedGroups = new Set();
     let logoBase64Cache = null;
 
-    // Estado de la pestaña Estadísticas
     let statsMonth = new Date().getMonth();
     let statsYear = new Date().getFullYear();
     let statsChartDonaInstance = null;
     let statsChartDiasInstance = null;
 
-    // Estado de privacidad
     let privacyMode = false;
+    let daltonicMode = false; // NUEVO ESTADO
 
-    // Estado del Wizard de Intercambio
     let currentIntercambioStep = 1;
 
     const defaultCategories = ['Ocio', 'Pasaje', 'Comida', 'Alquiler', 'Aseo personal'];
@@ -1841,7 +1925,6 @@
       const abs = Math.abs(value);
       return sign + abs.toFixed(2).replace('.', ',') + '$';
     }
-    // Igual que formatCurrency, pero respeta el modo privacidad
     function formatCurrencyPrivacy(value) {
       if (privacyMode) return '•••••';
       return formatCurrency(value);
@@ -1850,7 +1933,7 @@
       return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     }
 
-    /* ================== MODO PRIVACIDAD ================== */
+    /* ================== MODO PRIVACIDAD Y DALTÓNICO ================== */
     function updatePrivacyButton() {
       const btn = document.getElementById('privacyToggle');
       if (!btn) return;
@@ -1865,6 +1948,9 @@
         btn.setAttribute('aria-label', 'Ocultar números');
         btn.classList.remove('active');
       }
+      // Sincronizar el switch de la pestaña configuración
+      const switchEl = document.getElementById('settingsPrivacyToggle');
+      if (switchEl) switchEl.checked = privacyMode;
     }
 
     function togglePrivacy() {
@@ -1873,7 +1959,6 @@
         localStorage.setItem('vicel_privacy_mode', privacyMode ? '1' : '0');
       } catch (e) { /* localStorage podría no estar disponible */ }
       updatePrivacyButton();
-      // Redibujar todo para aplicar los cambios
       refreshAll();
     }
 
@@ -1885,7 +1970,36 @@
       }
       updatePrivacyButton();
     }
-    /* ================== FIN MODO PRIVACIDAD ================== */
+
+    function toggleDaltonic() {
+      daltonicMode = !daltonicMode;
+      try {
+        localStorage.setItem('vicel_daltonic_mode', daltonicMode ? '1' : '0');
+      } catch (e) {}
+      updateDaltonicUI();
+      refreshAll(); // Redibujar gráficos con nuevos colores si es necesario
+    }
+
+    function loadDaltonicMode() {
+      try {
+        daltonicMode = localStorage.getItem('vicel_daltonic_mode') === '1';
+      } catch (e) {
+        daltonicMode = false;
+      }
+      updateDaltonicUI();
+    }
+
+    function updateDaltonicUI() {
+      const switchEl = document.getElementById('daltonicToggle');
+      if (switchEl) switchEl.checked = daltonicMode;
+      
+      if (daltonicMode) {
+        document.body.classList.add('daltonic');
+      } else {
+        document.body.classList.remove('daltonic');
+      }
+    }
+    /* ================== FIN MODO PRIVACIDAD Y DALTÓNICO ================== */
 
     async function getCategoryBalancesMap() {
       const movements = await db.movements.toArray();
@@ -2222,8 +2336,9 @@
           if (loanCat && !loanCat.oculta) { await db.categories.update(loanCat.id, { oculta: 1 }); }
         } catch (e) { console.warn('No se pudo ocultar la categoría PRÉSTAMO:', e); }
 
-        // Cargar modo privacidad antes del primer render
+        // Cargar preferencias antes del primer render
         loadPrivacyMode();
+        loadDaltonicMode();
 
         await loadDefaultData();
         await refreshAll();
@@ -2246,28 +2361,19 @@
           document.getElementById('sidebarOverlay').classList.remove('active');
         });
 
-        // Lógica manual para las pestañas de Estadísticas
         document.querySelectorAll('#statsTabs button').forEach(tabBtn => {
           tabBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            // 1. Quitar 'active' de todos los botones
             document.querySelectorAll('#statsTabs button').forEach(btn => btn.classList.remove('active'));
-            // 2. Poner 'active' al botón clickeado
             tabBtn.classList.add('active');
-
-            // 3. Ocultar todos los paneles
             document.querySelectorAll('.stats-subtab-pane').forEach(pane => {
               pane.classList.remove('show', 'active');
             });
-
-            // 4. Mostrar el panel correspondiente
             const targetId = tabBtn.getAttribute('data-bs-target');
             const targetPane = document.querySelector(targetId);
             if (targetPane) {
               targetPane.classList.add('show', 'active');
             }
-
-            // 5. Si el target es el resumen visual, forzamos resize de los gráficos
             if (targetId === '#pane-resumen') {
               if (statsChartDonaInstance) statsChartDonaInstance.resize();
               if (statsChartDiasInstance) statsChartDiasInstance.resize();
@@ -2277,7 +2383,6 @@
 
         setupFormSubmissions();
 
-        // Listeners para el Feedback en tiempo real
         document.getElementById('movementAmount').addEventListener('input', updateMovementFeedback);
         document.querySelectorAll('input[name="movementType"]').forEach(radio => {
             radio.addEventListener('change', updateMovementFeedback);
@@ -2316,46 +2421,35 @@
 
     /* ================== VALIDACIÓN EN TIEMPO REAL ================== */
     function checkFormValidity() {
-      // Movimiento
       const movForm = document.getElementById('movementForm');
       const movBtn = document.getElementById('btn-save-movement');
       if (movForm && movBtn) {
         const amount = parseFloat(document.getElementById('movementAmount').value);
         movBtn.disabled = !(movForm.checkValidity() && amount > 0);
       }
-
-      // Préstamo
       const loanForm = document.getElementById('loanForm');
       const loanBtn = document.getElementById('btn-save-loan');
       if (loanForm && loanBtn) {
         const amount = parseFloat(document.getElementById('loanAmount').value);
         loanBtn.disabled = !(loanForm.checkValidity() && amount > 0);
       }
-
-      // Meta
       const goalForm = document.getElementById('goalForm');
       const goalBtn = document.getElementById('btn-save-goal');
       if (goalForm && goalBtn) {
         const amount = parseFloat(document.getElementById('goalTotal').value);
         goalBtn.disabled = !(goalForm.checkValidity() && amount > 0);
       }
-
-      // Redondeo
       const redondeoForm = document.getElementById('redondeoForm');
       const redondeoBtn = document.getElementById('btn-save-redondeo');
       if (redondeoForm && redondeoBtn) {
         const amount = parseFloat(document.getElementById('redondeoAmount').value);
         redondeoBtn.disabled = !(redondeoForm.checkValidity() && amount > 0);
       }
-
-      // Categoría
       const catForm = document.getElementById('categoryForm');
       const catBtn = document.getElementById('btn-save-category');
       if (catForm && catBtn) {
           catBtn.disabled = !catForm.checkValidity();
       }
-
-      // Cuenta
       const accForm = document.getElementById('accountForm');
       const accBtn = document.getElementById('btn-save-account');
       if (accForm && accBtn) {
@@ -2582,7 +2676,6 @@
 
       document.getElementById('statsPromedio').textContent = formatCurrency(promedioDiario);
 
-      // Comparación con mes anterior
       let pmIdx = statsMonth - 1, pyIdx = statsYear;
       if (pmIdx < 0) { pmIdx = 11; pyIdx--; }
       const prevPrefix = `${pyIdx}-${String(pmIdx + 1).padStart(2, '0')}`;
@@ -2615,7 +2708,6 @@
         }
       }
 
-      // Por categoría
       const categories = await db.categories.toArray();
       const catMap = {};
       categories.forEach(c => catMap[c.id] = c.nombre);
@@ -2628,7 +2720,6 @@
       });
       const catEntries = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
 
-      // Dona
       const donaCanvas = document.getElementById('statsChartDona');
       if (statsChartDonaInstance) { statsChartDonaInstance.destroy(); statsChartDonaInstance = null; }
       if (catEntries.length === 0) {
@@ -2638,7 +2729,9 @@
           options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { display: false } } }
         });
       } else {
-        const palette = ['#e2781f','#FFB347','#FFD93D','#6BCB77','#4D96FF','#845EC2','#FF6B6B','#00C9A7','#FF9671','#C34A36','#A8E6CF','#DDA0DD','#87CEEB','#F0E68C','#E6A8D7'];
+        const palette = daltonicMode 
+          ? ['#0072B2','#E69F00','#56B4E9','#009E73','#F0E442','#CC79A7','#999999'] 
+          : ['#e2781f','#FFB347','#FFD93D','#6BCB77','#4D96FF','#845EC2','#FF6B6B','#00C9A7','#FF9671','#C34A36','#A8E6CF','#DDA0DD','#87CEEB','#F0E68C','#E6A8D7'];
         const labels = catEntries.map(e => e[0]);
         const data = catEntries.map(e => e[1]);
         const colors = labels.map((_, i) => palette[i % palette.length]);
@@ -2655,7 +2748,6 @@
         });
       }
 
-      // Barras horizontales por categoría
       const barsContainer = document.getElementById('statsCategoryBars');
       barsContainer.innerHTML = '';
       if (catEntries.length === 0) {
@@ -2678,7 +2770,6 @@
         });
       }
 
-      // Barras por día del mes
       const diasEnMes = new Date(statsYear, statsMonth + 1, 0).getDate();
       const porDia = new Array(diasEnMes).fill(0);
       movsMes.forEach(m => {
@@ -2699,8 +2790,8 @@
           datasets: [{
             label: 'Gasto del día',
             data: porDia,
-            backgroundColor: '#e2781f',
-            hoverBackgroundColor: '#b3410e',
+            backgroundColor: daltonicMode ? '#0072B2' : '#e2781f',
+            hoverBackgroundColor: daltonicMode ? '#005A8E' : '#b3410e',
             borderRadius: 4,
             maxBarThickness: 24
           }]
@@ -2726,7 +2817,6 @@
         }
       });
 
-      // Top 5 gastos
       const topContainer = document.getElementById('statsTop5');
       topContainer.innerHTML = '';
       const gastos = movsMes
@@ -2756,7 +2846,6 @@
         });
       }
 
-      // Resize charts after drawing in case they are in an active tab
       setTimeout(() => {
         if (statsChartDonaInstance) statsChartDonaInstance.resize();
         if (statsChartDiasInstance) statsChartDiasInstance.resize();
@@ -2771,7 +2860,6 @@
       if (!ctx) return;
       if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
 
-      // Si el modo privacidad está activo, ocultamos el gráfico y mostramos el placeholder
       if (privacyMode) {
         ctx.style.display = 'none';
         if (placeholder) placeholder.style.display = 'flex';
@@ -2791,7 +2879,9 @@
         });
         return;
       }
-      const palette = ['#e2781f','#FFB347','#FFD93D','#6BCB77','#4D96FF','#845EC2','#FF6B6B','#00C9A7','#FF9671','#C34A36','#A8E6CF','#DDA0DD','#87CEEB','#F0E68C','#E6A8D7'];
+      const palette = daltonicMode 
+        ? ['#0072B2','#E69F00','#56B4E9','#009E73','#F0E442','#CC79A7','#999999'] 
+        : ['#e2781f','#FFB347','#FFD93D','#6BCB77','#4D96FF','#845EC2','#FF6B6B','#00C9A7','#FF9671','#C34A36','#A8E6CF','#DDA0DD','#87CEEB','#F0E68C','#E6A8D7'];
       const colors = labels.map((_, i) => palette[i % palette.length]);
       chartInstance = new Chart(ctx, {
         type: 'doughnut',
@@ -2871,7 +2961,6 @@
         }
         const sign = val >= 0 ? '' : '-';
         const abs = Math.abs(val).toFixed(2).replace('.', ',');
-        // En modo privacidad, el degradado se va pero mostramos •••••
         const amountDisplay = privacyMode ? '•••••' : `${sign}$${abs}`;
         pill.innerHTML = `
           <span class="drag-handle" title="Mantener presionado para mover"><i class="bi bi-chevron-expand"></i></span>
@@ -3492,13 +3581,10 @@
     }
 
     function updateIntercambioUI() {
-      // Ocultar todos los pasos
       document.querySelectorAll('.intercambio-step').forEach(step => step.classList.remove('active'));
-      // Mostrar el paso actual
       const currentStepEl = document.getElementById(`step-${currentIntercambioStep}-intercambio`);
       if (currentStepEl) currentStepEl.classList.add('active');
 
-      // Configurar botones
       const btnAtras = document.getElementById('btn-intercambio-atras');
       const btnSiguiente = document.getElementById('btn-intercambio-siguiente');
       const btnGuardar = document.getElementById('btn-intercambio-guardar');
@@ -3524,7 +3610,6 @@
       if (currentIntercambioStep === 1) {
         currentIntercambioStep = 2;
       } else if (currentIntercambioStep === 2) {
-        // Generar Resumen
         const amount = parseFloat(document.getElementById('intercambioAmount').value).toFixed(2).replace('.', ',');
         const catAName = document.getElementById('intercambioCatA').options[document.getElementById('intercambioCatA').selectedIndex].text.split(' —')[0];
         const catBName = document.getElementById('intercambioCatB').options[document.getElementById('intercambioCatB').selectedIndex].text.split(' —')[0];
@@ -4300,7 +4385,6 @@
       }
     }
     function setupTabs() {
-      // Solo escuchar los nav-item del menú lateral, no los de las sub-pestañas
       document.querySelectorAll('.sidebar .nav .nav-item').forEach(btn => {
         btn.addEventListener('click', () => {
           document.querySelectorAll('.sidebar .nav .nav-item').forEach(b => b.classList.remove('active'));
