@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vicel-finanzas-v36';
+const CACHE_NAME = 'vicel-finanzas-v35';
 const urlsToCache = [
   './',
   './index.html',
@@ -41,5 +41,37 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
+  // Ignorar peticiones a Google (Auth, Drive) y Analytics. 
+  // Estas siempre van a la red (network-only) para no romper la sincronización.
   if (url.hostname.includes('googleapis.com') ||
-      url.hostname.includes('accounts
+      url.hostname.includes('accounts.google.com') ||
+      url.hostname.includes('vicel-gd.github.io')) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
+  // Para el resto de archivos (App, imágenes, CDNs), usar Cache-First
+  event.respondWith(
+    caches.match(event.request).then(cachedResponse => {
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      
+      return fetch(event.request).then(networkResponse => {
+        // Si la respuesta es válida, la guardamos en caché dinámicamente
+        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, responseToCache);
+          });
+        }
+        return networkResponse;
+      }).catch(() => {
+        // Si falla la red y es una navegación, devolver el index.html
+        if (event.request.mode === 'navigate') {
+          return caches.match('./index.html');
+        }
+      });
+    })
+  );
+});
