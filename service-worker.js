@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vicel-finanzas-v34';
+const CACHE_NAME = 'vicel-finanzas-v35';
 const urlsToCache = [
   './',
   './index.html',
@@ -42,28 +42,4 @@ self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
   if (url.hostname.includes('googleapis.com') ||
-      url.hostname.includes('accounts.google.com') ||
-      url.hostname === 'www.google.com') {
-    event.respondWith(fetch(event.request));
-    return;
-  }
-
-  if (url.pathname.endsWith('/analytics.js')) {
-    event.respondWith(fetch(event.request));
-    return;
-  }
-
-  event.respondWith(
-    caches.match(event.request).then(cached => {
-      if (cached) return cached;
-      return fetch(event.request).then(response => {
-        if (!response || response.status !== 200 || response.type === 'opaque') {
-          return response;
-        }
-        const responseClone = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseClone));
-        return response;
-      });
-    }).catch(() => caches.match('./index.html'))
-  );
-});
+      url.hostname.includes('accounts

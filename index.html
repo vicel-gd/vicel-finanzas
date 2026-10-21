@@ -26,6 +26,7 @@
       --color-oscuro: #201e1f;
       --color-naranja: #e2781f;
       --color-naranja-hover: #b3410e;
+      --color-naranja-texto: #f5984a;
       --color-fondo: #201e1f;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -63,6 +64,8 @@
       .logo-sidebar { max-width: 110px; }
     }
 
+    .text-naranja { color: var(--color-naranja-texto) !important; }
+
     /* ============ BOTÓN DE PRIVACIDAD ============ */
     .privacy-toggle-btn {
       position: fixed;
@@ -90,8 +93,8 @@
     .privacy-toggle-btn:active { transform: scale(0.94); }
     .privacy-toggle-btn.active {
       background: var(--color-oscuro);
-      color: var(--color-naranja);
-      border: 2px solid var(--color-naranja);
+      color: var(--color-naranja-texto);
+      border: 2px solid var(--color-naranja-texto);
     }
     .privacy-toggle-btn.active:hover {
       background: #000;
@@ -135,7 +138,7 @@
     }
     .chart-privacy-placeholder i {
       font-size: 38px;
-      color: var(--color-naranja);
+      color: var(--color-naranja-texto);
     }
 
     .sidebar {
@@ -180,8 +183,8 @@
     }
     .sidebar .nav .nav-item i { font-size: 20px; width: 24px; text-align: center; }
     .sidebar .nav .nav-item:hover { background: rgba(0,0,0,0.05); }
-    .sidebar .nav .nav-item.active { background: var(--color-oscuro); color: var(--color-naranja); }
-    .sidebar .nav .nav-item.active i { color: var(--color-naranja); }
+    .sidebar .nav .nav-item.active { background: var(--color-oscuro); color: var(--color-naranja-texto); }
+    .sidebar .nav .nav-item.active i { color: var(--color-naranja-texto); }
 
     .main { margin-left: 240px; height: 100vh; overflow-y: auto; padding: 30px 40px; background: var(--color-oscuro); }
     .tab-content { display: none; }
@@ -1107,7 +1110,7 @@
     <button class="btn-landing-outline" id="btnTrialLanding">Iniciar prueba</button>
   </div>
 
-  <button class="privacy-toggle-btn" id="privacyToggle" onclick="togglePrivacy()" title="Ocultar números" type="button">
+  <button class="privacy-toggle-btn" id="privacyToggle" onclick="togglePrivacy()" title="Ocultar números" aria-label="Ocultar números" type="button">
     <i class="bi bi-eye-fill"></i>
   </button>
 
@@ -1394,7 +1397,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="movementModalTitle">Nuevo Movimiento</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body">
           <form id="movementForm">
@@ -1439,7 +1442,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">Movimiento Dividido</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body">
           <form id="splitMovementForm">
@@ -1488,7 +1491,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">Redondeo / Cuadre entre categorías</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body">
           <form id="redondeoForm">
@@ -1515,7 +1518,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">Intercambio entre categorías y cuentas</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body">
           <form id="intercambioForm">
@@ -1565,7 +1568,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">Nuevo Préstamo</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body">
           <form id="loanForm">
@@ -1594,7 +1597,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">Pagar préstamo</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body">
           <p>El dinero se devolverá a la misma categoría de la que salió (<span id="payLoanCategoryLabel"></span>).</p>
@@ -1616,7 +1619,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">Editar Préstamo</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body">
           <form id="editLoanForm">
@@ -1643,7 +1646,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="goalModalTitle">Nueva Meta</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body">
           <form id="goalForm">
@@ -1666,7 +1669,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="categoryModalTitle">Nueva Categoría</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body">
           <form id="categoryForm">
@@ -1687,7 +1690,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="accountModalTitle">Nueva Cuenta</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body">
           <form id="accountForm">
@@ -1834,7 +1837,7 @@
       return `${y}-${m}-${day}`;
     }
     function formatCurrency(value) {
-      const sign = value >= 0 ? '' : '-';
+      const sign = value > 0 ? '+' : value < 0 ? '-' : '';
       const abs = Math.abs(value);
       return sign + abs.toFixed(2).replace('.', ',') + '$';
     }
@@ -1854,10 +1857,12 @@
       if (privacyMode) {
         btn.innerHTML = '<i class="bi bi-eye-slash-fill"></i>';
         btn.title = 'Mostrar números';
+        btn.setAttribute('aria-label', 'Mostrar números');
         btn.classList.add('active');
       } else {
         btn.innerHTML = '<i class="bi bi-eye-fill"></i>';
         btn.title = 'Ocultar números';
+        btn.setAttribute('aria-label', 'Ocultar números');
         btn.classList.remove('active');
       }
     }
@@ -2380,8 +2385,8 @@
       const amount = parseFloat(amountInput.value);
 
       if (amount > 0) {
-        const sign = type === 'egreso' ? '-' : '+';
-        feedbackEl.innerHTML = `Se guardará como: <strong>${sign}${formatCurrency(amount)}</strong>`;
+        const montoFinal = type === 'egreso' ? -amount : amount;
+        feedbackEl.innerHTML = `Se guardará como: <strong>${formatCurrency(montoFinal)}</strong>`;
       } else {
         feedbackEl.innerHTML = '';
       }
@@ -2917,12 +2922,13 @@
         totalCalculado += balance;
         let statusClass = 'sin-verificar';
         let statusText = 'Sin verificar';
+        let statusTitle = 'El saldo real no ha sido verificado';
         let diff = 0;
         if (acc.saldoReal !== null && acc.saldoReal !== undefined) {
           diff = Math.round((acc.saldoReal - balance) * 100) / 100;
-          if (diff === 0) { statusClass = 'igual'; statusText = '✅ Verificado'; }
-          else if (diff < 0) { statusClass = 'falta'; statusText = `❌ Falta $${Math.abs(diff).toFixed(2).replace('.', ',')}`; }
-          else { statusClass = 'sobra'; statusText = `⚠️ Sobra $${diff.toFixed(2).replace('.', ',')}`; }
+          if (diff === 0) { statusClass = 'igual'; statusText = '✅ Verificado'; statusTitle = 'El saldo real coincide con el calculado'; }
+          else if (diff < 0) { statusClass = 'falta'; statusText = `❌ Falta $${Math.abs(diff).toFixed(2).replace('.', ',')}`; statusTitle = 'El saldo real es menor al calculado'; }
+          else { statusClass = 'sobra'; statusText = `⚠️ Sobra $${diff.toFixed(2).replace('.', ',')}`; statusTitle = 'El saldo real es mayor al calculado'; }
           totalReal += acc.saldoReal;
           totalVerificadas++;
         } else { totalReal += balance; }
@@ -2932,8 +2938,9 @@
         const card = document.createElement('div');
         card.className = 'account-card';
         card.dataset.accountId = acc.id;
-        // En modo privacidad, el status text también se oculta parcialmente
         const statusTextFinal = privacyMode ? (statusClass === 'igual' ? '✅ Verificado' : '•••••') : statusText;
+        const statusTitleFinal = privacyMode ? 'Estado oculto por privacidad' : statusTitle;
+        
         card.innerHTML = `
           <div class="account-name">${acc.nombre}</div>
           <div class="account-balance">${balanceDisplay}</div>
@@ -2942,13 +2949,16 @@
           <div class="real-value ${privacyMode ? 'privacy-locked' : ''}" data-account-id="${acc.id}" data-current-value="${acc.saldoReal !== null ? acc.saldoReal : ''}">
             ${realValueDisplay}
           </div>
-          <div class="status-pill ${statusClass}">${statusTextFinal}</div>
+          <div class="status-pill ${statusClass}" title="${statusTitleFinal}">
+            ${statusTextFinal}
+            <span class="visually-hidden">${statusTitleFinal}</span>
+          </div>
         `;
         container.appendChild(card);
         const realValueEl = card.querySelector('.real-value');
         realValueEl.addEventListener('click', function(e) {
           e.stopPropagation();
-          if (privacyMode) return; // No permitir editar en modo privacidad
+          if (privacyMode) return;
           if (this.querySelector('input')) return;
           const accountId = parseInt(this.dataset.accountId);
           const currentValue = this.dataset.currentValue || '';
@@ -2977,11 +2987,11 @@
       const totalContainer = document.getElementById('verificationTotalContainer');
       if (totalVerificadas > 0) {
         const diffTotal = Math.round((totalReal - totalCalculado) * 100) / 100;
-        let diffClass = '', diffText = '';
-        if (diffTotal === 0) { diffClass = 'igual'; diffText = '✅ Verificado'; }
-        else if (diffTotal < 0) { diffClass = 'falta'; diffText = `❌ Falta $${Math.abs(diffTotal).toFixed(2).replace('.', ',')}`; }
-        else { diffClass = 'sobra'; diffText = `⚠️ Sobra $${diffTotal.toFixed(2).replace('.', ',')}`; }
-        // En modo privacidad, simplificamos el bloque de verificación
+        let diffClass = '', diffText = '', diffTitle = '';
+        if (diffTotal === 0) { diffClass = 'igual'; diffText = '✅ Verificado'; diffTitle = 'El saldo real coincide con el calculado'; }
+        else if (diffTotal < 0) { diffClass = 'falta'; diffText = `❌ Falta $${Math.abs(diffTotal).toFixed(2).replace('.', ',')}`; diffTitle = 'El saldo real es menor al calculado'; }
+        else { diffClass = 'sobra'; diffText = `⚠️ Sobra $${diffTotal.toFixed(2).replace('.', ',')}`; diffTitle = 'El saldo real es mayor al calculado'; }
+        
         if (privacyMode) {
           totalContainer.innerHTML = `
             <div class="verification-total">
@@ -2989,7 +2999,10 @@
                 <div><span class="label">Total calculado</span><div class="value">•••••</div></div>
                 <div><span class="label">Total real</span><div class="value">•••••</div></div>
               </div>
-              <div class="comparison ${diffClass}">${diffText}</div>
+              <div class="comparison ${diffClass}" title="Estado oculto por privacidad">
+                ${diffText}
+                <span class="visually-hidden">Estado oculto por privacidad</span>
+              </div>
               <div class="fecha-verif" style="margin-top:4px; font-size:11px; color:#6c6b5e;">${totalVerificadas} cuenta(s) verificada(s)</div>
             </div>
           `;
@@ -3000,7 +3013,10 @@
                 <div><span class="label">Total calculado</span><div class="value">${formatCurrency(totalCalculado)}</div></div>
                 <div><span class="label">Total real</span><div class="value">${formatCurrency(totalReal)}</div></div>
               </div>
-              <div class="comparison ${diffClass}">${diffText}</div>
+              <div class="comparison ${diffClass}" title="${diffTitle}">
+                ${diffText}
+                <span class="visually-hidden">${diffTitle}</span>
+              </div>
               <div class="fecha-verif" style="margin-top:4px; font-size:11px; color:#6c6b5e;">${totalVerificadas} cuenta(s) verificada(s)</div>
             </div>
           `;
@@ -3017,7 +3033,6 @@
     function buildMovementCard(m, catMap, accountsMap) {
       const catName = catMap[m.categoriaId] || 'Sin categoría';
       const sign = m.monto >= 0 ? 'positive' : 'negative';
-      const abs = Math.abs(m.monto).toFixed(2).replace('.', ',');
       const accColor = m.cuenta ? (accountsMap[m.cuenta] || '#d4d0c0') : '#d4d0c0';
       const pill = document.createElement('div');
       pill.className = 'movement-pill';
@@ -3038,13 +3053,13 @@
             ${m.cuenta ? `<span class="account-badge" style="background:${accColor};">${m.cuenta}</span>` : ''}
             ${grupoBadge}
           </div>
-          <span class="amount ${sign}">${m.monto >= 0 ? '+' : '-'}$${abs}</span>
+          <span class="amount ${sign}">${formatCurrency(m.monto)}</span>
         </div>
         ${m.descripcion ? `<div class="movement-desc">${m.descripcion}</div>` : ''}
         <div class="movement-footer">
           <div class="actions">
-            <button class="btn-icon" onclick="editMovement(${m.id})" title="Editar"><i class="bi bi-pencil"></i></button>
-            <button class="btn-icon danger" onclick="deleteMovement(${m.id})" title="Eliminar"><i class="bi bi-trash"></i></button>
+            <button class="btn-icon" onclick="editMovement(${m.id})" title="Editar movimiento" aria-label="Editar movimiento"><i class="bi bi-pencil"></i></button>
+            <button class="btn-icon danger" onclick="deleteMovement(${m.id})" title="Eliminar movimiento" aria-label="Eliminar movimiento"><i class="bi bi-trash"></i></button>
           </div>
         </div>
       `;
@@ -3078,14 +3093,11 @@
 
       let amountStr, amountClass;
       if (grupoId.startsWith('redondeo_') || grupoId.startsWith('intercambio_')) {
-        const abs = Math.abs(firstMov.monto).toFixed(2).replace('.', ',');
-        amountStr = `$${abs}`;
-        amountClass = 'positive';
+        amountStr = formatCurrency(firstMov.monto);
+        amountClass = firstMov.monto >= 0 ? 'positive' : 'negative';
       } else {
         const total = movs.reduce((s, m) => s + m.monto, 0);
-        const sign = total >= 0 ? '+' : '-';
-        const abs = Math.abs(total).toFixed(2).replace('.', ',');
-        amountStr = `${sign}$${abs}`;
+        amountStr = formatCurrency(total);
         amountClass = total >= 0 ? 'positive' : 'negative';
       }
 
@@ -3109,9 +3121,9 @@
         ${sameDesc && firstMov.descripcion ? `<div class="movement-desc">${firstMov.descripcion}</div>` : ''}
         <div class="movement-footer">
           <div class="actions">
-            <button class="btn-icon" onclick="editGroupDescription('${grupoId}')" title="Editar descripción del grupo"><i class="bi bi-pencil"></i></button>
-            <button class="btn-icon danger" onclick="deleteGroup('${grupoId}')" title="Eliminar todo el grupo"><i class="bi bi-trash"></i></button>
-            <button class="btn-icon group-chevron" onclick="toggleGroup('${grupoId}')" title="Ver detalles"><i class="bi bi-chevron-down"></i></button>
+            <button class="btn-icon" onclick="editGroupDescription('${grupoId}')" title="Editar descripción del grupo" aria-label="Editar descripción del grupo"><i class="bi bi-pencil"></i></button>
+            <button class="btn-icon danger" onclick="deleteGroup('${grupoId}')" title="Eliminar todo el grupo" aria-label="Eliminar todo el grupo"><i class="bi bi-trash"></i></button>
+            <button class="btn-icon group-chevron" onclick="toggleGroup('${grupoId}')" title="Ver detalles" aria-label="Expandir detalles del grupo"><i class="bi bi-chevron-down"></i></button>
           </div>
         </div>
       `;
@@ -3347,7 +3359,7 @@
       div.innerHTML = `
         <div class="col-6"><select class="form-select split-line-category" onchange="updateSplitTotals()"></select></div>
         <div class="col-5"><input type="number" class="form-control split-line-amount" step="0.01" placeholder="Monto" oninput="updateSplitTotals()" /></div>
-        <div class="col-1"><button type="button" class="btn-icon danger" onclick="removeSplitLine(${id})"><i class="bi bi-trash"></i></button></div>
+        <div class="col-1"><button type="button" class="btn-icon danger" onclick="removeSplitLine(${id})" aria-label="Eliminar línea"><i class="bi bi-trash"></i></button></div>
       `;
       container.appendChild(div);
       const categories = await db.categories.toArray();
@@ -3840,10 +3852,10 @@
             <div class="loan-footer">
               <span class="date">${dateStr}</span>
               <div class="actions">
-                <button class="btn-icon" onclick="editLoan(${loan.id})" title="Editar"><i class="bi bi-pencil"></i></button>
-                <button class="btn-icon danger" onclick="deleteLoan(${loan.id})" title="Eliminar"><i class="bi bi-trash"></i></button>
-                ${isPending ? `<button class="btn-icon success" onclick="openPayLoan(${loan.id})" title="Marcar como pagado"><i class="bi bi-check-lg"></i></button>` :
-                             `<button class="btn-icon primary" onclick="revertLoanPaid(${loan.id})" title="Revertir a pendiente"><i class="bi bi-arrow-counterclockwise"></i></button>`}
+                <button class="btn-icon" onclick="editLoan(${loan.id})" title="Editar préstamo" aria-label="Editar préstamo"><i class="bi bi-pencil"></i></button>
+                <button class="btn-icon danger" onclick="deleteLoan(${loan.id})" title="Eliminar préstamo" aria-label="Eliminar préstamo"><i class="bi bi-trash"></i></button>
+                ${isPending ? `<button class="btn-icon success" onclick="openPayLoan(${loan.id})" title="Marcar como pagado" aria-label="Marcar como pagado"><i class="bi bi-check-lg"></i></button>` :
+                             `<button class="btn-icon primary" onclick="revertLoanPaid(${loan.id})" title="Revertir a pendiente" aria-label="Revertir a pendiente"><i class="bi bi-arrow-counterclockwise"></i></button>`}
               </div>
             </div>
           `;
@@ -4024,10 +4036,10 @@
             <div class="footer">
               <span>${goal.lograda ? '100%' : Math.round(progress) + '%'}</span>
               <div>
-                <button class="btn-icon" onclick="editGoal(${goal.id})"><i class="bi bi-pencil"></i></button>
-                <button class="btn-icon danger" onclick="deleteGoal(${goal.id})"><i class="bi bi-trash"></i></button>
-                ${!goal.lograda ? `<button class="btn-icon success" onclick="markGoalAchieved(${goal.id})"><i class="bi bi-check-lg"></i></button>` :
-                                  `<button class="btn-icon primary" onclick="revertGoalAchieved(${goal.id})"><i class="bi bi-arrow-counterclockwise"></i></button>`}
+                <button class="btn-icon" onclick="editGoal(${goal.id})" aria-label="Editar meta"><i class="bi bi-pencil"></i></button>
+                <button class="btn-icon danger" onclick="deleteGoal(${goal.id})" aria-label="Eliminar meta"><i class="bi bi-trash"></i></button>
+                ${!goal.lograda ? `<button class="btn-icon success" onclick="markGoalAchieved(${goal.id})" aria-label="Marcar meta como lograda"><i class="bi bi-check-lg"></i></button>` :
+                                  `<button class="btn-icon primary" onclick="revertGoalAchieved(${goal.id})" aria-label="Reactivar meta"><i class="bi bi-arrow-counterclockwise"></i></button>`}
               </div>
             </div>
           </div>
@@ -4094,11 +4106,11 @@
           <div class="category-pill-small">
             <div class="left"><span>${cat.nombre}</span></div>
             <div class="actions">
-              <button class="vis-toggle ${isHidden ? 'hidden' : ''}" onclick="toggleCategoryVisibility(${cat.id})" title="${isHidden ? 'Mostrar' : 'Ocultar'}">
+              <button class="vis-toggle ${isHidden ? 'hidden' : ''}" onclick="toggleCategoryVisibility(${cat.id})" title="${isHidden ? 'Mostrar' : 'Ocultar'}" aria-label="${isHidden ? 'Mostrar categoría' : 'Ocultar categoría'}">
                 <i class="bi ${isHidden ? 'bi-eye-slash' : 'bi-eye'}"></i>
               </button>
-              <button class="btn-icon" onclick="editCategory(${cat.id})"><i class="bi bi-pencil"></i></button>
-              <button class="btn-icon danger" onclick="deleteCategory(${cat.id})"><i class="bi bi-trash"></i></button>
+              <button class="btn-icon" onclick="editCategory(${cat.id})" aria-label="Editar categoría"><i class="bi bi-pencil"></i></button>
+              <button class="btn-icon danger" onclick="deleteCategory(${cat.id})" aria-label="Eliminar categoría"><i class="bi bi-trash"></i></button>
             </div>
           </div>
         `;
@@ -4188,8 +4200,8 @@
               <span>${acc.nombre}</span>
             </div>
             <div class="actions">
-              <button class="btn-icon" onclick="editAccount(${acc.id})"><i class="bi bi-pencil"></i></button>
-              <button class="btn-icon danger" onclick="deleteAccount(${acc.id})"><i class="bi bi-trash"></i></button>
+              <button class="btn-icon" onclick="editAccount(${acc.id})" aria-label="Editar cuenta"><i class="bi bi-pencil"></i></button>
+              <button class="btn-icon danger" onclick="deleteAccount(${acc.id})" aria-label="Eliminar cuenta"><i class="bi bi-trash"></i></button>
             </div>
           </div>
         `;
