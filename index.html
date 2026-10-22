@@ -26,22 +26,23 @@
       --color-oscuro: #201e1f;
       --color-naranja: #e2781f;
       --color-naranja-hover: #b3410e;
-      --color-naranja-texto: #f5984a; /* ALTO CONTRASTE: Para textos sobre fondos oscuros */
+      --color-naranja-texto: var(--color-naranja); /* Por defecto igual al naranja */
       --color-fondo: #201e1f;
       --color-positivo: #28a745; 
       --color-negativo: #dc3545; 
     }
 
-    /* ================== MODO DALTÓNICO (Opcional en Configuración) ================== */
+    /* ================== MODO DALTÓNICO (Controla Accesibilidad y Colores) ================== */
     body.daltonic {
       --color-naranja: #0072B2; /* Azul seguro para daltónicos */
       --color-naranja-hover: #005A8E;
-      --color-naranja-texto: #56B4E9;
+      --color-naranja-texto: #56B4E9; /* Alto contraste para textos */
       --color-positivo: #0072B2; 
       --color-negativo: #E69F00; 
     }
-    body.daltonic .split-badge[style*="#1fe21f"] { background-color: #0072B2 !important; } /* Dividido */
-    body.daltonic .split-badge[style*="#1f81e2"] { background-color: #E69F00 !important; } /* Redondeo */
+    body.daltonic .text-naranja { color: var(--color-naranja-texto) !important; }
+    body.daltonic .split-badge[style*="#1fe21f"] { background-color: #0072B2 !important; }
+    body.daltonic .split-badge[style*="#1f81e2"] { background-color: #E69F00 !important; }
     body.daltonic .stats-card.ingresado .stats-value { color: #0072B2 !important; }
     body.daltonic .stats-card.gastado .stats-value { color: #E69F00 !important; }
     body.daltonic .account-card .status-pill.igual { background: #cce5ff; color: #004085; }
@@ -123,44 +124,22 @@
     }
     @media (max-width: 992px) {
       .privacy-toggle-btn {
-        bottom: 20px;
-        right: 20px;
-        width: 42px;
-        height: 42px;
-        font-size: 20px;
+        bottom: 20px; right: 20px; width: 42px; height: 42px; font-size: 20px;
       }
     }
     @media (max-width: 576px) {
       .privacy-toggle-btn {
-        bottom: 16px;
-        right: 16px;
-        width: 40px;
-        height: 40px;
-        font-size: 18px;
+        bottom: 16px; right: 16px; width: 40px; height: 40px; font-size: 18px;
       }
     }
 
     .chart-privacy-placeholder {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      color: #6c6b5e;
-      font-weight: 600;
-      font-size: 14px;
-      background: rgba(255,247,224,0.08);
-      border-radius: 30px;
-      pointer-events: none;
-      text-align: center;
-      padding: 20px;
+      position: absolute; inset: 0; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 8px; color: #6c6b5e;
+      font-weight: 600; font-size: 14px; background: rgba(255,247,224,0.08);
+      border-radius: 30px; pointer-events: none; text-align: center; padding: 20px;
     }
-    .chart-privacy-placeholder i {
-      font-size: 38px;
-      color: var(--color-naranja-texto);
-    }
+    .chart-privacy-placeholder i { font-size: 38px; color: var(--color-naranja-texto); }
 
     .sidebar {
       background: var(--color-crema); height: 100vh; position: fixed; top: 0; left: 0;
@@ -218,9 +197,7 @@
       background: var(--color-crema); border-radius: 60px; padding: 14px 24px;
       display: flex; justify-content: space-between; align-items: center;
       font-weight: 700; font-size: 18px; color: var(--color-oscuro);
-      user-select: none;
-      position: relative;
-      min-height: 56px;
+      user-select: none; position: relative; min-height: 56px;
     }
     .category-pill .drag-handle {
       position: absolute; left: -58px; top: 50%; transform: translateY(-50%);
@@ -319,12 +296,8 @@
     }
     
     .custom-dropdown-menu {
-      background: #2a2a2a;
-      border: 1px solid #444;
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-      padding: 8px;
-      min-width: 200px;
+      background: #2a2a2a; border: 1px solid #444; border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5); padding: 8px; min-width: 200px;
     }
     .custom-dropdown-menu .dropdown-item {
       border-radius: 12px; padding: 10px 16px;
@@ -342,50 +315,26 @@
     .icon-intercambio { color: #845ec2 !important; }
 
     .person-total-card {
-      background: var(--color-crema);
-      border-radius: 28px;
-      padding: 18px 22px;
-      color: var(--color-oscuro);
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      height: 100%;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+      background: var(--color-crema); border-radius: 28px; padding: 18px 22px;
+      color: var(--color-oscuro); display: flex; flex-direction: column; gap: 4px;
+      height: 100%; box-shadow: 0 4px 14px rgba(0,0,0,0.15);
     }
     .person-total-card .person-name {
-      font-size: 14px;
-      font-weight: 700;
-      text-transform: uppercase;
-      color: var(--color-naranja);
-      letter-spacing: 1.2px;
+      font-size: 14px; font-weight: 700; text-transform: uppercase;
+      color: var(--color-naranja); letter-spacing: 1.2px;
     }
     .person-total-card .person-total {
-      font-size: 32px;
-      font-weight: 800;
-      color: var(--color-oscuro);
-      line-height: 1.1;
-      word-break: break-word;
+      font-size: 32px; font-weight: 800; color: var(--color-oscuro);
+      line-height: 1.1; word-break: break-word;
     }
     .person-total-card .person-count {
-      font-size: 12px;
-      color: #6c6b5e;
-      font-weight: 500;
-      margin-bottom: 10px;
+      font-size: 12px; color: #6c6b5e; font-weight: 500; margin-bottom: 10px;
     }
     .person-total-card .btn-pdf {
-      background: #25D366;
-      color: #fff;
-      border: none;
-      border-radius: 30px;
-      padding: 8px 18px;
-      font-weight: 600;
-      font-size: 13px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      cursor: pointer;
-      transition: 0.2s;
-      align-self: flex-start;
+      background: #25D366; color: #fff; border: none; border-radius: 30px;
+      padding: 8px 18px; font-weight: 600; font-size: 13px;
+      display: inline-flex; align-items: center; gap: 6px;
+      cursor: pointer; transition: 0.2s; align-self: flex-start;
       font-family: 'Poppins', sans-serif;
     }
     .person-total-card .btn-pdf:hover { background: #1eb658; }
@@ -418,29 +367,15 @@
     .filter-grid .filter-item .month-nav .btn-show-all.active { background: #28a745; }
 
     .movement-pill {
-      background: var(--color-crema);
-      border-radius: 28px;
-      padding: 14px 28px;
-      color: var(--color-oscuro);
-      font-weight: 600;
-      margin-bottom: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
+      background: var(--color-crema); border-radius: 28px; padding: 14px 28px;
+      color: var(--color-oscuro); font-weight: 600; margin-bottom: 10px;
+      display: flex; flex-direction: column; gap: 6px;
     }
     .movement-pill .movement-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
+      display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
     }
     .movement-pill .movement-who {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      flex-wrap: wrap;
-      min-width: 0;
+      display: flex; align-items: center; gap: 15px; flex-wrap: wrap; min-width: 0;
     }
     .movement-pill .movement-who .cat { font-weight: 700; text-transform: uppercase; }
     .movement-pill .movement-who .account-badge {
@@ -450,25 +385,17 @@
     }
     .movement-pill .movement-who .split-badge {
       border-radius: 30px; padding: 2px 10px; font-size: 11px; font-weight: 600;
-      display: inline-flex; align-items: center; gap: 4px;
-      color: #fff;
+      display: inline-flex; align-items: center; gap: 4px; color: #fff;
     }
     .movement-pill .amount { font-weight: 700; font-size: 18px; white-space: nowrap; }
     .movement-pill .amount.positive { color: var(--color-oscuro); }
     .movement-pill .amount.negative { color: var(--color-naranja-hover); }
     .movement-pill .movement-desc {
-      color: #4a4a4a;
-      font-weight: 400;
-      word-break: break-word;
-      overflow-wrap: break-word;
-      line-height: 1.4;
+      color: #4a4a4a; font-weight: 400; word-break: break-word;
+      overflow-wrap: break-word; line-height: 1.4;
     }
     .movement-pill .movement-footer {
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
+      display: flex; justify-content: flex-end; align-items: center; gap: 12px; flex-wrap: wrap;
     }
     .movement-pill .movement-footer .actions { display: flex; align-items: center; gap: 8px; }
     .movement-pill .movement-footer .actions .btn-icon {
@@ -481,12 +408,10 @@
     .movement-group { margin-bottom: 10px; }
     .movement-group > .movement-pill.group-parent { margin-bottom: 0; cursor: default; }
     .movement-group:not(.expanded) > .movement-pill.group-parent {
-      border-radius: 28px;
-      margin-bottom: 10px;
+      border-radius: 28px; margin-bottom: 10px;
     }
     .movement-group.expanded > .movement-pill.group-parent {
-      border-bottom-left-radius: 4px;
-      border-bottom-right-radius: 4px;
+      border-bottom-left-radius: 4px; border-bottom-right-radius: 4px;
     }
     .movement-pill.group-parent.tipo-dividido { background: #f0fce9; }
     .movement-pill.group-parent.tipo-redondeo { background: #ebf2fb; }
@@ -499,21 +424,14 @@
       display: inline-flex; align-items: center; justify-content: center;
     }
     .movement-pill.group-parent .group-chevron:hover { background: rgba(0,0,0,0.08); }
-    .movement-group.expanded > .movement-pill.group-parent .group-chevron {
-      transform: rotate(180deg);
-    }
+    .movement-group.expanded > .movement-pill.group-parent .group-chevron { transform: rotate(180deg); }
 
     .movement-group-children {
-      display: none;
-      border-radius: 0 0 20px 20px;
-      padding: 8px 10px 4px;
-      margin-bottom: 10px;
+      display: none; border-radius: 0 0 20px 20px; padding: 8px 10px 4px; margin-bottom: 10px;
     }
     .movement-group.expanded > .movement-group-children { display: block; }
     .movement-group-children .movement-pill {
-      margin-bottom: 6px;
-      border-radius: 20px;
-      padding: 12px 20px;
+      margin-bottom: 6px; border-radius: 20px; padding: 12px 20px;
     }
     .movement-group-children .movement-pill:last-child { margin-bottom: 4px; }
 
@@ -522,44 +440,27 @@
     .movement-group.tipo-intercambio .movement-group-children { background: #d4b8e0; }
 
     .loan-pill {
-      background: var(--color-crema);
-      border-radius: 28px;
-      padding: 14px 28px;
-      color: var(--color-oscuro);
-      font-weight: 600;
-      margin-bottom: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
+      background: var(--color-crema); border-radius: 28px; padding: 14px 28px;
+      color: var(--color-oscuro); font-weight: 600; margin-bottom: 10px;
+      display: flex; flex-direction: column; gap: 6px;
     }
     .loan-pill .loan-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
+      display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
     }
     .loan-pill .loan-who {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      flex-wrap: wrap;
-      min-width: 0;
+      display: flex; align-items: center; gap: 15px; flex-wrap: wrap; min-width: 0;
     }
     .loan-pill .loan-who .person { font-weight: 700; text-transform: uppercase; }
     .loan-pill .loan-who .account-badge {
       background: #d4d0c0; border-radius: 30px; padding: 2px 14px;
-      font-size: 12px; font-weight: 600; text-transform: uppercase;
-      white-space: nowrap;
+      font-size: 12px; font-weight: 600; text-transform: uppercase; white-space: nowrap;
     }
     .loan-pill .amount { font-weight: 700; font-size: 18px; white-space: nowrap; }
     .loan-pill .loan-desc {
-      color: #4a4a4a; font-weight: 400;
-      word-break: break-word; overflow-wrap: break-word; line-height: 1.4;
+      color: #4a4a4a; font-weight: 400; word-break: break-word; overflow-wrap: break-word; line-height: 1.4;
     }
     .loan-pill .loan-footer {
-      display: flex; justify-content: space-between; align-items: center;
-      gap: 12px; flex-wrap: wrap;
+      display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
     }
     .loan-pill .date { color: #4a4a4a; font-weight: 400; }
     .loan-pill .actions { display: flex; align-items: center; gap: 8px; }
@@ -601,28 +502,17 @@
 
     /* ================== CONFIGURACIÓN ================== */
     .settings-card {
-      background: var(--color-crema);
-      border-radius: 30px;
-      padding: 24px 28px;
-      color: var(--color-oscuro);
-      margin-bottom: 20px;
+      background: var(--color-crema); border-radius: 30px; padding: 24px 28px;
+      color: var(--color-oscuro); margin-bottom: 20px;
     }
     .settings-card h5 {
-      font-size: 16px;
-      font-weight: 700;
-      text-transform: uppercase;
-      color: var(--color-naranja);
-      letter-spacing: 1px;
-      margin-bottom: 16px;
-      border-bottom: 2px solid rgba(0,0,0,0.05);
-      padding-bottom: 8px;
+      font-size: 16px; font-weight: 700; text-transform: uppercase;
+      color: var(--color-naranja); letter-spacing: 1px; margin-bottom: 16px;
+      border-bottom: 2px solid rgba(0,0,0,0.05); padding-bottom: 8px;
     }
     .setting-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 0;
-      border-bottom: 1px solid rgba(0,0,0,0.05);
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.05);
     }
     .setting-row:last-child { border-bottom: none; }
     .setting-row .setting-info { display: flex; flex-direction: column; gap: 4px; }
@@ -649,169 +539,75 @@
     .form-control-color { width: 60px; height: 42px; padding: 4px; border-radius: 30px; cursor: pointer; }
     .form-check-label { font-weight: 500; }
 
-    /* ================== CUSTOM SELECT (categorías) ================== */
+    /* ================== CUSTOM SELECT ================== */
     .csel-wrap { position: relative; width: 100%; }
     .csel-btn {
-      width: 100%;
-      background: #fffdf6;
-      border: 1px solid #d4d0c0;
-      border-radius: 60px;
-      padding: 10px 18px;
-      font-family: 'Poppins', sans-serif;
-      font-weight: 500;
-      color: var(--color-oscuro);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-      min-height: 46px;
-      text-align: left;
-      transition: border-color 0.15s, box-shadow 0.15s;
+      width: 100%; background: #fffdf6; border: 1px solid #d4d0c0; border-radius: 60px;
+      padding: 10px 18px; font-family: 'Poppins', sans-serif; font-weight: 500;
+      color: var(--color-oscuro); display: flex; justify-content: space-between;
+      align-items: center; gap: 10px; cursor: pointer; min-height: 46px;
+      text-align: left; transition: border-color 0.15s, box-shadow 0.15s;
     }
     .csel-btn:hover { border-color: #bfb8a0; }
-    .csel-btn.open,
-    .csel-btn:focus {
-      border-color: var(--color-naranja);
-      box-shadow: 0 0 0 3px rgba(232,98,44,0.3);
-      outline: none;
+    .csel-btn.open, .csel-btn:focus {
+      border-color: var(--color-naranja); box-shadow: 0 0 0 3px rgba(232,98,44,0.3); outline: none;
     }
     .csel-btn-content {
-      flex: 1;
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      gap: 10px;
-      min-width: 0;
+      flex: 1; display: flex; justify-content: space-between; align-items: baseline; gap: 10px; min-width: 0;
     }
     .csel-btn .csel-name {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      text-transform: capitalize;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-transform: capitalize;
     }
-    .csel-btn .csel-amount {
-      font-weight: 700;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
+    .csel-btn .csel-amount { font-weight: 700; white-space: nowrap; flex-shrink: 0; }
     .csel-btn .csel-amount.positive { color: var(--color-oscuro); }
     .csel-btn .csel-amount.negative { color: var(--color-naranja-hover); }
-    .csel-btn > i {
-      color: #6c6b5e;
-      transition: transform 0.2s;
-      flex-shrink: 0;
-      font-size: 14px;
-    }
+    .csel-btn > i { color: #6c6b5e; transition: transform 0.2s; flex-shrink: 0; font-size: 14px; }
     .csel-btn.open > i { transform: rotate(180deg); }
 
     .csel-panel {
-      display: none;
-      position: absolute;
-      top: calc(100% + 4px);
-      left: 0;
-      right: 0;
-      background: #fffdf6;
-      border: 1px solid #d4d0c0;
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.18);
-      max-height: 280px;
-      overflow-y: auto;
-      z-index: 3000;
-      padding: 6px;
+      display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+      background: #fffdf6; border: 1px solid #d4d0c0; border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.18); max-height: 280px; overflow-y: auto;
+      z-index: 3000; padding: 6px;
     }
     .csel-panel.open { display: block; }
     .csel-opt {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      gap: 10px;
-      padding: 10px 14px;
-      border-radius: 14px;
-      cursor: pointer;
-      color: var(--color-oscuro);
-      font-weight: 500;
-      transition: background 0.15s;
+      display: flex; justify-content: space-between; align-items: baseline; gap: 10px;
+      padding: 10px 14px; border-radius: 14px; cursor: pointer;
+      color: var(--color-oscuro); font-weight: 500; transition: background 0.15s;
     }
-    .csel-opt:hover,
-    .csel-opt.selected { background: rgba(226,120,31,0.15); }
-    .csel-opt.disabled {
-      color: #b0ad9a;
-      cursor: not-allowed;
-      background: transparent !important;
-    }
+    .csel-opt:hover, .csel-opt.selected { background: rgba(226,120,31,0.15); }
+    .csel-opt.disabled { color: #b0ad9a; cursor: not-allowed; background: transparent !important; }
     .csel-opt .csel-name {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      text-transform: capitalize;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-transform: capitalize;
     }
-    .csel-opt .csel-amount {
-      font-weight: 700;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
+    .csel-opt .csel-amount { font-weight: 700; white-space: nowrap; flex-shrink: 0; }
     .csel-opt .csel-amount.positive { color: var(--color-oscuro); }
     .csel-opt .csel-amount.negative { color: var(--color-naranja-hover); }
 
     /* ================== ESTADÍSTICAS ================== */
-    .stats-month-nav {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+    .stats-month-nav { display: flex; align-items: center; gap: 10px; }
     .stats-month-nav button {
-      background: var(--color-naranja);
-      border: none;
-      color: #fff;
-      border-radius: 50%;
-      width: 38px;
-      height: 38px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: 0.2s;
-      font-size: 16px;
+      background: var(--color-naranja); border: none; color: #fff; border-radius: 50%;
+      width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: 0.2s; font-size: 16px;
     }
     .stats-month-nav button:hover { background: var(--color-naranja-hover); }
     .stats-month-nav .stats-month-label {
-      font-weight: 700;
-      font-size: 18px;
-      color: #fff;
-      min-width: 170px;
-      text-align: center;
-      text-transform: capitalize;
+      font-weight: 700; font-size: 18px; color: #fff; min-width: 170px;
+      text-align: center; text-transform: capitalize;
     }
 
-    .stats-cards {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-      margin-bottom: 20px;
-    }
+    .stats-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
     .stats-card {
-      background: var(--color-crema);
-      border-radius: 28px;
-      padding: 18px 22px;
-      color: var(--color-oscuro);
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
+      background: var(--color-crema); border-radius: 28px; padding: 18px 22px;
+      color: var(--color-oscuro); display: flex; flex-direction: column; gap: 6px;
       box-shadow: 0 4px 14px rgba(0,0,0,0.15);
     }
     .stats-card .stats-label {
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1.2px;
+      font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px;
     }
-    .stats-card .stats-value {
-      font-size: 30px;
-      font-weight: 800;
-      line-height: 1.1;
-      word-break: break-word;
-    }
+    .stats-card .stats-value { font-size: 30px; font-weight: 800; line-height: 1.1; word-break: break-word; }
     .stats-card.gastado .stats-label { color: var(--color-naranja-hover); }
     .stats-card.gastado .stats-value { color: var(--color-naranja-hover); }
     .stats-card.ingresado .stats-label { color: #155724; }
@@ -823,22 +619,12 @@
     .stats-card.promedio .stats-value { color: var(--color-oscuro); }
 
     .stats-comparison {
-      background: var(--color-crema);
-      border-radius: 24px;
-      padding: 14px 22px;
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      color: var(--color-oscuro);
-      font-weight: 600;
-      font-size: 15px;
+      background: var(--color-crema); border-radius: 24px; padding: 14px 22px;
+      margin-bottom: 20px; display: flex; align-items: center; gap: 12px;
+      color: var(--color-oscuro); font-weight: 600; font-size: 15px;
       box-shadow: 0 4px 14px rgba(0,0,0,0.15);
     }
-    .stats-comparison i {
-      font-size: 22px;
-      flex-shrink: 0;
-    }
+    .stats-comparison i { font-size: 22px; flex-shrink: 0; }
     .stats-comparison.positive { border-left: 6px solid #28a745; }
     .stats-comparison.positive i { color: #28a745; }
     .stats-comparison.negative { border-left: 6px solid #dc3545; }
@@ -847,157 +633,73 @@
     .stats-comparison.neutral i { color: #999; }
     .stats-comparison strong { color: var(--color-naranja-hover); }
 
-    .stats-chart-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      margin-bottom: 20px;
-    }
+    .stats-chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
     .stats-chart-container {
-      background: var(--color-crema);
-      border-radius: 28px;
-      padding: 18px 20px;
-      color: var(--color-oscuro);
-      box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+      background: var(--color-crema); border-radius: 28px; padding: 18px 20px;
+      color: var(--color-oscuro); box-shadow: 0 4px 14px rgba(0,0,0,0.15);
     }
     .stats-chart-title {
-      font-size: 14px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1.2px;
-      color: var(--color-naranja);
-      margin-bottom: 12px;
+      font-size: 14px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1.2px; color: var(--color-naranja); margin-bottom: 12px;
     }
-    .stats-chart-canvas {
-      position: relative;
-      height: 260px;
-    }
+    .stats-chart-canvas { position: relative; height: 260px; }
 
     .stats-section {
-      background: var(--color-crema);
-      border-radius: 28px;
-      padding: 20px 24px;
-      margin-bottom: 20px;
-      color: var(--color-oscuro);
-      box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+      background: var(--color-crema); border-radius: 28px; padding: 20px 24px;
+      margin-bottom: 20px; color: var(--color-oscuro); box-shadow: 0 4px 14px rgba(0,0,0,0.15);
     }
     .stats-section .stats-chart-title { margin-bottom: 16px; }
 
     .stats-category-bar {
-      display: grid;
-      grid-template-columns: 140px 1fr 100px 60px;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 0;
+      display: grid; grid-template-columns: 140px 1fr 100px 60px;
+      align-items: center; gap: 12px; padding: 10px 0;
       border-bottom: 1px solid rgba(0,0,0,0.08);
     }
     .stats-category-bar:last-child { border-bottom: none; }
     .stats-category-bar .bar-name {
-      font-weight: 700;
-      text-transform: uppercase;
-      font-size: 13px;
-      letter-spacing: 0.5px;
-      color: var(--color-oscuro);
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      font-weight: 700; text-transform: uppercase; font-size: 13px;
+      letter-spacing: 0.5px; color: var(--color-oscuro);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
-    .stats-category-bar .bar-track {
-      height: 14px;
-      background: #e8e2d0;
-      border-radius: 10px;
-      overflow: hidden;
-    }
+    .stats-category-bar .bar-track { height: 14px; background: #e8e2d0; border-radius: 10px; overflow: hidden; }
     .stats-category-bar .bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--color-naranja), var(--color-naranja-hover));
-      border-radius: 10px;
-      transition: width 0.4s ease;
+      height: 100%; background: linear-gradient(90deg, var(--color-naranja), var(--color-naranja-hover));
+      border-radius: 10px; transition: width 0.4s ease;
     }
-    .stats-category-bar .bar-amount {
-      font-weight: 700;
-      font-size: 14px;
-      color: var(--color-naranja-hover);
-      text-align: right;
-    }
-    .stats-category-bar .bar-percent {
-      font-weight: 600;
-      font-size: 13px;
-      color: #6c6b5e;
-      text-align: right;
-    }
+    .stats-category-bar .bar-amount { font-weight: 700; font-size: 14px; color: var(--color-naranja-hover); text-align: right; }
+    .stats-category-bar .bar-percent { font-weight: 600; font-size: 13px; color: #6c6b5e; text-align: right; }
 
     .stats-top-item {
-      display: grid;
-      grid-template-columns: 90px 1fr 100px;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 0;
+      display: grid; grid-template-columns: 90px 1fr 100px;
+      align-items: center; gap: 12px; padding: 10px 0;
       border-bottom: 1px solid rgba(0,0,0,0.08);
     }
     .stats-top-item:last-child { border-bottom: none; }
-    .stats-top-item .top-date {
-      font-size: 12px;
-      font-weight: 600;
-      color: #6c6b5e;
-      text-transform: uppercase;
-    }
-    .stats-top-item .top-detail {
-      min-width: 0;
-    }
+    .stats-top-item .top-date { font-size: 12px; font-weight: 600; color: #6c6b5e; text-transform: uppercase; }
+    .stats-top-item .top-detail { min-width: 0; }
     .stats-top-item .top-cat {
-      font-size: 13px;
-      font-weight: 700;
-      text-transform: uppercase;
-      color: var(--color-oscuro);
-      letter-spacing: 0.5px;
+      font-size: 13px; font-weight: 700; text-transform: uppercase;
+      color: var(--color-oscuro); letter-spacing: 0.5px;
     }
     .stats-top-item .top-desc {
-      font-size: 12px;
-      color: #6c6b5e;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      font-size: 12px; color: #6c6b5e; overflow: hidden;
+      text-overflow: ellipsis; white-space: nowrap;
     }
-    .stats-top-item .top-amount {
-      font-weight: 800;
-      font-size: 16px;
-      color: var(--color-naranja-hover);
-      text-align: right;
-    }
+    .stats-top-item .top-amount { font-weight: 800; font-size: 16px; color: var(--color-naranja-hover); text-align: right; }
 
-    .stats-empty {
-      text-align: center;
-      color: #6c6b5e;
-      font-style: italic;
-      padding: 20px 0;
-      font-size: 14px;
-    }
+    .stats-empty { text-align: center; color: #6c6b5e; font-style: italic; padding: 20px 0; font-size: 14px; }
 
     /* ============ TABS ESTADÍSTICAS ============ */
-    .custom-stats-tabs {
-      border-bottom: 2px solid #333;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
+    .custom-stats-tabs { border-bottom: 2px solid #333; gap: 10px; margin-bottom: 20px; }
     .custom-stats-tabs .nav-link {
-      border: none;
-      border-radius: 30px 30px 0 0;
-      color: #ccc;
-      font-weight: 600;
-      padding: 10px 20px;
-      transition: 0.2s;
+      border: none; border-radius: 30px 30px 0 0; color: #ccc;
+      font-weight: 600; padding: 10px 20px; transition: 0.2s;
     }
-    .custom-stats-tabs .nav-link:hover {
-      color: #fff;
-      background: rgba(255,255,255,0.05);
-    }
+    .custom-stats-tabs .nav-link:hover { color: #fff; background: rgba(255,255,255,0.05); }
     .custom-stats-tabs .nav-link.active {
-      color: var(--color-naranja);
-      background: var(--color-crema);
+      color: var(--color-naranja); background: var(--color-crema);
       border-bottom: 2px solid var(--color-naranja);
     }
-    /* ========================================= */
 
     .stats-subtab-pane { display: none; }
     .stats-subtab-pane.active { display: block; }
@@ -1006,18 +708,11 @@
     .intercambio-step { display: none; }
     .intercambio-step.active { display: block; }
     #intercambioSummaryText {
-      background-color: #fffdf6;
-      border: 2px dashed var(--color-naranja);
-      border-radius: 20px;
-      padding: 20px;
-      font-size: 16px;
-      line-height: 1.5;
-      text-align: center;
+      background-color: #fffdf6; border: 2px dashed var(--color-naranja);
+      border-radius: 20px; padding: 20px; font-size: 16px;
+      line-height: 1.5; text-align: center;
     }
-    #intercambioSummaryText strong {
-      color: var(--color-naranja);
-    }
-    /* ========================================= */
+    #intercambioSummaryText strong { color: var(--color-naranja); }
 
     .menu-toggle {
       display: none; background: var(--color-naranja); border: none; color: #fff;
@@ -1167,7 +862,6 @@
     <button class="btn-landing-outline" id="btnTrialLanding">Iniciar prueba</button>
   </div>
 
-  <!-- ARIA-LABEL añadido -->
   <button class="privacy-toggle-btn" id="privacyToggle" onclick="togglePrivacy()" title="Ocultar números" aria-label="Ocultar números" type="button">
     <i class="bi bi-eye-fill"></i>
   </button>
@@ -1194,7 +888,6 @@
       <button class="nav-item" data-tab="goals"><i class="bi bi-bullseye"></i> Metas</button>
       <button class="nav-item" data-tab="stats"><i class="bi bi-bar-chart-line"></i> Estadísticas</button>
       <button class="nav-item" data-tab="categories"><i class="bi bi-tags"></i> Categorías</button>
-      <!-- NUEVO BOTÓN DE CONFIGURACIÓN -->
       <button class="nav-item" data-tab="settings"><i class="bi bi-gear"></i> Configuración</button>
     </nav>
     <div class="logout-container" id="logoutContainer" style="display:none;">
@@ -1426,7 +1119,6 @@
       <div id="accountsList" class="row g-2"></div>
     </div>
 
-    <!-- ================== NUEVA PESTAÑA: CONFIGURACIÓN ================== -->
     <div id="tab-settings" class="tab-content">
       <div class="section-header">
         <h2>Configuración</h2>
@@ -1440,7 +1132,7 @@
             <div class="setting-row">
               <div class="setting-info">
                 <span class="setting-title">Modo Daltónico</span>
-                <span class="setting-desc">Usa colores seguros (azul/amarillo) en los gráficos.</span>
+                <span class="setting-desc">Colores seguros y mejoras de accesibilidad (WCAG).</span>
               </div>
               <div class="form-check form-switch">
                 <input class="form-check-input" type="checkbox" id="daltonicToggle" onchange="toggleDaltonic()" aria-label="Activar modo daltónico">
@@ -1478,11 +1170,9 @@
         </div>
       </div>
     </div>
-    <!-- =================================================================== -->
 
   </main>
 
-  <!-- MODALES -->
   <div class="modal fade" id="movementModal" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -1922,9 +1612,10 @@
       return `${y}-${m}-${day}`;
     }
     
-    // WCAG: Aseguramos el signo + explícito para positivos
+    // Función modificada: el signo + solo aparece en modo daltónico (accesibilidad)
     function formatCurrency(value) {
-      const sign = value > 0 ? '+' : value < 0 ? '-' : '';
+      let sign = value < 0 ? '-' : '';
+      if (daltonicMode && value > 0) sign = '+';
       const abs = Math.abs(value);
       return sign + abs.toFixed(2).replace('.', ',') + '$';
     }
@@ -3030,7 +2721,14 @@
         const statusTextFinal = privacyMode ? (statusClass === 'igual' ? '✅ Verificado' : '•••••') : statusText;
         const statusTitleFinal = privacyMode ? 'Estado oculto por privacidad' : statusTitle;
         
-        // WCAG: Se añade title y visually-hidden para los estados de cuenta
+        // Atributos de accesibilidad condicionados al modo daltónico
+        let pillAttrs = '';
+        let hiddenText = '';
+        if (daltonicMode) {
+          pillAttrs = `title="${statusTitleFinal}"`;
+          hiddenText = `<span class="visually-hidden">${statusTitleFinal}</span>`;
+        }
+
         card.innerHTML = `
           <div class="account-name">${acc.nombre}</div>
           <div class="account-balance">${balanceDisplay}</div>
@@ -3039,9 +2737,9 @@
           <div class="real-value ${privacyMode ? 'privacy-locked' : ''}" data-account-id="${acc.id}" data-current-value="${acc.saldoReal !== null ? acc.saldoReal : ''}">
             ${realValueDisplay}
           </div>
-          <div class="status-pill ${statusClass}" title="${statusTitleFinal}">
+          <div class="status-pill ${statusClass}" ${pillAttrs}>
             ${statusTextFinal}
-            <span class="visually-hidden">${statusTitleFinal}</span>
+            ${hiddenText}
           </div>
         `;
         container.appendChild(card);
@@ -3082,6 +2780,13 @@
         else if (diffTotal < 0) { diffClass = 'falta'; diffText = `❌ Falta ${formatCurrency(Math.abs(diffTotal))}`; diffTitle = 'El saldo real es menor al calculado'; }
         else { diffClass = 'sobra'; diffText = `⚠️ Sobra ${formatCurrency(diffTotal)}`; diffTitle = 'El saldo real es mayor al calculado'; }
         
+        let totalAttrs = '';
+        let hiddenTotalText = '';
+        if (daltonicMode) {
+          totalAttrs = `title="${diffTitle}"`;
+          hiddenTotalText = `<span class="visually-hidden">${diffTitle}</span>`;
+        }
+
         if (privacyMode) {
           totalContainer.innerHTML = `
             <div class="verification-total">
@@ -3103,9 +2808,9 @@
                 <div><span class="label">Total calculado</span><div class="value">${formatCurrency(totalCalculado)}</div></div>
                 <div><span class="label">Total real</span><div class="value">${formatCurrency(totalReal)}</div></div>
               </div>
-              <div class="comparison ${diffClass}" title="${diffTitle}">
+              <div class="comparison ${diffClass}" ${totalAttrs}>
                 ${diffText}
-                <span class="visually-hidden">${diffTitle}</span>
+                ${hiddenTotalText}
               </div>
               <div class="fecha-verif" style="margin-top:4px; font-size:11px; color:#6c6b5e;">${totalVerificadas} cuenta(s) verificada(s)</div>
             </div>
@@ -3136,7 +2841,10 @@
           grupoBadge = `<span class="split-badge" style="background:#1fe21f;" title="Movimiento dividido"><i class="bi bi-distribute-horizontal"></i> Dividido</span>`;
         }
       }
-      // WCAG: Se añade aria-label a los botones de acción de cada movimiento
+      
+      let ariaEdit = daltonicMode ? 'aria-label="Editar movimiento"' : '';
+      let ariaDelete = daltonicMode ? 'aria-label="Eliminar movimiento"' : '';
+
       pill.innerHTML = `
         <div class="movement-header">
           <div class="movement-who">
@@ -3149,8 +2857,8 @@
         ${m.descripcion ? `<div class="movement-desc">${m.descripcion}</div>` : ''}
         <div class="movement-footer">
           <div class="actions">
-            <button class="btn-icon" onclick="editMovement(${m.id})" title="Editar movimiento" aria-label="Editar movimiento"><i class="bi bi-pencil"></i></button>
-            <button class="btn-icon danger" onclick="deleteMovement(${m.id})" title="Eliminar movimiento" aria-label="Eliminar movimiento"><i class="bi bi-trash"></i></button>
+            <button class="btn-icon" onclick="editMovement(${m.id})" title="Editar movimiento" ${ariaEdit}><i class="bi bi-pencil"></i></button>
+            <button class="btn-icon danger" onclick="deleteMovement(${m.id})" title="Eliminar movimiento" ${ariaDelete}><i class="bi bi-trash"></i></button>
           </div>
         </div>
       `;
@@ -3198,9 +2906,12 @@
 
       const accColor = firstMov.cuenta ? (accountsMap[firstMov.cuenta] || '#d4d0c0') : '#d4d0c0';
 
+      let ariaEditG = daltonicMode ? 'aria-label="Editar descripción del grupo"' : '';
+      let ariaDeleteG = daltonicMode ? 'aria-label="Eliminar todo el grupo"' : '';
+      let ariaExpand = daltonicMode ? 'aria-label="Expandir detalles del grupo"' : '';
+
       const parent = document.createElement('div');
       parent.className = `movement-pill group-parent ${tipoClass}`;
-      // WCAG: Se añade aria-label a los botones de acción del grupo
       parent.innerHTML = `
         <div class="movement-header">
           <div class="movement-who">
@@ -3213,9 +2924,9 @@
         ${sameDesc && firstMov.descripcion ? `<div class="movement-desc">${firstMov.descripcion}</div>` : ''}
         <div class="movement-footer">
           <div class="actions">
-            <button class="btn-icon" onclick="editGroupDescription('${grupoId}')" title="Editar descripción del grupo" aria-label="Editar descripción del grupo"><i class="bi bi-pencil"></i></button>
-            <button class="btn-icon danger" onclick="deleteGroup('${grupoId}')" title="Eliminar todo el grupo" aria-label="Eliminar todo el grupo"><i class="bi bi-trash"></i></button>
-            <button class="btn-icon group-chevron" onclick="toggleGroup('${grupoId}')" title="Ver detalles" aria-label="Expandir detalles del grupo"><i class="bi bi-chevron-down"></i></button>
+            <button class="btn-icon" onclick="editGroupDescription('${grupoId}')" title="Editar descripción del grupo" ${ariaEditG}><i class="bi bi-pencil"></i></button>
+            <button class="btn-icon danger" onclick="deleteGroup('${grupoId}')" title="Eliminar todo el grupo" ${ariaDeleteG}><i class="bi bi-trash"></i></button>
+            <button class="btn-icon group-chevron" onclick="toggleGroup('${grupoId}')" title="Ver detalles" ${ariaExpand}><i class="bi bi-chevron-down"></i></button>
           </div>
         </div>
       `;
@@ -3448,11 +3159,11 @@
       const div = document.createElement('div');
       div.className = 'row align-items-center mb-2 split-line';
       div.dataset.lineId = id;
-      // WCAG: aria-label en el botón de eliminar línea
+      let ariaDel = daltonicMode ? 'aria-label="Eliminar línea"' : '';
       div.innerHTML = `
         <div class="col-6"><select class="form-select split-line-category" onchange="updateSplitTotals()"></select></div>
         <div class="col-5"><input type="number" class="form-control split-line-amount" step="0.01" placeholder="Monto" oninput="updateSplitTotals()" /></div>
-        <div class="col-1"><button type="button" class="btn-icon danger" onclick="removeSplitLine(${id})" aria-label="Eliminar línea"><i class="bi bi-trash"></i></button></div>
+        <div class="col-1"><button type="button" class="btn-icon danger" onclick="removeSplitLine(${id})" ${ariaDel}><i class="bi bi-trash"></i></button></div>
       `;
       container.appendChild(div);
       const categories = await db.categories.toArray();
@@ -3700,12 +3411,13 @@
         const col = document.createElement('div');
         col.className = 'col-md-6 col-lg-4';
         const totalDisplay = privacyMode ? '•••••' : formatCurrency(info.total);
+        let ariaPdf = daltonicMode ? `aria-label="Compartir PDF de ${escapeHtml(name)}"` : '';
         col.innerHTML = `
           <div class="person-total-card">
             <div class="person-name">${escapeHtml(name)}</div>
             <div class="person-total">${escapeHtml(totalDisplay)}</div>
             <div class="person-count">${info.count} préstamo${info.count !== 1 ? 's' : ''} pendiente${info.count !== 1 ? 's' : ''}</div>
-            <button class="btn-pdf" type="button" aria-label="Compartir PDF de ${escapeHtml(name)}">
+            <button class="btn-pdf" type="button" ${ariaPdf}>
               <i class="bi bi-whatsapp"></i> Compartir PDF
             </button>
           </div>
@@ -3929,7 +3641,12 @@
           const mov = loan.movimientoCreacionId ? movMap[loan.movimientoCreacionId] : null;
           let catName = 'Sin categoría';
           if (mov && mov.categoriaId && catMap[mov.categoriaId]) catName = catMap[mov.categoriaId];
-          // WCAG: aria-label en botones de acciones de préstamos
+
+          let ariaEdit = daltonicMode ? 'aria-label="Editar préstamo"' : '';
+          let ariaDelete = daltonicMode ? 'aria-label="Eliminar préstamo"' : '';
+          let ariaPay = daltonicMode ? 'aria-label="Marcar como pagado"' : '';
+          let ariaRevert = daltonicMode ? 'aria-label="Revertir a pendiente"' : '';
+
           pill.innerHTML = `
             <div class="loan-header">
               <div class="loan-who">
@@ -3942,10 +3659,10 @@
             <div class="loan-footer">
               <span class="date">${dateStr}</span>
               <div class="actions">
-                <button class="btn-icon" onclick="editLoan(${loan.id})" title="Editar préstamo" aria-label="Editar préstamo"><i class="bi bi-pencil"></i></button>
-                <button class="btn-icon danger" onclick="deleteLoan(${loan.id})" title="Eliminar préstamo" aria-label="Eliminar préstamo"><i class="bi bi-trash"></i></button>
-                ${isPending ? `<button class="btn-icon success" onclick="openPayLoan(${loan.id})" title="Marcar como pagado" aria-label="Marcar como pagado"><i class="bi bi-check-lg"></i></button>` :
-                             `<button class="btn-icon primary" onclick="revertLoanPaid(${loan.id})" title="Revertir a pendiente" aria-label="Revertir a pendiente"><i class="bi bi-arrow-counterclockwise"></i></button>`}
+                <button class="btn-icon" onclick="editLoan(${loan.id})" title="Editar préstamo" ${ariaEdit}><i class="bi bi-pencil"></i></button>
+                <button class="btn-icon danger" onclick="deleteLoan(${loan.id})" title="Eliminar préstamo" ${ariaDelete}><i class="bi bi-trash"></i></button>
+                ${isPending ? `<button class="btn-icon success" onclick="openPayLoan(${loan.id})" title="Marcar como pagado" ${ariaPay}><i class="bi bi-check-lg"></i></button>` :
+                             `<button class="btn-icon primary" onclick="revertLoanPaid(${loan.id})" title="Revertir a pendiente" ${ariaRevert}><i class="bi bi-arrow-counterclockwise"></i></button>`}
               </div>
             </div>
           `;
@@ -4113,7 +3830,12 @@
         const progress = goal.lograda ? 100 : ((goal.costoTotal - remaining) / goal.costoTotal) * 100;
         const col = document.createElement('div');
         col.className = 'col-md-6 col-lg-4';
-        // WCAG: aria-label en botones de acciones de metas
+
+        let ariaEditG = daltonicMode ? 'aria-label="Editar meta"' : '';
+        let ariaDeleteG = daltonicMode ? 'aria-label="Eliminar meta"' : '';
+        let ariaMark = daltonicMode ? 'aria-label="Marcar meta como lograda"' : '';
+        let ariaRevert = daltonicMode ? 'aria-label="Reactivar meta"' : '';
+
         col.innerHTML = `
           <div class="goal-card">
             <div>
@@ -4127,10 +3849,10 @@
             <div class="footer">
               <span>${goal.lograda ? '100%' : Math.round(progress) + '%'}</span>
               <div>
-                <button class="btn-icon" onclick="editGoal(${goal.id})" aria-label="Editar meta"><i class="bi bi-pencil"></i></button>
-                <button class="btn-icon danger" onclick="deleteGoal(${goal.id})" aria-label="Eliminar meta"><i class="bi bi-trash"></i></button>
-                ${!goal.lograda ? `<button class="btn-icon success" onclick="markGoalAchieved(${goal.id})" aria-label="Marcar meta como lograda"><i class="bi bi-check-lg"></i></button>` :
-                                  `<button class="btn-icon primary" onclick="revertGoalAchieved(${goal.id})" aria-label="Reactivar meta"><i class="bi bi-arrow-counterclockwise"></i></button>`}
+                <button class="btn-icon" onclick="editGoal(${goal.id})" ${ariaEditG}><i class="bi bi-pencil"></i></button>
+                <button class="btn-icon danger" onclick="deleteGoal(${goal.id})" ${ariaDeleteG}><i class="bi bi-trash"></i></button>
+                ${!goal.lograda ? `<button class="btn-icon success" onclick="markGoalAchieved(${goal.id})" ${ariaMark}><i class="bi bi-check-lg"></i></button>` :
+                                  `<button class="btn-icon primary" onclick="revertGoalAchieved(${goal.id})" ${ariaRevert}><i class="bi bi-arrow-counterclockwise"></i></button>`}
               </div>
             </div>
           </div>
@@ -4193,16 +3915,20 @@
         const col = document.createElement('div');
         col.className = 'col-md-6 col-lg-4';
         const isHidden = cat.oculta ? true : false;
-        // WCAG: aria-label en botones de categorías
+        
+        let ariaToggle = daltonicMode ? `aria-label="${isHidden ? 'Mostrar categoría' : 'Ocultar categoría'}"` : '';
+        let ariaEditC = daltonicMode ? 'aria-label="Editar categoría"' : '';
+        let ariaDeleteC = daltonicMode ? 'aria-label="Eliminar categoría"' : '';
+
         col.innerHTML = `
           <div class="category-pill-small">
             <div class="left"><span>${cat.nombre}</span></div>
             <div class="actions">
-              <button class="vis-toggle ${isHidden ? 'hidden' : ''}" onclick="toggleCategoryVisibility(${cat.id})" title="${isHidden ? 'Mostrar' : 'Ocultar'}" aria-label="${isHidden ? 'Mostrar categoría' : 'Ocultar categoría'}">
+              <button class="vis-toggle ${isHidden ? 'hidden' : ''}" onclick="toggleCategoryVisibility(${cat.id})" title="${isHidden ? 'Mostrar' : 'Ocultar'}" ${ariaToggle}>
                 <i class="bi ${isHidden ? 'bi-eye-slash' : 'bi-eye'}"></i>
               </button>
-              <button class="btn-icon" onclick="editCategory(${cat.id})" aria-label="Editar categoría"><i class="bi bi-pencil"></i></button>
-              <button class="btn-icon danger" onclick="deleteCategory(${cat.id})" aria-label="Eliminar categoría"><i class="bi bi-trash"></i></button>
+              <button class="btn-icon" onclick="editCategory(${cat.id})" ${ariaEditC}><i class="bi bi-pencil"></i></button>
+              <button class="btn-icon danger" onclick="deleteCategory(${cat.id})" ${ariaDeleteC}><i class="bi bi-trash"></i></button>
             </div>
           </div>
         `;
@@ -4285,7 +4011,10 @@
         const color = acc.color || DEFAULT_ACCOUNT_COLOR;
         const col = document.createElement('div');
         col.className = 'col-md-6 col-lg-4';
-        // WCAG: aria-label en botones de cuentas
+        
+        let ariaEditA = daltonicMode ? 'aria-label="Editar cuenta"' : '';
+        let ariaDeleteA = daltonicMode ? 'aria-label="Eliminar cuenta"' : '';
+
         col.innerHTML = `
           <div class="account-pill">
             <div class="left">
@@ -4293,8 +4022,8 @@
               <span>${acc.nombre}</span>
             </div>
             <div class="actions">
-              <button class="btn-icon" onclick="editAccount(${acc.id})" aria-label="Editar cuenta"><i class="bi bi-pencil"></i></button>
-              <button class="btn-icon danger" onclick="deleteAccount(${acc.id})" aria-label="Eliminar cuenta"><i class="bi bi-trash"></i></button>
+              <button class="btn-icon" onclick="editAccount(${acc.id})" ${ariaEditA}><i class="bi bi-pencil"></i></button>
+              <button class="btn-icon danger" onclick="deleteAccount(${acc.id})" ${ariaDeleteA}><i class="bi bi-trash"></i></button>
             </div>
           </div>
         `;
