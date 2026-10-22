@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vicel-finanzas-v37'; // <-- Actualizado a v37
+const CACHE_NAME = 'vicel-finanzas-v38'; // <-- Actualizado a v38
 const urlsToCache = [
   './',
   './index.html',
@@ -41,8 +41,6 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
-  // Ignorar peticiones a Google (Auth, Drive) y Analytics. 
-  // Estas siempre van a la red (network-only) para no romper la sincronización.
   if (url.hostname.includes('googleapis.com') ||
       url.hostname.includes('accounts.google.com') ||
       url.hostname.includes('vicel-gd.github.io')) {
@@ -50,7 +48,6 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Para el resto de archivos (App, imágenes, CDNs), usar Cache-First
   event.respondWith(
     caches.match(event.request).then(cachedResponse => {
       if (cachedResponse) {
@@ -58,7 +55,6 @@ self.addEventListener('fetch', event => {
       }
       
       return fetch(event.request).then(networkResponse => {
-        // Si la respuesta es válida, la guardamos en caché dinámicamente
         if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then(cache => {
@@ -67,7 +63,6 @@ self.addEventListener('fetch', event => {
         }
         return networkResponse;
       }).catch(() => {
-        // Si falla la red y es una navegación, devolver el index.html
         if (event.request.mode === 'navigate') {
           return caches.match('./index.html');
         }

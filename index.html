@@ -26,7 +26,7 @@
       --color-oscuro: #201e1f;
       --color-naranja: #e2781f;
       --color-naranja-hover: #b3410e;
-      --color-naranja-texto: var(--color-naranja); /* Por defecto igual al naranja */
+      --color-naranja-texto: var(--color-naranja);
       --color-fondo: #201e1f;
       --color-positivo: #28a745; 
       --color-negativo: #dc3545; 
@@ -34,9 +34,9 @@
 
     /* ================== MODO DALTÓNICO (Controla Accesibilidad y Colores) ================== */
     body.daltonic {
-      --color-naranja: #0072B2; /* Azul seguro para daltónicos */
+      --color-naranja: #0072B2;
       --color-naranja-hover: #005A8E;
-      --color-naranja-texto: #56B4E9; /* Alto contraste para textos */
+      --color-naranja-texto: #56B4E9;
       --color-positivo: #0072B2; 
       --color-negativo: #E69F00; 
     }
@@ -129,7 +129,8 @@
     }
     @media (max-width: 576px) {
       .privacy-toggle-btn {
-        bottom: 16px; right: 16px; width: 40px; height: 40px; font-size: 18px;
+        bottom: 16px; right: 16px; width: 44px; height: 44px; font-size: 20px;
+        -webkit-tap-highlight-color: transparent;
       }
     }
 
@@ -739,6 +740,8 @@
       .stats-cards { grid-template-columns: repeat(2, 1fr); }
       .stats-chart-row { grid-template-columns: 1fr; }
     }
+    
+    /* ================== MEDIA QUERY MÓVILES (OPTIMIZACIÓN TÁCTIL) ================== */
     @media (max-width: 576px) {
       .main { padding: 15px; }
       .page-title { font-size: 22px; padding-right: 50px; }
@@ -788,15 +791,24 @@
       .movement-pill .amount { font-size: 20px; font-weight: 800; flex-shrink: 0; }
       .movement-pill .movement-desc { font-size: 14px; line-height: 1.35; color: #5a5647; }
       .movement-pill .movement-footer { gap: 8px; align-items: center; }
-      .movement-pill .movement-footer .actions { gap: 2px; }
+      
+      /* Optimización Táctil: Acciones */
+      .actions, .movement-pill .movement-footer .actions { gap: 8px !important; }
       .movement-pill .movement-footer .actions .btn-icon {
-        padding: 6px 8px; font-size: 18px; min-width: 38px; min-height: 38px;
+        padding: 6px 8px; font-size: 18px; 
+        min-width: 44px; min-height: 44px;
         display: flex; align-items: center; justify-content: center;
         color: #5a5a4a; background: transparent; border-radius: 30px;
         -webkit-tap-highlight-color: transparent;
       }
       .movement-pill .movement-footer .actions .btn-icon:active { background: rgba(0,0,0,0.08); }
-      .movement-pill.group-parent .group-chevron { min-width: 38px; min-height: 38px; padding: 6px 8px; }
+      
+      /* Optimización Táctil: Group Chevron */
+      .movement-pill.group-parent .group-chevron { 
+        min-width: 44px; min-height: 44px; padding: 6px 8px; 
+        display: flex; align-items: center; justify-content: center;
+        -webkit-tap-highlight-color: transparent; 
+      }
 
       .movement-group-children { padding: 6px 8px 2px; }
       .movement-group-children .movement-pill { padding: 10px 14px; border-radius: 16px; }
@@ -810,9 +822,12 @@
       .loan-pill .loan-desc { font-size: 14px; line-height: 1.35; color: #5a5647; }
       .loan-pill .loan-footer { gap: 8px; align-items: center; }
       .loan-pill .date { font-size: 13px; color: #5a5647; }
-      .loan-pill .actions { gap: 2px; }
+      
+      /* Optimización Táctil: Acciones Préstamos */
+      .loan-pill .actions { gap: 8px !important; }
       .loan-pill .actions .btn-icon {
-        padding: 6px 8px; font-size: 18px; min-width: 38px; min-height: 38px;
+        padding: 6px 8px; font-size: 18px; 
+        min-width: 44px; min-height: 44px;
         display: flex; align-items: center; justify-content: center;
         color: #5a5a4a; background: transparent; border-radius: 30px;
         -webkit-tap-highlight-color: transparent;
@@ -822,13 +837,25 @@
       .goal-card { padding: 16px 18px; }
       .goal-card .title { font-size: 16px; }
       .goal-card .progress-row { font-size: 14px; flex-wrap: wrap; }
+      
+      /* Optimización Táctil: Categorías y Cuentas */
       .category-pill-small, .account-pill { padding: 10px 14px; font-size: 14px; flex-wrap: wrap; gap: 6px; }
+      .category-pill-small .actions, .account-pill .actions { gap: 8px !important; }
       .category-pill-small .actions .vis-toggle,
       .category-pill-small .actions .btn-icon,
       .account-pill .actions .btn-icon {
-        font-size: 18px; padding: 6px 8px; min-width: 44px; min-height: 44px;
+        font-size: 18px; padding: 6px 8px; 
+        min-width: 44px; min-height: 44px;
         display: flex; align-items: center; justify-content: center;
+        -webkit-tap-highlight-color: transparent;
       }
+      
+      /* Optimización Táctil: Privacidad */
+      .privacy-toggle-btn {
+        width: 44px !important; height: 44px !important;
+        -webkit-tap-highlight-color: transparent;
+      }
+
       .chart-container { height: 220px; }
       .btn-primary-custom { padding: 8px 16px; font-size: 14px; }
       .section-header h2 { font-size: 20px; }
@@ -1612,7 +1639,6 @@
       return `${y}-${m}-${day}`;
     }
     
-    // Función modificada: el signo + solo aparece en modo daltónico (accesibilidad)
     function formatCurrency(value) {
       let sign = value < 0 ? '-' : '';
       if (daltonicMode && value > 0) sign = '+';
@@ -2029,7 +2055,6 @@
           if (loanCat && !loanCat.oculta) { await db.categories.update(loanCat.id, { oculta: 1 }); }
         } catch (e) { console.warn('No se pudo ocultar la categoría PRÉSTAMO:', e); }
 
-        // Cargar preferencias antes del primer render
         loadPrivacyMode();
         loadDaltonicMode();
 
@@ -2721,7 +2746,6 @@
         const statusTextFinal = privacyMode ? (statusClass === 'igual' ? '✅ Verificado' : '•••••') : statusText;
         const statusTitleFinal = privacyMode ? 'Estado oculto por privacidad' : statusTitle;
         
-        // Atributos de accesibilidad condicionados al modo daltónico
         let pillAttrs = '';
         let hiddenText = '';
         if (daltonicMode) {
