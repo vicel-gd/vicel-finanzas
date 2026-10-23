@@ -2627,18 +2627,15 @@
       const byCuenta = {};
       movsCategoria.forEach(m => {
         const key = (m.cuenta && m.cuenta.trim()) ? m.cuenta : 'sin_cuenta';
-        byCuenta[key] = (byCuenta[key] || 0) + m.monto;
+        // Usamos el valor absoluto para que las barras se pinten aunque el saldo sea negativo
+        byCuenta[key] = (byCuenta[key] || 0) + Math.abs(m.monto);
       });
-      const positivos = {};
-      Object.entries(byCuenta).forEach(([key, val]) => {
-        if (val > 0) positivos[key] = val;
-      });
-      const totalPositivo = Object.values(positivos).reduce((s, v) => s + v, 0);
-      if (totalPositivo <= 0) return null;
+      const total = Object.values(byCuenta).reduce((s, v) => s + v, 0);
+      if (total <= 0) return null;
       const stops = [];
       let acumulado = 0;
-      Object.entries(positivos).forEach(([key, amt]) => {
-        const pct = (amt / totalPositivo) * 100;
+      Object.entries(byCuenta).forEach(([key, amt]) => {
+        const pct = (amt / total) * 100;
         const start = acumulado;
         acumulado += pct;
         let color;
@@ -2686,7 +2683,8 @@
         pill.className = 'category-pill';
         pill.dataset.categoriaId = cat.id;
         
-        if (val > 0 && !privacyMode) {
+        // Pintamos el gradiente siempre que haya movimientos, sin importar si el balance es positivo o negativo
+        if (val !== 0 && !privacyMode) {
           const catMovs = movementsByCat[cat.id] || [];
           const gradient = buildCategoryGradient(catMovs, accountsMap);
           if (gradient) pill.style.background = gradient;
