@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vicel-finanzas-v39'; // <-- Actualizado a v39
+const CACHE_NAME = 'vicel-finanzas-v40'; // <-- Actualizado a v40
 const urlsToCache = [
   './',
   './index.html',

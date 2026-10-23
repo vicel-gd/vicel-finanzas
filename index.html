@@ -1486,7 +1486,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE CUENTA (Agregada la moneda) -->
+  <!-- MODAL DE CUENTA (Selector dinámico de moneda) -->
   <div class="modal fade" id="accountModal" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -1500,10 +1500,7 @@
             <div class="mb-3">
               <label>Moneda</label>
               <select id="accountCurrency" class="form-select">
-                <option value="USD">Dólares (USD)</option>
-                <option value="EUR">Euros (EUR)</option>
-                <option value="VES">Bolívares (VES)</option>
-                <option value="ARS">Pesos Argentinos (ARS)</option>
+                <!-- Se llena dinámicamente -->
               </select>
             </div>
             <div class="mb-3"><label>Color</label><input type="color" id="accountColor" class="form-control form-control-color" value="#888888" /></div>
@@ -1518,41 +1515,42 @@
     </div>
   </div>
 
-  <!-- NUEVO MODAL: CONFIGURAR MONEDAS -->
+  <!-- NUEVO MODAL: CONFIGURAR MONEDAS DINÁMICO -->
   <div class="modal fade" id="currenciesModal" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Tasas de Cambio</h5>
+          <h5 class="modal-title">Gestor de Monedas</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body">
-          <p class="small text-muted mb-3">Define cuántos <strong>USD</strong> equivale 1 unidad de cada moneda.</p>
-          <div class="mb-3">
-            <label>1 Bolívar (VES) =</label>
-            <div class="input-group">
-              <input type="number" id="rateVES" class="form-control" step="0.0001" placeholder="Ej: 0.025">
-              <span class="input-group-text">USD</span>
+          <p class="small text-muted mb-3">Todas las tasas se calculan frente al <strong>USD</strong> (1 USD = X).</p>
+          
+          <!-- Lista de monedas existentes -->
+          <div id="currenciesListContainer" class="mb-4">
+            <!-- Se llena dinámicamente -->
+          </div>
+
+          <hr>
+          <h6 class="mb-3 text-naranja fw-bold">Añadir nueva moneda</h6>
+          <div class="row g-2">
+            <div class="col-4">
+              <input type="text" id="newCurrencyCode" class="form-control form-control-sm" placeholder="Código (ej. USDT)" maxlength="5" style="text-transform: uppercase;">
+            </div>
+            <div class="col-3">
+              <input type="text" id="newCurrencySymbol" class="form-control form-control-sm" placeholder="Símbolo (ej. ₮)" maxlength="4">
+            </div>
+            <div class="col-3">
+              <input type="number" id="newCurrencyRate" class="form-control form-control-sm" placeholder="Tasa vs USD" step="0.0001">
+            </div>
+            <div class="col-2">
+              <button class="btn btn-primary w-100" style="background:var(--color-naranja);border:none; padding: 4px;" onclick="addNewCurrency()"><i class="bi bi-plus-lg"></i></button>
             </div>
           </div>
-          <div class="mb-3">
-            <label>1 Euro (EUR) =</label>
-            <div class="input-group">
-              <input type="number" id="rateEUR" class="form-control" step="0.0001" placeholder="Ej: 1.08">
-              <span class="input-group-text">USD</span>
-            </div>
-          </div>
-          <div class="mb-3">
-            <label>1 Peso Argentino (ARS) =</label>
-            <div class="input-group">
-              <input type="number" id="rateARS" class="form-control" step="0.0001" placeholder="Ej: 0.001">
-              <span class="input-group-text">USD</span>
-            </div>
-          </div>
+
         </div>
         <div class="modal-footer">
-          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button class="btn btn-primary" style="background:var(--color-naranja);border:none;" onclick="saveCurrencies()">Guardar</button>
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
         </div>
       </div>
     </div>
@@ -1657,12 +1655,10 @@
       accounts: '++id, nombre, saldoReal, fechaVerificacion, color, moneda',
       config: '++id, clave, valor'
     }).upgrade(async tx => {
-      // Upgrade accounts
       const accounts = await tx.table('accounts').toArray();
       for (const acc of accounts) {
         if (!acc.moneda) await tx.table('accounts').update(acc.id, { moneda: 'USD' });
       }
-      // Upgrade config
       const configCount = await tx.table('config').count();
       if (configCount === 0) {
         await tx.table('config').bulkAdd([
@@ -1671,6 +1667,35 @@
           { clave: 'tasa_ARS', valor: 0.001 }
         ]);
       }
+    });
+
+    db.version(17).stores({
+      categories: '++id, nombre, esPredeterminado, color, oculta, orden, presupuesto',
+      movements: '++id, fecha, categoriaId, monto, descripcion, cuenta, grupoId',
+      loans: '++id, persona, monto, fecha, descripcion, estado, fechaPago, cuentaPago, movimientoCreacionId, movimientoPagoId',
+      goals: '++id, nombre, costoTotal, categoriaAnclaId, lograda',
+      accounts: '++id, nombre, saldoReal, fechaVerificacion, color, moneda',
+      config: '++id, clave, valor',
+      currencies: '++id, code, symbol, rate'
+    }).upgrade(async tx => {
+      // Migrar las tasas antiguas a la nueva tabla currencies
+      const configs = await tx.table('config').toArray();
+      const oldRates = {};
+      configs.forEach(c => {
+        if (c.clave.startsWith('tasa_')) {
+          const code = c.clave.replace('tasa_', '');
+          oldRates[code] = c.valor;
+        }
+      });
+      
+      const defaults = [
+        { code: 'USD', symbol: '$', rate: 1 },
+        { code: 'VES', symbol: 'Bs.', rate: oldRates['VES'] || 0.025 },
+        { code: 'EUR', symbol: '€', rate: oldRates['EUR'] || 1.08 },
+        { code: 'ARS', symbol: 'ARS', rate: oldRates['ARS'] || 0.001 }
+      ];
+      
+      await tx.table('currencies').bulkAdd(defaults);
     });
 
     let currentMonth = new Date().getMonth();
@@ -1688,7 +1713,10 @@
 
     let privacyMode = false;
     let daltonicMode = false;
-    let exchangeRates = { USD: 1 }; // Se actualiza desde la DB
+    
+    // Estados dinámicos multi-moneda
+    let currenciesList = []; 
+    let exchangeRates = { USD: 1 }; 
 
     let currentIntercambioStep = 1;
 
@@ -1711,18 +1739,18 @@
       return `${y}-${m}-${day}`;
     }
     
-    // Formateo multi-moneda
+    // Formateo multi-moneda dinámico
+    function getCurrencySymbol(code) {
+      const c = currenciesList.find(curr => curr.code === code);
+      return c ? c.symbol : '$';
+    }
+
     function formatCurrency(value, moneda = 'USD') {
       let sign = value < 0 ? '-' : '';
       if (daltonicMode && value > 0) sign = '+';
       const abs = Math.abs(value);
       const formatted = abs.toFixed(2).replace('.', ',');
-      
-      let symbol = '$';
-      if (moneda === 'EUR') symbol = '€';
-      else if (moneda === 'VES') symbol = 'Bs.';
-      else if (moneda === 'ARS') symbol = 'ARS';
-      
+      const symbol = getCurrencySymbol(moneda);
       return sign + formatted + symbol;
     }
     function formatCurrencyPrivacy(value, moneda = 'USD') {
@@ -1733,44 +1761,107 @@
       return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     }
 
-    /* ================== CONFIGURACIÓN MULTI-MONEDA ================== */
-    async function loadExchangeRates() {
-      const configs = await db.config.toArray();
-      exchangeRates = { USD: 1 }; // Reset base
-      configs.forEach(c => {
-        if (c.clave.startsWith('tasa_')) {
-          const moneda = c.clave.replace('tasa_', '');
-          exchangeRates[moneda] = parseFloat(c.valor);
-        }
+    /* ================== CONFIGURACIÓN MULTI-MONEDA DINÁMICA ================== */
+    async function loadCurrencies() {
+      currenciesList = await db.currencies.toArray();
+      exchangeRates = { USD: 1 }; 
+      currenciesList.forEach(c => {
+        exchangeRates[c.code] = parseFloat(c.rate);
       });
     }
 
     async function openCurrenciesModal() {
-      document.getElementById('rateVES').value = exchangeRates['VES'] || '';
-      document.getElementById('rateEUR').value = exchangeRates['EUR'] || '';
-      document.getElementById('rateARS').value = exchangeRates['ARS'] || '';
+      renderCurrenciesList();
+      document.getElementById('newCurrencyCode').value = '';
+      document.getElementById('newCurrencySymbol').value = '';
+      document.getElementById('newCurrencyRate').value = '';
       new bootstrap.Modal(document.getElementById('currenciesModal')).show();
     }
 
-    async function saveCurrencies() {
-      const rates = [
-        { clave: 'tasa_VES', valor: parseFloat(document.getElementById('rateVES').value) || 0 },
-        { clave: 'tasa_EUR', valor: parseFloat(document.getElementById('rateEUR').value) || 0 },
-        { clave: 'tasa_ARS', valor: parseFloat(document.getElementById('rateARS').value) || 0 }
-      ];
-      
-      await db.transaction('rw', db.config, async () => {
-        for (const r of rates) {
-          const existing = await db.config.where('clave').equals(r.clave).first();
-          if (existing) await db.config.update(existing.id, { valor: r.valor });
-          else await db.config.add(r);
-        }
+    function renderCurrenciesList() {
+      const container = document.getElementById('currenciesListContainer');
+      container.innerHTML = '';
+      currenciesList.forEach(c => {
+        const row = document.createElement('div');
+        row.className = 'd-flex justify-content-between align-items-center mb-2 p-2 border rounded bg-white';
+        
+        const isBase = c.code === 'USD';
+        const btnDelete = isBase 
+          ? '' 
+          : `<button class="btn btn-sm btn-outline-danger border-0" onclick="deleteCurrency(${c.id}, '${c.code}')" aria-label="Eliminar ${c.code}"><i class="bi bi-trash"></i></button>`;
+        
+        row.innerHTML = `
+          <div>
+            <strong>${c.code}</strong> (${c.symbol}) <br>
+            <small class="text-muted">Tasa: 1 ${c.code} = ${c.rate} USD</small>
+          </div>
+          <div>
+            ${btnDelete}
+          </div>
+        `;
+        container.appendChild(row);
       });
+    }
+
+    async function addNewCurrency() {
+      const codeInput = document.getElementById('newCurrencyCode');
+      const symbolInput = document.getElementById('newCurrencySymbol');
+      const rateInput = document.getElementById('newCurrencyRate');
       
-      await loadExchangeRates();
-      bootstrap.Modal.getInstance(document.getElementById('currenciesModal')).hide();
-      await refreshAll();
-      scheduleSync();
+      const code = codeInput.value.trim().toUpperCase();
+      const symbol = symbolInput.value.trim();
+      const rate = parseFloat(rateInput.value);
+
+      if (!code || !symbol || isNaN(rate) || rate <= 0) {
+        alert('Completa todos los campos correctamente. La tasa debe ser mayor a 0.');
+        return;
+      }
+      if (code === 'USD') {
+        alert('El USD ya está configurado como moneda base y no se puede duplicar.');
+        return;
+      }
+
+      try {
+        await db.currencies.add({ code, symbol, rate });
+        await loadCurrencies();
+        renderCurrenciesList();
+        await populateCurrencyDropdown();
+        codeInput.value = '';
+        symbolInput.value = '';
+        rateInput.value = '';
+      } catch (e) {
+        console.error(e);
+        alert('Error al añadir la moneda.');
+      }
+    }
+
+    async function deleteCurrency(id, code) {
+      if (code === 'USD') return;
+      
+      const inUse = await db.accounts.where('moneda').equals(code).count();
+      if (inUse > 0) {
+        alert(`No puedes eliminar ${code} porque hay ${inUse} cuenta(s) usándola. Cambia la moneda de esas cuentas primero.`);
+        return;
+      }
+
+      if (!confirm(`¿Eliminar la moneda ${code}?`)) return;
+      
+      await db.currencies.delete(id);
+      await loadCurrencies();
+      renderCurrenciesList();
+      await populateCurrencyDropdown();
+    }
+
+    async function populateCurrencyDropdown() {
+      const select = document.getElementById('accountCurrency');
+      if (!select) return;
+      select.innerHTML = '';
+      currenciesList.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.code;
+        opt.textContent = `${c.code} (${c.symbol})`;
+        select.appendChild(opt);
+      });
     }
     /* ================================================================ */
 
@@ -2125,17 +2216,26 @@
         const resp = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, { headers: { Authorization: `Bearer ${token}` } });
         if (!resp.ok) throw new Error('Error al descargar archivo');
         const driveData = await resp.json();
-        await db.transaction('rw', db.categories, db.movements, db.loans, db.goals, db.accounts, db.config, async () => {
+        await db.transaction('rw', db.categories, db.movements, db.loans, db.goals, db.accounts, db.config, db.currencies, async () => {
           await db.categories.clear(); await db.movements.clear(); await db.loans.clear();
-          await db.goals.clear(); await db.accounts.clear(); await db.config.clear();
+          await db.goals.clear(); await db.accounts.clear(); await db.config.clear(); await db.currencies.clear();
           if (driveData.categories) await db.categories.bulkAdd(driveData.categories);
           if (driveData.movements) await db.movements.bulkAdd(driveData.movements);
           if (driveData.loans) await db.loans.bulkAdd(driveData.loans);
           if (driveData.goals) await db.goals.bulkAdd(driveData.goals);
           if (driveData.accounts) await db.accounts.bulkAdd(driveData.accounts);
           if (driveData.config) await db.config.bulkAdd(driveData.config);
+          if (driveData.currencies) await db.currencies.bulkAdd(driveData.currencies);
+          else {
+            // Fallback si el backup es antiguo y no tiene currencies
+            await db.currencies.bulkAdd([
+              { code: 'USD', symbol: '$', rate: 1 },
+              { code: 'VES', symbol: 'Bs.', rate: 0.025 }
+            ]);
+          }
         });
-        await loadExchangeRates();
+        await loadCurrencies();
+        await populateCurrencyDropdown();
         await refreshAll();
         syncPill.textContent = 'Datos cargados desde Drive';
         setTimeout(() => { if (isGoogleSession) syncPill.textContent = 'Conectado a Drive'; }, 3000);
@@ -2151,7 +2251,8 @@
       const goals = await db.goals.toArray();
       const accounts = await db.accounts.toArray();
       const config = await db.config.toArray();
-      return { version: 1, lastUpdated: new Date().toISOString(), categories, movements, loans, goals, accounts, config };
+      const currencies = await db.currencies.toArray();
+      return { version: 1, lastUpdated: new Date().toISOString(), categories, movements, loans, goals, accounts, config, currencies };
     }
     function scheduleSync() {
       if (!accessToken || !driveFileId) return;
@@ -2181,7 +2282,8 @@
 
         loadPrivacyMode();
         loadDaltonicMode();
-        await loadExchangeRates();
+        await loadCurrencies();
+        await populateCurrencyDropdown();
 
         await loadDefaultData();
         await refreshAll();
@@ -2346,10 +2448,10 @@
     }
     async function resetToTrialDefaults() {
       try {
-        await db.transaction('rw', db.categories, db.movements, db.loans, db.goals, db.accounts, db.config, async () => {
+        await db.transaction('rw', db.categories, db.movements, db.loans, db.goals, db.accounts, db.config, db.currencies, async () => {
           await db.categories.clear(); await db.movements.clear();
           await db.loans.clear(); await db.goals.clear(); await db.accounts.clear();
-          await db.config.clear();
+          await db.config.clear(); await db.currencies.clear();
         });
         await loadDefaultData();
         const accCount = await db.accounts.count();
@@ -2359,12 +2461,12 @@
             { nombre: 'Binance', saldoReal: null, fechaVerificacion: null, color: '#FFF7A0', moneda: 'USD' }
           ]);
         }
-        await db.config.bulkAdd([
-          { clave: 'tasa_VES', valor: 0.025 },
-          { clave: 'tasa_EUR', valor: 1.08 },
-          { clave: 'tasa_ARS', valor: 0.001 }
+        await db.currencies.bulkAdd([
+          { code: 'USD', symbol: '$', rate: 1 },
+          { code: 'VES', symbol: 'Bs.', rate: 0.025 }
         ]);
-        await loadExchangeRates();
+        await loadCurrencies();
+        await populateCurrencyDropdown();
       } catch (e) { console.error('Error en resetToTrialDefaults:', e); throw e; }
     }
     async function exportData() {
@@ -2389,17 +2491,25 @@
           alert('El archivo no tiene el formato esperado.'); return;
         }
         if (!confirm('Esto reemplazará todos los datos actuales. ¿Continuar?')) return;
-        await db.transaction('rw', db.categories, db.movements, db.loans, db.goals, db.accounts, db.config, async () => {
+        await db.transaction('rw', db.categories, db.movements, db.loans, db.goals, db.accounts, db.config, db.currencies, async () => {
           await db.categories.clear(); await db.movements.clear();
-          await db.loans.clear(); await db.goals.clear(); await db.accounts.clear(); await db.config.clear();
+          await db.loans.clear(); await db.goals.clear(); await db.accounts.clear(); await db.config.clear(); await db.currencies.clear();
           await db.categories.bulkAdd(data.categories);
           await db.movements.bulkAdd(data.movements);
           await db.loans.bulkAdd(data.loans);
           await db.goals.bulkAdd(data.goals);
           await db.accounts.bulkAdd(data.accounts);
           if (data.config) await db.config.bulkAdd(data.config);
+          if (data.currencies) await db.currencies.bulkAdd(data.currencies);
+          else {
+            await db.currencies.bulkAdd([
+              { code: 'USD', symbol: '$', rate: 1 },
+              { code: 'VES', symbol: 'Bs.', rate: 0.025 }
+            ]);
+          }
         });
-        await loadExchangeRates();
+        await loadCurrencies();
+        await populateCurrencyDropdown();
         await refreshAll();
         alert('Datos importados correctamente.');
         scheduleSync();
@@ -2409,21 +2519,21 @@
     async function resetAllData() {
       if (!confirm('¿Estás seguro de reiniciar todos los datos? Esta acción no se puede deshacer.')) return;
       try {
-        await db.transaction('rw', db.categories, db.movements, db.loans, db.goals, db.accounts, db.config, async () => {
+        await db.transaction('rw', db.categories, db.movements, db.loans, db.goals, db.accounts, db.config, db.currencies, async () => {
           await db.categories.clear(); await db.movements.clear();
-          await db.loans.clear(); await db.goals.clear(); await db.accounts.clear(); await db.config.clear();
+          await db.loans.clear(); await db.goals.clear(); await db.accounts.clear(); await db.config.clear(); await db.currencies.clear();
         });
         await loadDefaultData();
         await db.accounts.bulkAdd([
           { nombre: 'Efectivo', saldoReal: null, fechaVerificacion: null, color: '#90EE90', moneda: 'USD' },
           { nombre: 'Binance', saldoReal: null, fechaVerificacion: null, color: '#FFF7A0', moneda: 'USD' }
         ]);
-        await db.config.bulkAdd([
-          { clave: 'tasa_VES', valor: 0.025 },
-          { clave: 'tasa_EUR', valor: 1.08 },
-          { clave: 'tasa_ARS', valor: 0.001 }
+        await db.currencies.bulkAdd([
+          { code: 'USD', symbol: '$', rate: 1 },
+          { code: 'VES', symbol: 'Bs.', rate: 0.025 }
         ]);
-        await loadExchangeRates();
+        await loadCurrencies();
+        await populateCurrencyDropdown();
         await refreshAll();
         alert('Datos reiniciados correctamente.');
         scheduleSync();
@@ -3486,7 +3596,7 @@
         select.innerHTML = '';
         accounts.forEach(a => {
           const opt = document.createElement('option');
-          opt.value = a.nombre; opt.textContent = a.nombre;
+          opt.value = a.nombre; opt.textContent = `${a.nombre} (${a.moneda})`;
           select.appendChild(opt);
         });
       });
@@ -4257,8 +4367,7 @@
       document.getElementById('accountForm').reset();
       document.getElementById('accountEditId').value = '';
       document.getElementById('accountColor').value = DEFAULT_ACCOUNT_COLOR;
-      document.getElementById('accountCurrency').value = 'USD';
-      document.getElementById('accountModalTitle').textContent = 'Nueva Cuenta';
+      // El select de moneda ya está cargado por populateCurrencyDropdown()
       checkFormValidity();
       new bootstrap.Modal(document.getElementById('accountModal')).show();
     }
