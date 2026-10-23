@@ -199,18 +199,7 @@
       display: flex; justify-content: space-between; align-items: center;
       font-weight: 700; font-size: 18px; color: var(--color-oscuro);
       user-select: none; position: relative; min-height: 56px;
-      transition: border 0.3s ease;
     }
-    
-    /* Novedad: Estilos para presupuestos */
-    .category-pill.budget-warning { border: 2px solid var(--color-naranja); }
-    .category-pill.budget-exceeded { border: 2px solid #dc3545; }
-    
-    .category-pill .name-wrapper { display: flex; flex-direction: column; gap: 2px; align-items: flex-start; }
-    .category-pill .budget-text { font-size: 11px; font-weight: 500; color: #6c6b5e; display: flex; align-items: center; gap: 4px; }
-    .category-pill .budget-text.exceeded { color: #dc3545; font-weight: 700; }
-    .category-pill .budget-alert-icon { font-size: 14px; color: #dc3545; }
-
     .category-pill .drag-handle {
       position: absolute; left: -58px; top: 50%; transform: translateY(-50%);
       width: 48px; height: 48px; background: var(--color-naranja); color: var(--color-crema);
@@ -752,7 +741,6 @@
       .stats-chart-row { grid-template-columns: 1fr; }
     }
     
-    /* ================== MEDIA QUERY MÓVILES (OPTIMIZACIÓN TÁCTIL) ================== */
     @media (max-width: 576px) {
       .main { padding: 15px; }
       .page-title { font-size: 22px; padding-right: 50px; }
@@ -763,7 +751,6 @@
       .card-loans .value { font-size: 26px; }
       .category-list { padding-left: 52px; }
       .category-pill { font-size: 15px; padding: 12px 18px; min-height: 52px; }
-      .category-pill .name-wrapper { max-width: 65%; } /* Evitar que el texto choque con el monto */
       .category-pill .drag-handle { width: 42px; height: 42px; left: -52px; }
       .category-pill .drag-handle i { font-size: 18px; }
 
@@ -804,7 +791,6 @@
       .movement-pill .movement-desc { font-size: 14px; line-height: 1.35; color: #5a5647; }
       .movement-pill .movement-footer { gap: 8px; align-items: center; }
       
-      /* Optimización Táctil: Acciones */
       .actions, .movement-pill .movement-footer .actions { gap: 8px !important; }
       .movement-pill .movement-footer .actions .btn-icon {
         padding: 6px 8px; font-size: 18px; 
@@ -815,7 +801,6 @@
       }
       .movement-pill .movement-footer .actions .btn-icon:active { background: rgba(0,0,0,0.08); }
       
-      /* Optimización Táctil: Group Chevron */
       .movement-pill.group-parent .group-chevron { 
         min-width: 44px; min-height: 44px; padding: 6px 8px; 
         display: flex; align-items: center; justify-content: center;
@@ -835,7 +820,6 @@
       .loan-pill .loan-footer { gap: 8px; align-items: center; }
       .loan-pill .date { font-size: 13px; color: #5a5647; }
       
-      /* Optimización Táctil: Acciones Préstamos */
       .loan-pill .actions { gap: 8px !important; }
       .loan-pill .actions .btn-icon {
         padding: 6px 8px; font-size: 18px; 
@@ -850,7 +834,6 @@
       .goal-card .title { font-size: 16px; }
       .goal-card .progress-row { font-size: 14px; flex-wrap: wrap; }
       
-      /* Optimización Táctil: Categorías y Cuentas */
       .category-pill-small, .account-pill { padding: 10px 14px; font-size: 14px; flex-wrap: wrap; gap: 6px; }
       .category-pill-small .actions, .account-pill .actions { gap: 8px !important; }
       .category-pill-small .actions .vis-toggle,
@@ -862,7 +845,6 @@
         -webkit-tap-highlight-color: transparent;
       }
       
-      /* Optimización Táctil: Privacidad */
       .privacy-toggle-btn {
         width: 44px !important; height: 44px !important;
         -webkit-tap-highlight-color: transparent;
@@ -943,7 +925,7 @@
         <div class="category-list" id="categoryList"></div>
         <div class="balance-cards">
           <div class="card-balance">
-            <div class="label">BALANCE TOTAL</div>
+            <div class="label">BALANCE TOTAL (USD)</div>
             <div class="value" id="totalBalance">0,00$</div>
           </div>
           <div class="card-balance">
@@ -951,7 +933,7 @@
             <div id="verificationTotalContainer"></div>
           </div>
           <div class="card-loans">
-            <div class="label">PRÉSTAMOS PENDIENTES</div>
+            <div class="label">PRÉSTAMOS PENDIENTES (USD)</div>
             <div class="value" id="pendingLoansTotal">0,00$</div>
           </div>
           <div class="chart-container">
@@ -1153,7 +1135,10 @@
 
       <div class="section-header mt-4">
         <h2>Cuentas</h2>
-        <button class="btn-primary-custom" onclick="openAddAccount()"><i class="bi bi-plus-lg"></i> Nuevo</button>
+        <div class="d-flex gap-2">
+          <button class="btn-primary-custom" style="background:transparent; border: 1px solid var(--color-naranja); color: var(--color-naranja-texto);" onclick="openCurrenciesModal()"><i class="bi bi-currency-exchange"></i> Configurar Monedas</button>
+          <button class="btn-primary-custom" onclick="openAddAccount()"><i class="bi bi-plus-lg"></i> Nuevo</button>
+        </div>
       </div>
       <div id="accountsList" class="row g-2"></div>
     </div>
@@ -1490,11 +1475,6 @@
         <div class="modal-body">
           <form id="categoryForm">
             <div class="mb-3"><label>Nombre</label><input type="text" id="categoryName" class="form-control" required /></div>
-            <!-- NUEVO: Input de Presupuesto -->
-            <div class="mb-3">
-              <label>Presupuesto mensual (opcional)</label>
-              <input type="number" id="categoryBudget" class="form-control" step="0.01" placeholder="Ej: 150.00" />
-            </div>
             <input type="hidden" id="categoryEditId" />
           </form>
         </div>
@@ -1506,6 +1486,7 @@
     </div>
   </div>
 
+  <!-- MODAL DE CUENTA (Agregada la moneda) -->
   <div class="modal fade" id="accountModal" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -1516,6 +1497,15 @@
         <div class="modal-body">
           <form id="accountForm">
             <div class="mb-3"><label>Nombre</label><input type="text" id="accountName" class="form-control" required /></div>
+            <div class="mb-3">
+              <label>Moneda</label>
+              <select id="accountCurrency" class="form-select">
+                <option value="USD">Dólares (USD)</option>
+                <option value="EUR">Euros (EUR)</option>
+                <option value="VES">Bolívares (VES)</option>
+                <option value="ARS">Pesos Argentinos (ARS)</option>
+              </select>
+            </div>
             <div class="mb-3"><label>Color</label><input type="color" id="accountColor" class="form-control form-control-color" value="#888888" /></div>
             <input type="hidden" id="accountEditId" />
           </form>
@@ -1528,12 +1518,52 @@
     </div>
   </div>
 
+  <!-- NUEVO MODAL: CONFIGURAR MONEDAS -->
+  <div class="modal fade" id="currenciesModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Tasas de Cambio</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <p class="small text-muted mb-3">Define cuántos <strong>USD</strong> equivale 1 unidad de cada moneda.</p>
+          <div class="mb-3">
+            <label>1 Bolívar (VES) =</label>
+            <div class="input-group">
+              <input type="number" id="rateVES" class="form-control" step="0.0001" placeholder="Ej: 0.025">
+              <span class="input-group-text">USD</span>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label>1 Euro (EUR) =</label>
+            <div class="input-group">
+              <input type="number" id="rateEUR" class="form-control" step="0.0001" placeholder="Ej: 1.08">
+              <span class="input-group-text">USD</span>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label>1 Peso Argentino (ARS) =</label>
+            <div class="input-group">
+              <input type="number" id="rateARS" class="form-control" step="0.0001" placeholder="Ej: 0.001">
+              <span class="input-group-text">USD</span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button class="btn btn-primary" style="background:var(--color-naranja);border:none;" onclick="saveCurrencies()">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
     const db = new Dexie('FinanzasDB');
     db.version(12).stores({
-      categories: '++id, nombre, esPredeterminado, color, oculta, orden',
+      categories: '++id, nombre, esPredeterminado, color, oculta, orden, presupuesto',
       movements: '++id, fecha, categoriaId, monto, descripcion, cuenta',
       loans: '++id, persona, monto, fecha, descripcion, estado, fechaPago, cuentaPago, movimientoCreacionId, movimientoPagoId',
       goals: '++id, nombre, costoTotal, categoriaAnclaId, lograda',
@@ -1597,7 +1627,7 @@
     });
 
     db.version(13).stores({
-      categories: '++id, nombre, esPredeterminado, color, oculta, orden',
+      categories: '++id, nombre, esPredeterminado, color, oculta, orden, presupuesto',
       movements: '++id, fecha, categoriaId, monto, descripcion, cuenta, grupoId',
       loans: '++id, persona, monto, fecha, descripcion, estado, fechaPago, cuentaPago, movimientoCreacionId, movimientoPagoId',
       goals: '++id, nombre, costoTotal, categoriaAnclaId, lograda',
@@ -1605,7 +1635,7 @@
     });
 
     db.version(14).stores({
-      categories: '++id, nombre, esPredeterminado, color, oculta, orden',
+      categories: '++id, nombre, esPredeterminado, color, oculta, orden, presupuesto',
       movements: '++id, fecha, categoriaId, monto, descripcion, cuenta, grupoId',
       loans: '++id, persona, monto, fecha, descripcion, estado, fechaPago, cuentaPago, movimientoCreacionId, movimientoPagoId',
       goals: '++id, nombre, costoTotal, categoriaAnclaId, lograda',
@@ -1619,13 +1649,28 @@
       }
     });
 
-    // NUEVO: Versión 15 añade presupuesto
-    db.version(15).stores({
+    db.version(16).stores({
       categories: '++id, nombre, esPredeterminado, color, oculta, orden, presupuesto',
       movements: '++id, fecha, categoriaId, monto, descripcion, cuenta, grupoId',
       loans: '++id, persona, monto, fecha, descripcion, estado, fechaPago, cuentaPago, movimientoCreacionId, movimientoPagoId',
       goals: '++id, nombre, costoTotal, categoriaAnclaId, lograda',
-      accounts: '++id, nombre, saldoReal, fechaVerificacion, color'
+      accounts: '++id, nombre, saldoReal, fechaVerificacion, color, moneda',
+      config: '++id, clave, valor'
+    }).upgrade(async tx => {
+      // Upgrade accounts
+      const accounts = await tx.table('accounts').toArray();
+      for (const acc of accounts) {
+        if (!acc.moneda) await tx.table('accounts').update(acc.id, { moneda: 'USD' });
+      }
+      // Upgrade config
+      const configCount = await tx.table('config').count();
+      if (configCount === 0) {
+        await tx.table('config').bulkAdd([
+          { clave: 'tasa_VES', valor: 0.025 },
+          { clave: 'tasa_EUR', valor: 1.08 },
+          { clave: 'tasa_ARS', valor: 0.001 }
+        ]);
+      }
     });
 
     let currentMonth = new Date().getMonth();
@@ -1643,6 +1688,7 @@
 
     let privacyMode = false;
     let daltonicMode = false;
+    let exchangeRates = { USD: 1 }; // Se actualiza desde la DB
 
     let currentIntercambioStep = 1;
 
@@ -1665,19 +1711,68 @@
       return `${y}-${m}-${day}`;
     }
     
-    function formatCurrency(value) {
+    // Formateo multi-moneda
+    function formatCurrency(value, moneda = 'USD') {
       let sign = value < 0 ? '-' : '';
       if (daltonicMode && value > 0) sign = '+';
       const abs = Math.abs(value);
-      return sign + abs.toFixed(2).replace('.', ',') + '$';
+      const formatted = abs.toFixed(2).replace('.', ',');
+      
+      let symbol = '$';
+      if (moneda === 'EUR') symbol = '€';
+      else if (moneda === 'VES') symbol = 'Bs.';
+      else if (moneda === 'ARS') symbol = 'ARS';
+      
+      return sign + formatted + symbol;
     }
-    function formatCurrencyPrivacy(value) {
+    function formatCurrencyPrivacy(value, moneda = 'USD') {
       if (privacyMode) return '•••••';
-      return formatCurrency(value);
+      return formatCurrency(value, moneda);
     }
     function escapeHtml(s) {
       return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     }
+
+    /* ================== CONFIGURACIÓN MULTI-MONEDA ================== */
+    async function loadExchangeRates() {
+      const configs = await db.config.toArray();
+      exchangeRates = { USD: 1 }; // Reset base
+      configs.forEach(c => {
+        if (c.clave.startsWith('tasa_')) {
+          const moneda = c.clave.replace('tasa_', '');
+          exchangeRates[moneda] = parseFloat(c.valor);
+        }
+      });
+    }
+
+    async function openCurrenciesModal() {
+      document.getElementById('rateVES').value = exchangeRates['VES'] || '';
+      document.getElementById('rateEUR').value = exchangeRates['EUR'] || '';
+      document.getElementById('rateARS').value = exchangeRates['ARS'] || '';
+      new bootstrap.Modal(document.getElementById('currenciesModal')).show();
+    }
+
+    async function saveCurrencies() {
+      const rates = [
+        { clave: 'tasa_VES', valor: parseFloat(document.getElementById('rateVES').value) || 0 },
+        { clave: 'tasa_EUR', valor: parseFloat(document.getElementById('rateEUR').value) || 0 },
+        { clave: 'tasa_ARS', valor: parseFloat(document.getElementById('rateARS').value) || 0 }
+      ];
+      
+      await db.transaction('rw', db.config, async () => {
+        for (const r of rates) {
+          const existing = await db.config.where('clave').equals(r.clave).first();
+          if (existing) await db.config.update(existing.id, { valor: r.valor });
+          else await db.config.add(r);
+        }
+      });
+      
+      await loadExchangeRates();
+      bootstrap.Modal.getInstance(document.getElementById('currenciesModal')).hide();
+      await refreshAll();
+      scheduleSync();
+    }
+    /* ================================================================ */
 
     /* ================== MODO PRIVACIDAD Y DALTÓNICO ================== */
     function updatePrivacyButton() {
@@ -2030,15 +2125,17 @@
         const resp = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, { headers: { Authorization: `Bearer ${token}` } });
         if (!resp.ok) throw new Error('Error al descargar archivo');
         const driveData = await resp.json();
-        await db.transaction('rw', db.categories, db.movements, db.loans, db.goals, db.accounts, async () => {
+        await db.transaction('rw', db.categories, db.movements, db.loans, db.goals, db.accounts, db.config, async () => {
           await db.categories.clear(); await db.movements.clear(); await db.loans.clear();
-          await db.goals.clear(); await db.accounts.clear();
+          await db.goals.clear(); await db.accounts.clear(); await db.config.clear();
           if (driveData.categories) await db.categories.bulkAdd(driveData.categories);
           if (driveData.movements) await db.movements.bulkAdd(driveData.movements);
           if (driveData.loans) await db.loans.bulkAdd(driveData.loans);
           if (driveData.goals) await db.goals.bulkAdd(driveData.goals);
           if (driveData.accounts) await db.accounts.bulkAdd(driveData.accounts);
+          if (driveData.config) await db.config.bulkAdd(driveData.config);
         });
+        await loadExchangeRates();
         await refreshAll();
         syncPill.textContent = 'Datos cargados desde Drive';
         setTimeout(() => { if (isGoogleSession) syncPill.textContent = 'Conectado a Drive'; }, 3000);
@@ -2053,7 +2150,8 @@
       const loans = await db.loans.toArray();
       const goals = await db.goals.toArray();
       const accounts = await db.accounts.toArray();
-      return { version: 1, lastUpdated: new Date().toISOString(), categories, movements, loans, goals, accounts };
+      const config = await db.config.toArray();
+      return { version: 1, lastUpdated: new Date().toISOString(), categories, movements, loans, goals, accounts, config };
     }
     function scheduleSync() {
       if (!accessToken || !driveFileId) return;
@@ -2083,6 +2181,7 @@
 
         loadPrivacyMode();
         loadDaltonicMode();
+        await loadExchangeRates();
 
         await loadDefaultData();
         await refreshAll();
@@ -2247,18 +2346,25 @@
     }
     async function resetToTrialDefaults() {
       try {
-        await db.transaction('rw', db.categories, db.movements, db.loans, db.goals, db.accounts, async () => {
+        await db.transaction('rw', db.categories, db.movements, db.loans, db.goals, db.accounts, db.config, async () => {
           await db.categories.clear(); await db.movements.clear();
           await db.loans.clear(); await db.goals.clear(); await db.accounts.clear();
+          await db.config.clear();
         });
         await loadDefaultData();
         const accCount = await db.accounts.count();
         if (accCount === 0) {
           await db.accounts.bulkAdd([
-            { nombre: 'Efectivo', saldoReal: null, fechaVerificacion: null, color: '#90EE90' },
-            { nombre: 'Binance', saldoReal: null, fechaVerificacion: null, color: '#FFF7A0' }
+            { nombre: 'Efectivo', saldoReal: null, fechaVerificacion: null, color: '#90EE90', moneda: 'USD' },
+            { nombre: 'Binance', saldoReal: null, fechaVerificacion: null, color: '#FFF7A0', moneda: 'USD' }
           ]);
         }
+        await db.config.bulkAdd([
+          { clave: 'tasa_VES', valor: 0.025 },
+          { clave: 'tasa_EUR', valor: 1.08 },
+          { clave: 'tasa_ARS', valor: 0.001 }
+        ]);
+        await loadExchangeRates();
       } catch (e) { console.error('Error en resetToTrialDefaults:', e); throw e; }
     }
     async function exportData() {
@@ -2283,15 +2389,17 @@
           alert('El archivo no tiene el formato esperado.'); return;
         }
         if (!confirm('Esto reemplazará todos los datos actuales. ¿Continuar?')) return;
-        await db.transaction('rw', db.categories, db.movements, db.loans, db.goals, db.accounts, async () => {
+        await db.transaction('rw', db.categories, db.movements, db.loans, db.goals, db.accounts, db.config, async () => {
           await db.categories.clear(); await db.movements.clear();
-          await db.loans.clear(); await db.goals.clear(); await db.accounts.clear();
+          await db.loans.clear(); await db.goals.clear(); await db.accounts.clear(); await db.config.clear();
           await db.categories.bulkAdd(data.categories);
           await db.movements.bulkAdd(data.movements);
           await db.loans.bulkAdd(data.loans);
           await db.goals.bulkAdd(data.goals);
           await db.accounts.bulkAdd(data.accounts);
+          if (data.config) await db.config.bulkAdd(data.config);
         });
+        await loadExchangeRates();
         await refreshAll();
         alert('Datos importados correctamente.');
         scheduleSync();
@@ -2301,15 +2409,21 @@
     async function resetAllData() {
       if (!confirm('¿Estás seguro de reiniciar todos los datos? Esta acción no se puede deshacer.')) return;
       try {
-        await db.transaction('rw', db.categories, db.movements, db.loans, db.goals, db.accounts, async () => {
+        await db.transaction('rw', db.categories, db.movements, db.loans, db.goals, db.accounts, db.config, async () => {
           await db.categories.clear(); await db.movements.clear();
-          await db.loans.clear(); await db.goals.clear(); await db.accounts.clear();
+          await db.loans.clear(); await db.goals.clear(); await db.accounts.clear(); await db.config.clear();
         });
         await loadDefaultData();
         await db.accounts.bulkAdd([
-          { nombre: 'Efectivo', saldoReal: null, fechaVerificacion: null, color: '#90EE90' },
-          { nombre: 'Binance', saldoReal: null, fechaVerificacion: null, color: '#FFF7A0' }
+          { nombre: 'Efectivo', saldoReal: null, fechaVerificacion: null, color: '#90EE90', moneda: 'USD' },
+          { nombre: 'Binance', saldoReal: null, fechaVerificacion: null, color: '#FFF7A0', moneda: 'USD' }
         ]);
+        await db.config.bulkAdd([
+          { clave: 'tasa_VES', valor: 0.025 },
+          { clave: 'tasa_EUR', valor: 1.08 },
+          { clave: 'tasa_ARS', valor: 0.001 }
+        ]);
+        await loadExchangeRates();
         await refreshAll();
         alert('Datos reiniciados correctamente.');
         scheduleSync();
@@ -2388,6 +2502,9 @@
 
       const prefix = `${statsYear}-${String(statsMonth + 1).padStart(2, '0')}`;
       const allMovements = await db.movements.toArray();
+      const accounts = await db.accounts.toArray();
+      const accountsMap = {};
+      accounts.forEach(a => { accountsMap[a.nombre] = a; });
 
       const movsMes = allMovements.filter(m => {
         if (!m.fecha || !m.fecha.startsWith(prefix)) return false;
@@ -2398,8 +2515,11 @@
       let totalGastado = 0;
       let totalIngresado = 0;
       movsMes.forEach(m => {
-        if (m.monto < 0) totalGastado += Math.abs(m.monto);
-        else if (m.monto > 0) totalIngresado += m.monto;
+        const acc = accountsMap[m.cuenta];
+        const rate = acc ? (exchangeRates[acc.moneda] || 1) : 1;
+        const montoUSD = m.monto * rate;
+        if (montoUSD < 0) totalGastado += Math.abs(montoUSD);
+        else if (montoUSD > 0) totalIngresado += montoUSD;
       });
       const balance = totalIngresado - totalGastado;
 
@@ -2423,9 +2543,14 @@
       let pmIdx = statsMonth - 1, pyIdx = statsYear;
       if (pmIdx < 0) { pmIdx = 11; pyIdx--; }
       const prevPrefix = `${pyIdx}-${String(pmIdx + 1).padStart(2, '0')}`;
+      
       const totalGastadoPrev = allMovements
         .filter(m => m.fecha && m.fecha.startsWith(prevPrefix) && m.monto < 0 && !isSpecialNonExpenseMovement(m))
-        .reduce((s, m) => s + Math.abs(m.monto), 0);
+        .reduce((s, m) => {
+          const acc = accountsMap[m.cuenta];
+          const rate = acc ? (exchangeRates[acc.moneda] || 1) : 1;
+          return s + Math.abs(m.monto * rate);
+        }, 0);
 
       const compEl = document.getElementById('statsComparison');
       const prevMonthName = new Date(pyIdx, pmIdx).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
@@ -2458,8 +2583,10 @@
       const byCat = {};
       movsMes.forEach(m => {
         if (m.monto < 0) {
+          const acc = accountsMap[m.cuenta];
+          const rate = acc ? (exchangeRates[acc.moneda] || 1) : 1;
           const name = catMap[m.categoriaId] || 'Sin categoría';
-          byCat[name] = (byCat[name] || 0) + Math.abs(m.monto);
+          byCat[name] = (byCat[name] || 0) + Math.abs(m.monto * rate);
         }
       });
       const catEntries = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
@@ -2518,9 +2645,12 @@
       const porDia = new Array(diasEnMes).fill(0);
       movsMes.forEach(m => {
         if (m.monto < 0) {
+          const acc = accountsMap[m.cuenta];
+          const rate = acc ? (exchangeRates[acc.moneda] || 1) : 1;
+          const montoUSD = Math.abs(m.monto * rate);
           const day = parseInt(m.fecha.slice(8, 10));
           if (day >= 1 && day <= diasEnMes) {
-            porDia[day - 1] += Math.abs(m.monto);
+            porDia[day - 1] += montoUSD;
           }
         }
       });
@@ -2659,7 +2789,7 @@
         acumulado += pct;
         let color;
         if (key === 'sin_cuenta') color = NO_ACCOUNT_COLOR;
-        else color = accountsMap[key] || DEFAULT_ACCOUNT_COLOR;
+        else color = accountsMap[key] ? accountsMap[key].color : DEFAULT_ACCOUNT_COLOR;
         stops.push(`${color} ${start.toFixed(4)}%`);
         stops.push(`${color} ${acumulado.toFixed(4)}%`);
       });
@@ -2672,16 +2802,21 @@
       categories.forEach(c => catMap[c.id] = c.nombre);
       const accounts = await db.accounts.toArray();
       const accountsMap = {};
-      accounts.forEach(a => { accountsMap[a.nombre] = a.color || DEFAULT_ACCOUNT_COLOR; });
+      accounts.forEach(a => { accountsMap[a.nombre] = a; });
+      
       const sortedCats = [...categories].sort((a, b) => (a.orden || 0) - (b.orden || 0));
       const visibleCats = sortedCats.filter(c => !c.oculta);
       const movements = await db.movements.toArray();
       
-      let totalMov = 0;
+      let totalMovUSD = 0;
       const sums = {};
       const movementsByCat = {};
       movements.forEach(m => {
-        totalMov += m.monto;
+        const acc = accountsMap[m.cuenta];
+        const rate = acc ? (exchangeRates[acc.moneda] || 1) : 1;
+        const montoUSD = m.monto * rate;
+        totalMovUSD += montoUSD;
+
         if (m.categoriaId && catMap[m.categoriaId]) {
           const catName = catMap[m.categoriaId];
           sums[catName] = (sums[catName] || 0) + m.monto;
@@ -2691,67 +2826,27 @@
       });
       visibleCats.forEach(c => { if (!(c.nombre in sums)) sums[c.nombre] = 0; });
 
-      // Cálculo de presupuestos del mes actual
-      const ahora = new Date();
-      const mesPrefix = `${ahora.getFullYear()}-${String(ahora.getMonth() + 1).padStart(2, '0')}`;
-
       const listContainer = document.getElementById('categoryList');
       listContainer.innerHTML = '';
-      
       for (const cat of visibleCats) {
         const key = cat.nombre;
         const val = sums[key] || 0;
         const pill = document.createElement('div');
-        
-        // Calcular gasto del mes actual para esta categoría
-        let gastoMesCat = 0;
-        movements.forEach(m => {
-          if (m.categoriaId === cat.id && m.monto < 0 && m.fecha.startsWith(mesPrefix)) {
-            // Excluir movimientos especiales de presupuesto
-            if (!isSpecialNonExpenseMovement(m)) {
-              gastoMesCat += Math.abs(m.monto);
-            }
-          }
-        });
-
-        let budgetHtml = '';
-        let pillClasses = 'category-pill';
-        
-        if (cat.presupuesto && cat.presupuesto > 0) {
-          const isExceeded = gastoMesCat >= cat.presupuesto;
-          const isWarning = gastoMesCat >= (cat.presupuesto * 0.8);
-          
-          if (isExceeded) pillClasses += ' budget-exceeded';
-          else if (isWarning) pillClasses += ' budget-warning';
-
-          const icon = isExceeded ? '<i class="bi bi-exclamation-triangle budget-alert-icon"></i>' : '';
-          const textClass = isExceeded ? 'budget-text exceeded' : 'budget-text';
-
-          budgetHtml = `<span class="${textClass}">Gastado: ${formatCurrency(gastoMesCat)} / ${formatCurrency(cat.presupuesto)} ${icon}</span>`;
-        }
-
-        pill.className = pillClasses;
+        pill.className = 'category-pill';
         pill.dataset.categoriaId = cat.id;
-        
         if (val > 0 && !privacyMode) {
           const catMovs = movementsByCat[cat.id] || [];
           const gradient = buildCategoryGradient(catMovs, accountsMap);
           if (gradient) pill.style.background = gradient;
         }
-        
         const amountDisplay = privacyMode ? '•••••' : formatCurrency(val);
-        
         pill.innerHTML = `
           <span class="drag-handle" title="Mantener presionado para mover"><i class="bi bi-chevron-expand"></i></span>
-          <span class="name-wrapper">
-            <span class="name">${key}</span>
-            ${budgetHtml}
-          </span>
+          <span class="name">${key}</span>
           <span class="amount ${val >= 0 ? 'positive' : 'negative'}">${amountDisplay}</span>
         `;
         listContainer.appendChild(pill);
       }
-      
       if (sortableInstance) { sortableInstance.destroy(); sortableInstance = null; }
       if (listContainer.children.length > 1) {
         sortableInstance = new Sortable(listContainer, {
@@ -2777,7 +2872,7 @@
       const loans = await db.loans.where('estado').equals('pendiente').toArray();
       const pendingTotal = loans.reduce((sum, l) => sum + l.monto, 0);
       document.getElementById('pendingLoansTotal').textContent = formatCurrencyPrivacy(pendingTotal);
-      const totalBalance = totalMov + pendingTotal;
+      const totalBalance = totalMovUSD + pendingTotal;
       document.getElementById('totalBalance').textContent = formatCurrencyPrivacy(totalBalance);
       await renderAccountsWithVerification(movements);
       updateChart(sums);
@@ -2786,12 +2881,16 @@
       const accounts = await db.accounts.toArray();
       const container = document.getElementById('accountBalances');
       container.innerHTML = '';
-      let totalCalculado = 0;
-      let totalReal = 0;
+      let totalCalculadoUSD = 0;
+      let totalRealUSD = 0;
       let totalVerificadas = 0;
+      
       for (const acc of accounts) {
         const balance = movements.reduce((sum, m) => m.cuenta === acc.nombre ? sum + m.monto : sum, 0);
-        totalCalculado += balance;
+        const rate = exchangeRates[acc.moneda] || 1;
+        
+        totalCalculadoUSD += balance * rate;
+
         let statusClass = 'sin-verificar';
         let statusText = 'Sin verificar';
         let statusTitle = 'El saldo real no ha sido verificado';
@@ -2799,14 +2898,16 @@
         if (acc.saldoReal !== null && acc.saldoReal !== undefined) {
           diff = Math.round((acc.saldoReal - balance) * 100) / 100;
           if (diff === 0) { statusClass = 'igual'; statusText = '✅ Verificado'; statusTitle = 'El saldo real coincide con el calculado'; }
-          else if (diff < 0) { statusClass = 'falta'; statusText = `❌ Falta ${formatCurrency(Math.abs(diff))}`; statusTitle = 'El saldo real es menor al calculado'; }
-          else { statusClass = 'sobra'; statusText = `⚠️ Sobra ${formatCurrency(diff)}`; statusTitle = 'El saldo real es mayor al calculado'; }
-          totalReal += acc.saldoReal;
+          else if (diff < 0) { statusClass = 'falta'; statusText = `❌ Falta ${formatCurrency(Math.abs(diff), acc.moneda)}`; statusTitle = 'El saldo real es menor al calculado'; }
+          else { statusClass = 'sobra'; statusText = `⚠️ Sobra ${formatCurrency(diff, acc.moneda)}`; statusTitle = 'El saldo real es mayor al calculado'; }
+          totalRealUSD += acc.saldoReal * rate;
           totalVerificadas++;
-        } else { totalReal += balance; }
-        const realValueReal = (acc.saldoReal !== null && acc.saldoReal !== undefined) ? formatCurrency(acc.saldoReal) : '$0,00';
+        } else { totalRealUSD += balance * rate; }
+        
+        const realValueReal = (acc.saldoReal !== null && acc.saldoReal !== undefined) ? formatCurrency(acc.saldoReal, acc.moneda) : formatCurrency(0, acc.moneda);
         const realValueDisplay = privacyMode ? '•••••' : realValueReal;
-        const balanceDisplay = formatCurrencyPrivacy(balance);
+        const balanceDisplay = formatCurrencyPrivacy(balance, acc.moneda);
+        
         const card = document.createElement('div');
         card.className = 'account-card';
         card.dataset.accountId = acc.id;
@@ -2821,11 +2922,11 @@
         }
 
         card.innerHTML = `
-          <div class="account-name">${acc.nombre}</div>
+          <div class="account-name">${acc.nombre} (${acc.moneda})</div>
           <div class="account-balance">${balanceDisplay}</div>
           <div class="divider"></div>
           <div class="real-label">EXISTENCIA REAL</div>
-          <div class="real-value ${privacyMode ? 'privacy-locked' : ''}" data-account-id="${acc.id}" data-current-value="${acc.saldoReal !== null ? acc.saldoReal : ''}">
+          <div class="real-value ${privacyMode ? 'privacy-locked' : ''}" data-account-id="${acc.id}" data-current-value="${acc.saldoReal !== null ? acc.saldoReal : ''}" data-moneda="${acc.moneda}">
             ${realValueDisplay}
           </div>
           <div class="status-pill ${statusClass}" ${pillAttrs}>
@@ -2840,6 +2941,7 @@
           if (privacyMode) return;
           if (this.querySelector('input')) return;
           const accountId = parseInt(this.dataset.accountId);
+          const moneda = this.dataset.moneda || 'USD';
           const currentValue = this.dataset.currentValue || '';
           const input = document.createElement('input');
           input.type = 'number'; input.step = '0.01'; input.value = currentValue; input.placeholder = '0,00';
@@ -2849,7 +2951,7 @@
             const newVal = isNaN(val) ? null : val;
             this.dataset.currentValue = newVal !== null ? newVal : '';
             saveRealBalance(accountId, newVal);
-            this.innerHTML = newVal !== null ? formatCurrency(newVal) : '$0,00';
+            this.innerHTML = newVal !== null ? formatCurrency(newVal, moneda) : formatCurrency(0, moneda);
             refreshDashboard(); scheduleSync();
           };
           input.addEventListener('blur', save);
@@ -2858,18 +2960,18 @@
             if (e.key === 'Escape') {
               const val = this.dataset.currentValue !== undefined ? this.dataset.currentValue : '';
               const parent = this.parentElement;
-              parent.innerHTML = val !== '' ? formatCurrency(parseFloat(val)) : '$0,00';
+              parent.innerHTML = val !== '' ? formatCurrency(parseFloat(val), moneda) : formatCurrency(0, moneda);
             }
           });
         });
       }
       const totalContainer = document.getElementById('verificationTotalContainer');
       if (totalVerificadas > 0) {
-        const diffTotal = Math.round((totalReal - totalCalculado) * 100) / 100;
+        const diffTotalUSD = Math.round((totalRealUSD - totalCalculadoUSD) * 100) / 100;
         let diffClass = '', diffText = '', diffTitle = '';
-        if (diffTotal === 0) { diffClass = 'igual'; diffText = '✅ Verificado'; diffTitle = 'El saldo real coincide con el calculado'; }
-        else if (diffTotal < 0) { diffClass = 'falta'; diffText = `❌ Falta ${formatCurrency(Math.abs(diffTotal))}`; diffTitle = 'El saldo real es menor al calculado'; }
-        else { diffClass = 'sobra'; diffText = `⚠️ Sobra ${formatCurrency(diffTotal)}`; diffTitle = 'El saldo real es mayor al calculado'; }
+        if (diffTotalUSD === 0) { diffClass = 'igual'; diffText = '✅ Verificado'; diffTitle = 'El saldo real coincide con el calculado'; }
+        else if (diffTotalUSD < 0) { diffClass = 'falta'; diffText = `❌ Falta ${formatCurrency(Math.abs(diffTotalUSD))}`; diffTitle = 'El saldo real es menor al calculado'; }
+        else { diffClass = 'sobra'; diffText = `⚠️ Sobra ${formatCurrency(diffTotalUSD)}`; diffTitle = 'El saldo real es mayor al calculado'; }
         
         let totalAttrs = '';
         let hiddenTotalText = '';
@@ -2882,8 +2984,8 @@
           totalContainer.innerHTML = `
             <div class="verification-total">
               <div style="display:flex; flex-direction:column; gap:6px;">
-                <div><span class="label">Total calculado</span><div class="value">•••••</div></div>
-                <div><span class="label">Total real</span><div class="value">•••••</div></div>
+                <div><span class="label">Total calculado (USD)</span><div class="value">•••••</div></div>
+                <div><span class="label">Total real (USD)</span><div class="value">•••••</div></div>
               </div>
               <div class="comparison ${diffClass}" title="Estado oculto por privacidad">
                 ${diffText}
@@ -2896,8 +2998,8 @@
           totalContainer.innerHTML = `
             <div class="verification-total">
               <div style="display:flex; flex-direction:column; gap:6px;">
-                <div><span class="label">Total calculado</span><div class="value">${formatCurrency(totalCalculado)}</div></div>
-                <div><span class="label">Total real</span><div class="value">${formatCurrency(totalReal)}</div></div>
+                <div><span class="label">Total calculado (USD)</span><div class="value">${formatCurrency(totalCalculadoUSD)}</div></div>
+                <div><span class="label">Total real (USD)</span><div class="value">${formatCurrency(totalRealUSD)}</div></div>
               </div>
               <div class="comparison ${diffClass}" ${totalAttrs}>
                 ${diffText}
@@ -2919,7 +3021,10 @@
     function buildMovementCard(m, catMap, accountsMap) {
       const catName = catMap[m.categoriaId] || 'Sin categoría';
       const sign = m.monto >= 0 ? 'positive' : 'negative';
-      const accColor = m.cuenta ? (accountsMap[m.cuenta] || '#d4d0c0') : '#d4d0c0';
+      const acc = accountsMap[m.cuenta];
+      const accColor = acc ? acc.color : '#d4d0c0';
+      const moneda = acc ? acc.moneda : 'USD';
+
       const pill = document.createElement('div');
       pill.className = 'movement-pill';
       let grupoBadge = '';
@@ -2943,7 +3048,7 @@
             ${m.cuenta ? `<span class="account-badge" style="background:${accColor};">${m.cuenta}</span>` : ''}
             ${grupoBadge}
           </div>
-          <span class="amount ${sign}">${formatCurrency(m.monto)}</span>
+          <span class="amount ${sign}">${formatCurrency(m.monto, moneda)}</span>
         </div>
         ${m.descripcion ? `<div class="movement-desc">${m.descripcion}</div>` : ''}
         <div class="movement-footer">
@@ -2966,6 +3071,9 @@
       const sameAccount = movs.every(m => m.cuenta === firstMov.cuenta);
       const sameDesc = movs.every(m => (m.descripcion || '') === (firstMov.descripcion || ''));
       const catName = catMap[firstMov.categoriaId] || 'Sin categoría';
+      const acc = accountsMap[firstMov.cuenta];
+      const accColor = acc ? acc.color : '#d4d0c0';
+      const moneda = acc ? acc.moneda : 'USD';
 
       let tipoLabel = 'Grupo', tipoClass = '', tipoBadgeStyle = '';
       if (grupoId.startsWith('split_')) {
@@ -2983,19 +3091,17 @@
 
       let amountStr, amountClass;
       if (grupoId.startsWith('redondeo_') || grupoId.startsWith('intercambio_')) {
-        amountStr = formatCurrency(firstMov.monto);
+        amountStr = formatCurrency(firstMov.monto, moneda);
         amountClass = firstMov.monto >= 0 ? 'positive' : 'negative';
       } else {
         const total = movs.reduce((s, m) => s + m.monto, 0);
-        amountStr = formatCurrency(total);
+        amountStr = formatCurrency(total, moneda);
         amountClass = total >= 0 ? 'positive' : 'negative';
       }
 
       let tipoIcon = 'bi-distribute-horizontal';
       if (grupoId.startsWith('redondeo_')) tipoIcon = 'bi-arrow-left-right';
       else if (grupoId.startsWith('intercambio_')) tipoIcon = 'bi-shuffle';
-
-      const accColor = firstMov.cuenta ? (accountsMap[firstMov.cuenta] || '#d4d0c0') : '#d4d0c0';
 
       let ariaEditG = daltonicMode ? 'aria-label="Editar descripción del grupo"' : '';
       let ariaDeleteG = daltonicMode ? 'aria-label="Eliminar todo el grupo"' : '';
@@ -3100,7 +3206,7 @@
 
       const accounts = await db.accounts.toArray();
       const accountsMap = {};
-      accounts.forEach(a => { accountsMap[a.nombre] = a.color || DEFAULT_ACCOUNT_COLOR; });
+      accounts.forEach(a => { accountsMap[a.nombre] = a; });
 
       const container = document.getElementById('movementsList');
       container.innerHTML = '';
@@ -3720,6 +3826,10 @@
       const categories = await db.categories.toArray();
       const catMap = {};
       categories.forEach(c => { catMap[c.id] = c.nombre; });
+      const accounts = await db.accounts.toArray();
+      const accountsMap = {};
+      accounts.forEach(a => { accountsMap[a.nombre] = a; });
+
       const renderList = (containerId, items, isPending) => {
         const container = document.getElementById(containerId);
         container.innerHTML = '';
@@ -4059,7 +4169,6 @@
     function openAddCategory() {
       document.getElementById('categoryForm').reset();
       document.getElementById('categoryEditId').value = '';
-      document.getElementById('categoryBudget').value = ''; // Limpiar campo presupuesto
       document.getElementById('categoryModalTitle').textContent = 'Nueva Categoría';
       checkFormValidity();
       new bootstrap.Modal(document.getElementById('categoryModal')).show();
@@ -4068,7 +4177,6 @@
       const cat = await db.categories.get(id);
       if (!cat) return;
       document.getElementById('categoryName').value = cat.nombre;
-      document.getElementById('categoryBudget').value = cat.presupuesto || ''; // Cargar presupuesto
       document.getElementById('categoryEditId').value = cat.id;
       document.getElementById('categoryModalTitle').textContent = 'Editar Categoría';
       checkFormValidity();
@@ -4076,15 +4184,13 @@
     }
     async function saveCategory() {
       const name = document.getElementById('categoryName').value.trim();
-      const budgetVal = parseFloat(document.getElementById('categoryBudget').value);
-      const presupuesto = isNaN(budgetVal) || budgetVal <= 0 ? null : budgetVal;
       const editId = document.getElementById('categoryEditId').value;
       if (!name) { alert('El nombre es obligatorio.'); return; }
-      if (editId) await db.categories.update(parseInt(editId), { nombre: name, presupuesto });
+      if (editId) await db.categories.update(parseInt(editId), { nombre: name });
       else {
         const last = await db.categories.orderBy('orden').last();
         const nuevoOrden = (last && last.orden !== undefined) ? last.orden + 1 : 0;
-        await db.categories.add({ nombre: name, esPredeterminado: 0, color: '#E8622C', oculta: 0, orden: nuevoOrden, presupuesto });
+        await db.categories.add({ nombre: name, esPredeterminado: 0, color: '#E8622C', oculta: 0, orden: nuevoOrden });
       }
       bootstrap.Modal.getInstance(document.getElementById('categoryModal')).hide();
       await refreshAll(); scheduleSync();
@@ -4114,7 +4220,7 @@
           <div class="account-pill">
             <div class="left">
               <span style="display:inline-block; width:14px; height:14px; border-radius:50%; background:${color}; border:1px solid rgba(0,0,0,0.25); flex-shrink:0;"></span>
-              <span>${acc.nombre}</span>
+              <span>${acc.nombre} <small class="text-muted fw-bold" style="font-size:10px;">(${acc.moneda})</small></span>
             </div>
             <div class="actions">
               <button class="btn-icon" onclick="editAccount(${acc.id})" ${ariaEditA}><i class="bi bi-pencil"></i></button>
@@ -4132,7 +4238,7 @@
       select.innerHTML = '<option value="">Sin cuenta</option>';
       accounts.forEach(a => {
         const opt = document.createElement('option');
-        opt.value = a.nombre; opt.textContent = a.nombre;
+        opt.value = a.nombre; opt.textContent = `${a.nombre} (${a.moneda})`;
         select.appendChild(opt);
       });
     }
@@ -4143,7 +4249,7 @@
       select.innerHTML = '';
       accounts.forEach(a => {
         const opt = document.createElement('option');
-        opt.value = a.nombre; opt.textContent = a.nombre;
+        opt.value = a.nombre; opt.textContent = `${a.nombre} (${a.moneda})`;
         select.appendChild(opt);
       });
     }
@@ -4151,6 +4257,7 @@
       document.getElementById('accountForm').reset();
       document.getElementById('accountEditId').value = '';
       document.getElementById('accountColor').value = DEFAULT_ACCOUNT_COLOR;
+      document.getElementById('accountCurrency').value = 'USD';
       document.getElementById('accountModalTitle').textContent = 'Nueva Cuenta';
       checkFormValidity();
       new bootstrap.Modal(document.getElementById('accountModal')).show();
@@ -4160,6 +4267,7 @@
       if (!acc) return;
       document.getElementById('accountName').value = acc.nombre;
       document.getElementById('accountColor').value = acc.color || DEFAULT_ACCOUNT_COLOR;
+      document.getElementById('accountCurrency').value = acc.moneda || 'USD';
       document.getElementById('accountEditId').value = acc.id;
       document.getElementById('accountModalTitle').textContent = 'Editar Cuenta';
       checkFormValidity();
@@ -4168,17 +4276,18 @@
     async function saveAccount() {
       const name = document.getElementById('accountName').value.trim();
       const color = document.getElementById('accountColor').value || DEFAULT_ACCOUNT_COLOR;
+      const moneda = document.getElementById('accountCurrency').value || 'USD';
       const editId = document.getElementById('accountEditId').value;
       if (!name) { alert('El nombre es obligatorio.'); return; }
       if (editId) {
         const oldName = (await db.accounts.get(parseInt(editId))).nombre;
-        await db.accounts.update(parseInt(editId), { nombre: name, color });
+        await db.accounts.update(parseInt(editId), { nombre: name, color, moneda });
         if (oldName !== name) {
           await db.movements.where('cuenta').equals(oldName).modify({ cuenta: name });
           await db.loans.where('cuentaPago').equals(oldName).modify({ cuentaPago: name });
         }
       } else {
-        await db.accounts.add({ nombre: name, saldoReal: null, fechaVerificacion: null, color });
+        await db.accounts.add({ nombre: name, saldoReal: null, fechaVerificacion: null, color, moneda });
       }
       bootstrap.Modal.getInstance(document.getElementById('accountModal')).hide();
       await refreshAll(); scheduleSync();
@@ -4211,7 +4320,7 @@
         accSelect.innerHTML = '<option value="all">Todas</option>';
         accounts.forEach(a => {
           const opt = document.createElement('option');
-          opt.value = a.nombre; opt.textContent = a.nombre;
+          opt.value = a.nombre; opt.textContent = `${a.nombre} (${a.moneda})`;
           accSelect.appendChild(opt);
         });
       }
