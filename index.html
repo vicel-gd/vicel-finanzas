@@ -1474,6 +1474,11 @@
         <div class="modal-body">
           <form id="categoryForm">
             <div class="mb-3"><label>Nombre</label><input type="text" id="categoryName" class="form-control" required /></div>
+            <div class="mb-3">
+              <label>Presupuesto mensual (opcional)</label>
+              <input type="number" id="categoryBudget" class="form-control" step="0.01" placeholder="Ej: 50" />
+              <small class="text-muted" style="font-size:11px;">Deja en blanco si no quieres límite.</small>
+            </div>
             <input type="hidden" id="categoryEditId" />
           </form>
         </div>
@@ -2680,15 +2685,46 @@
         const pill = document.createElement('div');
         pill.className = 'category-pill';
         pill.dataset.categoriaId = cat.id;
+        
         if (val > 0 && !privacyMode) {
           const catMovs = movementsByCat[cat.id] || [];
           const gradient = buildCategoryGradient(catMovs, accountsMap);
           if (gradient) pill.style.background = gradient;
         }
+
         const amountDisplay = privacyMode ? '•••••' : formatCurrency(val);
+
+        // --- LÓGICA DE PRESUPUESTOS ---
+        const catMovs = movementsByCat[cat.id] || [];
+        const currentPrefix = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+        let spentThisMonth = 0;
+        catMovs.forEach(m => {
+            if (m.fecha && m.fecha.startsWith(currentPrefix) && m.monto < 0) {
+                spentThisMonth += Math.abs(m.monto);
+            }
+        });
+        const budget = cat.presupuesto || 0;
+        const hasBudget = budget > 0;
+        const isOverBudget = hasBudget && spentThisMonth > budget;
+
+        if (isOverBudget) {
+            pill.style.border = '2px solid #dc3545';
+        }
+
+        let budgetHtml = '';
+        if (hasBudget && !privacyMode) {
+            budgetHtml = `<div class="budget-info" style="font-size: 11px; margin-top: 2px; font-weight: 700; color: ${isOverBudget ? '#dc3545' : '#6c6b5e'};">
+                Gastado: ${spentThisMonth.toFixed(2).replace('.', ',')}$ / ${budget.toFixed(2).replace('.', ',')}$ ${isOverBudget ? '⚠️' : ''}
+            </div>`;
+        }
+        // ------------------------------
+
         pill.innerHTML = `
           <span class="drag-handle" title="Mantener presionado para mover"><i class="bi bi-chevron-expand"></i></span>
-          <span class="name">${key}</span>
+          <div style="display: flex; flex-direction: column; align-items: flex-start; flex: 1; min-width: 0;">
+            <span class="name">${key}</span>
+            ${budgetHtml}
+          </div>
           <span class="amount ${val >= 0 ? 'positive' : 'negative'}">${amountDisplay}</span>
         `;
         listContainer.appendChild(pill);
@@ -4010,6 +4046,7 @@
     function openAddCategory() {
       document.getElementById('categoryForm').reset();
       document.getElementById('categoryEditId').value = '';
+      document.getElementById('categoryBudget').value = '';
       document.getElementById('categoryModalTitle').textContent = 'Nueva Categoría';
       checkFormValidity();
       new bootstrap.Modal(document.getElementById('categoryModal')).show();
@@ -4018,6 +4055,7 @@
       const cat = await db.categories.get(id);
       if (!cat) return;
       document.getElementById('categoryName').value = cat.nombre;
+      document.getElementById('categoryBudget').value = cat.presupuesto || '';
       document.getElementById('categoryEditId').value = cat.id;
       document.getElementById('categoryModalTitle').textContent = 'Editar Categoría';
       checkFormValidity();
@@ -4025,13 +4063,15 @@
     }
     async function saveCategory() {
       const name = document.getElementById('categoryName').value.trim();
+      const budgetVal = parseFloat(document.getElementById('categoryBudget').value);
+      const presupuesto = isNaN(budgetVal) ? null : budgetVal;
       const editId = document.getElementById('categoryEditId').value;
       if (!name) { alert('El nombre es obligatorio.'); return; }
-      if (editId) await db.categories.update(parseInt(editId), { nombre: name });
+      if (editId) await db.categories.update(parseInt(editId), { nombre: name, presupuesto });
       else {
         const last = await db.categories.orderBy('orden').last();
         const nuevoOrden = (last && last.orden !== undefined) ? last.orden + 1 : 0;
-        await db.categories.add({ nombre: name, esPredeterminado: 0, color: '#E8622C', oculta: 0, orden: nuevoOrden });
+        await db.categories.add({ nombre: name, esPredeterminado: 0, color: '#E8622C', oculta: 0, orden: nuevoOrden, presupuesto });
       }
       bootstrap.Modal.getInstance(document.getElementById('categoryModal')).hide();
       await refreshAll(); scheduleSync();
