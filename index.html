@@ -105,6 +105,7 @@
       justify-content: center;
       gap: 6px;
       font-size: 14px;
+      user-select: none;
     }
     .loan-toggle-btn input { display: none; }
     
@@ -1466,11 +1467,11 @@
               <label>Tipo de Préstamo</label>
               <div class="loan-toggle-container">
                 <label class="loan-toggle-btn cobro active" id="btn-loan-cobro">
-                  <input type="radio" name="loanType" value="cobro" checked>
+                  <input type="radio" name="loanType" id="loanTypeCobro" value="cobro" checked>
                   <i class="bi bi-arrow-down-left"></i> Me deben (A favor)
                 </label>
                 <label class="loan-toggle-btn deuda" id="btn-loan-deuda">
-                  <input type="radio" name="loanType" value="deuda">
+                  <input type="radio" name="loanType" id="loanTypeDeuda" value="deuda">
                   <i class="bi bi-arrow-up-right"></i> Yo debo (En contra)
                 </label>
               </div>
@@ -2210,10 +2211,12 @@
 
         // Manejar el toggle verde/rojo de los préstamos
         document.querySelectorAll('.loan-toggle-btn').forEach(btn => {
-          btn.addEventListener('click', function() {
+          btn.addEventListener('click', function(e) {
+            e.preventDefault(); // Evitar el comportamiento por defecto del label
             document.querySelectorAll('.loan-toggle-btn').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
-            this.querySelector('input').checked = true;
+            const input = this.querySelector('input');
+            if (input) input.checked = true;
           });
         });
 
