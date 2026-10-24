@@ -52,6 +52,76 @@
     body.daltonic .amount.negative { color: #E69F00 !important; }
     /* ============================================================================== */
 
+    /* ================== TOAST NOTIFICACIÓN ================== */
+    .sync-toast {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translate(-50%, -150%);
+      background: var(--color-oscuro);
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 0 0 20px 20px;
+      z-index: 9999;
+      font-weight: 600;
+      font-size: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      pointer-events: none;
+      border: 2px solid var(--color-naranja);
+      border-top: none;
+    }
+    .sync-toast.show {
+      transform: translate(-50%, 0);
+    }
+    .sync-toast i {
+      color: var(--color-naranja-texto);
+      font-size: 18px;
+    }
+    /* ======================================================== */
+
+    /* ================== BOTONES DE PRÉSTAMO ================== */
+    .loan-toggle-container {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .loan-toggle-btn {
+      flex: 1;
+      padding: 12px 10px;
+      text-align: center;
+      border-radius: 30px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 2px solid #d4d0c0;
+      background: #fffdf6;
+      color: var(--color-oscuro);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 14px;
+    }
+    .loan-toggle-btn input { display: none; }
+    
+    .loan-toggle-btn.cobro.active {
+      background: #28a745;
+      border-color: #28a745;
+      color: #fff;
+      box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
+    }
+    .loan-toggle-btn.deuda.active {
+      background: #dc3545;
+      border-color: #dc3545;
+      color: #fff;
+      box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
+    }
+    /* ======================================================== */
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; }
     body {
@@ -869,12 +939,18 @@
       .settings-card { padding: 16px 20px; }
       .setting-row { padding: 10px 0; }
       .setting-row .setting-title { font-size: 14px; }
+      .loan-toggle-btn { font-size: 12px; padding: 10px 5px; }
     }
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: var(--color-oscuro); }
     ::-webkit-scrollbar-thumb { background: var(--color-naranja); border-radius: 10px; }
   </style></head>
 <body>
+
+  <!-- NUEVA NOTIFICACIÓN TOAST -->
+  <div id="syncToast" class="sync-toast">
+    <i class="bi bi-cloud-arrow-up-fill"></i> <span id="syncToastText">Guardando...</span>
+  </div>
 
   <div id="landingPage">
     <img src="logo-vicel.png" alt="VICEL Finanzas" class="logo-img" />
@@ -925,7 +1001,7 @@
         <div class="category-list" id="categoryList"></div>
         <div class="balance-cards">
           <div class="card-balance">
-            <div class="label">SALDO LÍQUIDO (Cuentas)</div>
+            <div class="label">SALDO LÍQUIDO</div>
             <div class="value" id="liquidBalance">0,00$</div>
           </div>
           
@@ -1386,17 +1462,17 @@
         </div>
         <div class="modal-body">
           <form id="loanForm">
-            <div class="mb-3">
+            <div class="mb-2">
               <label>Tipo de Préstamo</label>
-              <div>
-                <div class="form-check form-check-inline">
-                  <input class="form-check-input" type="radio" name="loanType" id="loanTypeCobro" value="cobro" checked />
-                  <label class="form-check-label" for="loanTypeCobro">Me deben (A favor)</label>
-                </div>
-                <div class="form-check form-check-inline">
-                  <input class="form-check-input" type="radio" name="loanType" id="loanTypeDeuda" value="deuda" />
-                  <label class="form-check-label" for="loanTypeDeuda">Yo debo (En contra)</label>
-                </div>
+              <div class="loan-toggle-container">
+                <label class="loan-toggle-btn cobro active" id="btn-loan-cobro">
+                  <input type="radio" name="loanType" value="cobro" checked>
+                  <i class="bi bi-arrow-down-left"></i> Me deben (A favor)
+                </label>
+                <label class="loan-toggle-btn deuda" id="btn-loan-deuda">
+                  <input type="radio" name="loanType" value="deuda">
+                  <i class="bi bi-arrow-up-right"></i> Yo debo (En contra)
+                </label>
               </div>
             </div>
             <div class="mb-3"><label>Persona</label><input type="text" id="loanPerson" class="form-control" required /></div>
@@ -1630,7 +1706,6 @@
       }
     });
 
-    // Subimos la versión para eliminar cualquier rastro de la tabla 'config' y la columna 'moneda'
     db.version(17).stores({
       categories: '++id, nombre, esPredeterminado, color, oculta, orden, presupuesto',
       movements: '++id, fecha, categoriaId, monto, descripcion, cuenta, grupoId',
@@ -1702,6 +1777,20 @@
     function escapeHtml(s) {
       return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     }
+
+    /* ================== NOTIFICACIÓN TOAST ================== */
+    function showToast(msg) {
+      const toast = document.getElementById('syncToast');
+      const text = document.getElementById('syncToastText');
+      if (!toast || !text) return;
+      text.textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(window.toastTimeout);
+      window.toastTimeout = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
+    }
+    /* ======================================================== */
 
     /* ================== MODO PRIVACIDAD Y DALTÓNICO ================== */
     function updatePrivacyButton() {
@@ -2081,16 +2170,22 @@
     }
     function scheduleSync() {
       if (!accessToken || !driveFileId) return;
+      
+      // Mostrar animación Toast
+      showToast('Guardando datos...');
       syncPill.textContent = 'Guardando...';
+      
       if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
       syncDebounceTimer = setTimeout(async () => {
         try {
           await uploadToDrive(accessToken, driveFileId);
           syncPill.textContent = 'Guardado';
+          showToast('¡Datos guardados!');
           setTimeout(() => { if (isGoogleSession) syncPill.textContent = 'Conectado a Drive'; }, 2000);
         } catch (e) {
           console.error('Error al sincronizar:', e);
           syncPill.textContent = 'Error al guardar';
+          showToast('Error al guardar');
           setTimeout(() => { if (isGoogleSession) syncPill.textContent = 'Conectado a Drive'; }, 3000);
         }
         syncDebounceTimer = null;
@@ -2112,6 +2207,15 @@
         await refreshAll();
         setupTabs();
         updateMonthLabel();
+
+        // Manejar el toggle verde/rojo de los préstamos
+        document.querySelectorAll('.loan-toggle-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            document.querySelectorAll('.loan-toggle-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            this.querySelector('input').checked = true;
+          });
+        });
 
         document.getElementById('filterSearch').addEventListener('input', applyFilters);
         document.getElementById('filterType').addEventListener('change', applyFilters);
@@ -3815,6 +3919,11 @@
     function openAddLoan() {
       document.getElementById('loanForm').reset();
       document.getElementById('loanDate').value = getTodayLocal();
+      // Reiniciar toggle a "Me deben"
+      document.querySelectorAll('.loan-toggle-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('btn-loan-cobro').classList.add('active');
+      document.getElementById('loanTypeCobro').checked = true;
+      
       refreshCategoriesDropdownForLoan();
       refreshAccountsDropdownForLoan();
       checkFormValidity();
