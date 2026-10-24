@@ -925,17 +925,31 @@
         <div class="category-list" id="categoryList"></div>
         <div class="balance-cards">
           <div class="card-balance">
-            <div class="label">BALANCE TOTAL</div>
-            <div class="value" id="totalBalance">0,00$</div>
+            <div class="label">SALDO LÍQUIDO (Cuentas)</div>
+            <div class="value" id="liquidBalance">0,00$</div>
           </div>
+          
+          <div class="card-balance" style="padding: 20px 28px;">
+            <div class="d-flex justify-content-between mb-2 align-items-center">
+               <span class="label" style="margin:0; color: var(--color-positivo); font-size: 13px;">POR COBRAR (A favor)</span>
+               <span class="fw-bold" id="totalReceivable" style="color: var(--color-positivo); font-size: 20px;">0,00$</span>
+            </div>
+            <div class="d-flex justify-content-between mb-2 align-items-center">
+               <span class="label" style="margin:0; color: var(--color-negativo); font-size: 13px;">POR PAGAR (Deudas)</span>
+               <span class="fw-bold" id="totalPayable" style="color: var(--color-negativo); font-size: 20px;">0,00$</span>
+            </div>
+            <hr style="margin: 12px 0; border-color: rgba(0,0,0,0.1);">
+            <div class="d-flex justify-content-between align-items-end">
+               <span class="label" style="margin:0; font-size: 14px;">PATRIMONIO NETO</span>
+               <span class="value" id="netWorth" style="font-size: 36px;">0,00$</span>
+            </div>
+          </div>
+
           <div class="card-balance">
             <div class="sub-cards" id="accountBalances"></div>
             <div id="verificationTotalContainer"></div>
           </div>
-          <div class="card-loans">
-            <div class="label">PRÉSTAMOS PENDIENTES</div>
-            <div class="value" id="pendingLoansTotal">0,00$</div>
-          </div>
+          
           <div class="chart-container">
             <canvas id="chartCanvas"></canvas>
             <div class="chart-privacy-placeholder" id="chartPrivacyPlaceholder" style="display:none;">
@@ -1372,6 +1386,19 @@
         </div>
         <div class="modal-body">
           <form id="loanForm">
+            <div class="mb-3">
+              <label>Tipo de Préstamo</label>
+              <div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="loanType" id="loanTypeCobro" value="cobro" checked />
+                  <label class="form-check-label" for="loanTypeCobro">Me deben (A favor)</label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="loanType" id="loanTypeDeuda" value="deuda" />
+                  <label class="form-check-label" for="loanTypeDeuda">Yo debo (En contra)</label>
+                </div>
+              </div>
+            </div>
             <div class="mb-3"><label>Persona</label><input type="text" id="loanPerson" class="form-control" required /></div>
             <div class="mb-3"><label>Monto</label><input type="number" id="loanAmount" class="form-control" step="0.01" required /></div>
             <div class="mb-3"><label>Fecha</label><input type="date" id="loanDate" class="form-control" required /></div>
@@ -1380,7 +1407,7 @@
                 <option value="" disabled selected>Seleccionar categoría</option>
               </select>
             </div>
-            <div class="mb-3"><label>Cuenta (de donde sale el dinero)</label><select id="loanAccount" class="form-select" required></select></div>
+            <div class="mb-3"><label>Cuenta</label><select id="loanAccount" class="form-select" required></select></div>
             <div class="mb-3"><label>Descripción (opcional)</label><input type="text" id="loanDescription" class="form-control" /></div>
           </form>
         </div>
@@ -1396,12 +1423,12 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Pagar préstamo</h5>
+          <h5 class="modal-title">Pagar / Cobrar Préstamo</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body">
           <p>El dinero se devolverá a la misma categoría de la que salió (<span id="payLoanCategoryLabel"></span>).</p>
-          <p>Selecciona la cuenta por la que entra el dinero:</p>
+          <p>Selecciona la cuenta por la que entra/sale el dinero:</p>
           <div class="mb-3"><label>Cuenta</label><select id="payLoanAccount" class="form-select"></select></div>
           <input type="hidden" id="payLoanId" />
           <input type="hidden" id="payLoanCategoryId" />
@@ -1429,7 +1456,7 @@
             <div class="mb-3"><label>Cuenta</label><select id="editLoanAccount" class="form-select" required></select></div>
             <div class="mb-3"><label>Descripción (opcional)</label><input type="text" id="editLoanDescription" class="form-control" /></div>
             <div class="mb-2 text-white-50" style="font-size:13px;">
-              <i class="bi bi-info-circle"></i> Monto (<strong id="editLoanAmountLabel"></strong>) y categoría (<strong id="editLoanCategoryLabel"></strong>) no se pueden modificar.
+              <i class="bi bi-info-circle"></i> Monto (<strong id="editLoanAmountLabel"></strong>), tipo (<strong id="editLoanTipoLabel"></strong>) y categoría (<strong id="editLoanCategoryLabel"></strong>) no se pueden modificar.
             </div>
           </form>
         </div>
@@ -1610,6 +1637,19 @@
       loans: '++id, persona, monto, fecha, descripcion, estado, fechaPago, cuentaPago, movimientoCreacionId, movimientoPagoId',
       goals: '++id, nombre, costoTotal, categoriaAnclaId, lograda',
       accounts: '++id, nombre, saldoReal, fechaVerificacion, color'
+    });
+
+    db.version(18).stores({
+      categories: '++id, nombre, esPredeterminado, color, oculta, orden, presupuesto',
+      movements: '++id, fecha, categoriaId, monto, descripcion, cuenta, grupoId',
+      loans: '++id, persona, monto, fecha, descripcion, estado, fechaPago, cuentaPago, movimientoCreacionId, movimientoPagoId, tipo',
+      goals: '++id, nombre, costoTotal, categoriaAnclaId, lograda',
+      accounts: '++id, nombre, saldoReal, fechaVerificacion, color'
+    }).upgrade(async tx => {
+      const loans = await tx.table('loans').toArray();
+      for (const loan of loans) {
+        if (!loan.tipo) await tx.table('loans').update(loan.id, { tipo: 'cobro' });
+      }
     });
 
     let currentMonth = new Date().getMonth();
@@ -2372,10 +2412,18 @@
 
       const prefix = `${statsYear}-${String(statsMonth + 1).padStart(2, '0')}`;
       const allMovements = await db.movements.toArray();
+      
+      const allLoans = await db.loans.toArray();
+      const loanMovIds = new Set();
+      allLoans.forEach(l => {
+        if (l.movimientoCreacionId) loanMovIds.add(l.movimientoCreacionId);
+        if (l.movimientoPagoId) loanMovIds.add(l.movimientoPagoId);
+      });
 
       const movsMes = allMovements.filter(m => {
         if (!m.fecha || !m.fecha.startsWith(prefix)) return false;
         if (isSpecialNonExpenseMovement(m)) return false;
+        if (loanMovIds.has(m.id)) return false;
         return true;
       });
 
@@ -2408,7 +2456,7 @@
       if (pmIdx < 0) { pmIdx = 11; pyIdx--; }
       const prevPrefix = `${pyIdx}-${String(pmIdx + 1).padStart(2, '0')}`;
       const totalGastadoPrev = allMovements
-        .filter(m => m.fecha && m.fecha.startsWith(prevPrefix) && m.monto < 0 && !isSpecialNonExpenseMovement(m))
+        .filter(m => m.fecha && m.fecha.startsWith(prevPrefix) && m.monto < 0 && !isSpecialNonExpenseMovement(m) && !loanMovIds.has(m.id))
         .reduce((s, m) => s + Math.abs(m.monto), 0);
 
       const compEl = document.getElementById('statsComparison');
@@ -2627,7 +2675,6 @@
       const byCuenta = {};
       movsCategoria.forEach(m => {
         const key = (m.cuenta && m.cuenta.trim()) ? m.cuenta : 'sin_cuenta';
-        // Usamos el valor absoluto para que las barras se pinten aunque el saldo sea negativo
         byCuenta[key] = (byCuenta[key] || 0) + Math.abs(m.monto);
       });
       const total = Object.values(byCuenta).reduce((s, v) => s + v, 0);
@@ -2659,11 +2706,11 @@
       const visibleCats = sortedCats.filter(c => !c.oculta);
       const movements = await db.movements.toArray();
       
-      let totalMov = 0;
+      let totalLiquido = 0;
       const sums = {};
       const movementsByCat = {};
       movements.forEach(m => {
-        totalMov += m.monto;
+        totalLiquido += m.monto;
 
         if (m.categoriaId && catMap[m.categoriaId]) {
           const catName = catMap[m.categoriaId];
@@ -2683,7 +2730,6 @@
         pill.className = 'category-pill';
         pill.dataset.categoriaId = cat.id;
         
-        // Pintamos el gradiente siempre que haya movimientos, sin importar si el balance es positivo o negativo
         if (val !== 0 && !privacyMode) {
           const catMovs = movementsByCat[cat.id] || [];
           const gradient = buildCategoryGradient(catMovs, accountsMap);
@@ -2692,7 +2738,6 @@
 
         const amountDisplay = privacyMode ? '•••••' : formatCurrency(val);
 
-        // --- LÓGICA DE PRESUPUESTOS ---
         const catMovs = movementsByCat[cat.id] || [];
         const currentPrefix = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
         let spentThisMonth = 0;
@@ -2715,7 +2760,6 @@
                 Gastado: ${spentThisMonth.toFixed(2).replace('.', ',')}$ / ${budget.toFixed(2).replace('.', ',')}$ ${isOverBudget ? '⚠️' : ''}
             </div>`;
         }
-        // ------------------------------
 
         pill.innerHTML = `
           <span class="drag-handle" title="Mantener presionado para mover"><i class="bi bi-chevron-expand"></i></span>
@@ -2749,11 +2793,27 @@
           }
         });
       }
-      const loans = await db.loans.where('estado').equals('pendiente').toArray();
-      const pendingTotal = loans.reduce((sum, l) => sum + l.monto, 0);
-      document.getElementById('pendingLoansTotal').textContent = formatCurrencyPrivacy(pendingTotal);
-      const totalBalance = totalMov + pendingTotal;
-      document.getElementById('totalBalance').textContent = formatCurrencyPrivacy(totalBalance);
+      
+      // Patrimonio Neto
+      const pendingLoans = await db.loans.where('estado').equals('pendiente').toArray();
+      let totalPorCobrar = 0;
+      let totalPorPagar = 0;
+      
+      pendingLoans.forEach(l => {
+        if (l.tipo === 'deuda') {
+          totalPorPagar += l.monto;
+        } else {
+          totalPorCobrar += l.monto;
+        }
+      });
+      
+      const netWorth = totalLiquido + totalPorCobrar - totalPorPagar;
+      
+      document.getElementById('liquidBalance').textContent = formatCurrencyPrivacy(totalLiquido);
+      document.getElementById('totalReceivable').textContent = formatCurrencyPrivacy(totalPorCobrar);
+      document.getElementById('totalPayable').textContent = formatCurrencyPrivacy(totalPorPagar);
+      document.getElementById('netWorth').textContent = formatCurrencyPrivacy(netWorth);
+      
       await renderAccountsWithVerification(movements);
       updateChart(sums);
     }
@@ -3468,7 +3528,7 @@
       const byPerson = {};
       pending.forEach(l => {
         const key = l.persona;
-        if (!byPerson[key]) byPerson[key] = { total: 0, count: 0 };
+        if (!byPerson[key]) byPerson[key] = { total: 0, count: 0, tipo: l.tipo };
         byPerson[key].total += l.monto;
         byPerson[key].count++;
       });
@@ -3723,10 +3783,14 @@
           let ariaPay = daltonicMode ? 'aria-label="Marcar como pagado"' : '';
           let ariaRevert = daltonicMode ? 'aria-label="Revertir a pendiente"' : '';
 
+          let tipoLabel = loan.tipo === 'deuda' ? 'Yo debo' : 'Me deben';
+          let tipoBadgeClass = loan.tipo === 'deuda' ? 'background:#dc3545;' : 'background:#28a745;';
+
           pill.innerHTML = `
             <div class="loan-header">
               <div class="loan-who">
                 <span class="person">${loan.persona}</span>
+                <span class="account-badge" title="Tipo de préstamo" style="color:#fff; ${tipoBadgeClass}">${tipoLabel}</span>
                 <span class="account-badge" title="Categoría de origen">${catName}</span>
               </div>
               <span class="amount">${formatCurrency(loan.monto)}</span>
@@ -3777,14 +3841,21 @@
       const categoriaId = parseInt(categoriaRaw);
       const cuenta = document.getElementById('loanAccount').value;
       const descripcion = document.getElementById('loanDescription').value;
+      const tipo = document.querySelector('input[name="loanType"]:checked').value;
+      
       if (!persona || isNaN(monto) || monto <= 0 || !fecha || !cuenta) { alert('Completa todos los campos obligatorios.'); return; }
       if (!categoriaId || isNaN(categoriaId)) { alert('Debes seleccionar una categoría para el préstamo.'); return; }
-      const movDesc = descripcion || `Préstamo a ${persona}`;
-      const movId = await db.movements.add({ fecha, categoriaId, monto: -monto, descripcion: movDesc, cuenta });
+      
+      const movMonto = tipo === 'deuda' ? monto : -monto;
+      const movDesc = descripcion || (tipo === 'deuda' ? `Préstamo de ${persona}` : `Préstamo a ${persona}`);
+      
+      const movId = await db.movements.add({ fecha, categoriaId, monto: movMonto, descripcion: movDesc, cuenta });
+      
       await db.loans.add({
         persona, monto, fecha, descripcion, estado: 'pendiente',
-        fechaPago: null, cuentaPago: null, movimientoCreacionId: movId, movimientoPagoId: null
+        fechaPago: null, cuentaPago: null, movimientoCreacionId: movId, movimientoPagoId: null, tipo
       });
+      
       bootstrap.Modal.getInstance(document.getElementById('loanModal')).hide();
       await refreshAll(); scheduleSync();
     }
@@ -3797,6 +3868,7 @@
       document.getElementById('editLoanDate').value = loan.fecha;
       document.getElementById('editLoanDescription').value = loan.descripcion || '';
       document.getElementById('editLoanAmountLabel').textContent = formatCurrency(loan.monto);
+      document.getElementById('editLoanTipoLabel').textContent = loan.tipo === 'deuda' ? 'Yo debo' : 'Me deben';
       await refreshAccountsDropdown('editLoanAccount');
       document.getElementById('editLoanAccount').value = mov ? (mov.cuenta || '') : '';
       if (mov && mov.categoriaId) {
@@ -3852,9 +3924,12 @@
       if (!cuentaPago) { alert('Debes seleccionar una cuenta.'); return; }
       const loan = await db.loans.get(loanId);
       if (!loan) return;
-      const movDesc = `Devolución de préstamo de ${loan.persona}`;
+      
+      const movMonto = loan.tipo === 'deuda' ? -loan.monto : loan.monto;
+      const movDesc = loan.tipo === 'deuda' ? `Pago de deuda a ${loan.persona}` : `Devolución de préstamo de ${loan.persona}`;
+      
       const movId = await db.movements.add({
-        fecha: getTodayLocal(), categoriaId: categoriaId, monto: loan.monto, descripcion: movDesc, cuenta: cuentaPago
+        fecha: getTodayLocal(), categoriaId: categoriaId, monto: movMonto, descripcion: movDesc, cuenta: cuentaPago
       });
       await db.loans.update(loanId, {
         estado: 'pagado', fechaPago: getTodayLocal(), cuentaPago: cuentaPago, movimientoPagoId: movId
