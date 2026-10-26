@@ -1643,7 +1643,7 @@
     }
     
     /* ================== FORMATEO DE MONEDA (v45.4) ================== */
-    // Con signo: '-' siempre para negativos. '+' SOLO en Modo Daltónico (accesibilidad por color).
+    // Con signo: '-' siempre para negativos. '+' SOLO en Modo Daltónico.
     function formatCurrency(value) {
       const num = Number(value) || 0;
       const abs = Math.abs(num);
@@ -1652,7 +1652,6 @@
       else if (num > 0 && daltonicMode) sign = '+';
       return sign + abs.toFixed(2).replace('.', ',') + '$';
     }
-    // Sin signo: solo la magnitud absoluta. Para totales agregados (Gastado, Ingresado, Promedio, Top 5, barras).
     function formatCurrencyAbs(value) {
       const abs = Math.abs(Number(value) || 0);
       return abs.toFixed(2).replace('.', ',') + '$';
@@ -1665,13 +1664,11 @@
       if (privacyMode) return '•••••';
       return formatCurrencyAbs(value);
     }
-    /* ============================================================== */
 
     function escapeHtml(s) {
       return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     }
 
-    /* ================== NOTIFICACIÓN TOAST ================== */
     function showToast(state) {
       const toast = document.getElementById('syncToast');
       const text = document.getElementById('syncToastText');
@@ -1701,7 +1698,6 @@
       }
     }
 
-    /* ================== MODO PRIVACIDAD Y DALTÓNICO ================== */
     function updatePrivacyButton() {
       const btn = document.getElementById('privacyToggle');
       if (!btn) return;
@@ -2196,7 +2192,6 @@
       }
     });
 
-    /* ================== VALIDACIÓN EN TIEMPO REAL ================== */
     function checkFormValidity() {
       const movForm = document.getElementById('movementForm');
       const movBtn = document.getElementById('btn-save-movement');
@@ -2390,8 +2385,6 @@
       await refreshAccountsList();
       await refreshFilterDropdowns();
     }
-
-    /* ================== ESTADÍSTICAS ================== */
 
     function changeStatsMonth(delta) {
       statsMonth += delta;
@@ -2645,8 +2638,6 @@
       }, 50);
     }
 
-    /* ================== FIN ESTADÍSTICAS ================== */
-
     function updateChart(sums) {
       const ctx = document.getElementById('chartCanvas');
       const placeholder = document.getElementById('chartPrivacyPlaceholder');
@@ -2688,13 +2679,25 @@
       });
     }
 
+    /* ==========================================================
+       FIX v45.5: El degradado ahora refleja el SALDO NETO real 
+       por cuenta, no el volumen absoluto de movimientos.
+       ========================================================== */
     function buildCategoryGradient(movsCategoria, accountsMap) {
-      const byCuenta = {};
+      const netByCuenta = {};
       movsCategoria.forEach(m => {
         const key = (m.cuenta && m.cuenta.trim()) ? m.cuenta : 'sin_cuenta';
-        byCuenta[key] = (byCuenta[key] || 0) + Math.abs(m.monto);
+        netByCuenta[key] = (netByCuenta[key] || 0) + m.monto;
       });
-      const total = Object.values(byCuenta).reduce((s, v) => s + v, 0);
+
+      // Convertimos el saldo neto a valor absoluto para calcular las proporciones
+      const byCuenta = {};
+      let total = 0;
+      Object.keys(netByCuenta).forEach(key => {
+        byCuenta[key] = Math.abs(netByCuenta[key]);
+        total += byCuenta[key];
+      });
+
       if (total <= 0) return null;
       const stops = [];
       let acumulado = 0;
