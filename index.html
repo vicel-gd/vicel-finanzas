@@ -50,7 +50,10 @@
     body.daltonic .account-card .status-pill.sobra { background: #d1ecf1; color: #0c5460; }
     body.daltonic .amount.positive { color: #0072B2 !important; }
     body.daltonic .amount.negative { color: #E69F00 !important; }
-    /* ============================================================================== */
+
+    /* ================== MODO PRIVACIDAD (v45.3) ================== */
+    body.privacy-mode .stats-category-bar .bar-track { visibility: hidden; }
+    /* ============================================================ */
 
     /* ================== TOAST NOTIFICACIÓN (ESTILO SAMSUNG) ================== */
     .sync-toast {
@@ -1203,11 +1206,23 @@
           <div class="stats-chart-row">
             <div class="stats-chart-container">
               <div class="stats-chart-title">Gastos por categoría</div>
-              <div class="stats-chart-canvas"><canvas id="statsChartDona"></canvas></div>
+              <div class="stats-chart-canvas">
+                <canvas id="statsChartDona"></canvas>
+                <div class="chart-privacy-placeholder" id="statsChartDonaPrivacy" style="display:none;">
+                  <i class="bi bi-eye-slash-fill"></i>
+                  <p>Datos ocultos por privacidad</p>
+                </div>
+              </div>
             </div>
             <div class="stats-chart-container">
               <div class="stats-chart-title">Gastos por día del mes</div>
-              <div class="stats-chart-canvas"><canvas id="statsChartDias"></canvas></div>
+              <div class="stats-chart-canvas">
+                <canvas id="statsChartDias"></canvas>
+                <div class="chart-privacy-placeholder" id="statsChartDiasPrivacy" style="display:none;">
+                  <i class="bi bi-eye-slash-fill"></i>
+                  <p>Datos ocultos por privacidad</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1774,16 +1789,32 @@
       return `${y}-${m}-${day}`;
     }
     
+    /* ================== FORMATEO DE MONEDA (v45.3) ================== */
+    // Con signo: usa '+' para positivos, '-' para negativos. Ideal para movimientos y balances.
     function formatCurrency(value) {
-      let sign = value < 0 ? '-' : '';
-      if (daltonicMode && value > 0) sign = '+';
-      const abs = Math.abs(value);
+      const num = Number(value) || 0;
+      const abs = Math.abs(num);
+      let sign = '';
+      if (num > 0) sign = '+';
+      else if (num < 0) sign = '-';
       return sign + abs.toFixed(2).replace('.', ',') + '$';
     }
+    // Sin signo: solo la magnitud absoluta. Ideal para totales (Gastado, Ingresado, Promedio), Top 5 y barras.
+    function formatCurrencyAbs(value) {
+      const abs = Math.abs(Number(value) || 0);
+      return abs.toFixed(2).replace('.', ',') + '$';
+    }
+    // Variantes que respetan el Modo Privacidad
     function formatCurrencyPrivacy(value) {
       if (privacyMode) return '•••••';
       return formatCurrency(value);
     }
+    function formatCurrencyPrivacyAbs(value) {
+      if (privacyMode) return '•••••';
+      return formatCurrencyAbs(value);
+    }
+    /* ============================================================== */
+
     function escapeHtml(s) {
       return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     }
@@ -1844,6 +1875,7 @@
       try {
         localStorage.setItem('vicel_privacy_mode', privacyMode ? '1' : '0');
       } catch (e) { /* localStorage podría no estar disponible */ }
+      document.body.classList.toggle('privacy-mode', privacyMode);
       updatePrivacyButton();
       refreshAll();
     }
@@ -1854,6 +1886,7 @@
       } catch (e) {
         privacyMode = false;
       }
+      document.body.classList.toggle('privacy-mode', privacyMode);
       updatePrivacyButton();
     }
 
@@ -2404,6 +2437,14 @@
           await db.categories.update(cats[i].id, { orden: i });
         }
       }
+      // v45.3: También crea cuentas por defecto si no hay ninguna
+      const accCount = await db.accounts.count();
+      if (accCount === 0) {
+        await db.accounts.bulkAdd([
+          { nombre: 'Efectivo', saldoReal: null, fechaVerificacion: null, color: '#90EE90' },
+          { nombre: 'Binance', saldoReal: null, fechaVerificacion: null, color: '#FFF7A0' }
+        ]);
+      }
     }
     async function resetToTrialDefaults() {
       try {
@@ -2412,13 +2453,6 @@
           await db.loans.clear(); await db.goals.clear(); await db.accounts.clear();
         });
         await loadDefaultData();
-        const accCount = await db.accounts.count();
-        if (accCount === 0) {
-          await db.accounts.bulkAdd([
-            { nombre: 'Efectivo', saldoReal: null, fechaVerificacion: null, color: '#90EE90' },
-            { nombre: 'Binance', saldoReal: null, fechaVerificacion: null, color: '#FFF7A0' }
-          ]);
-        }
       } catch (e) { console.error('Error en resetToTrialDefaults:', e); throw e; }
     }
     async function exportData() {
@@ -2466,10 +2500,6 @@
           await db.loans.clear(); await db.goals.clear(); await db.accounts.clear();
         });
         await loadDefaultData();
-        await db.accounts.bulkAdd([
-          { nombre: 'Efectivo', saldoReal: null, fechaVerificacion: null, color: '#90EE90' },
-          { nombre: 'Binance', saldoReal: null, fechaVerificacion: null, color: '#FFF7A0' }
-        ]);
         await refreshAll();
         alert('Datos reiniciados correctamente.');
         scheduleSync();
@@ -2579,14 +2609,15 @@
       if (diasConsiderados < 1) diasConsiderados = 1;
       const promedioDiario = totalGastado / diasConsiderados;
 
-      document.getElementById('statsTotalGastado').textContent = formatCurrency(totalGastado);
-      document.getElementById('statsTotalIngresado').textContent = formatCurrency(totalIngresado);
+      // v45.3: Usamos formatCurrencyPrivacyAbs para magnitudes y formatCurrencyPrivacy para balance
+      document.getElementById('statsTotalGastado').textContent = formatCurrencyPrivacyAbs(totalGastado);
+      document.getElementById('statsTotalIngresado').textContent = formatCurrencyPrivacyAbs(totalIngresado);
 
       const balanceEl = document.getElementById('statsBalance');
-      balanceEl.textContent = formatCurrency(balance);
+      balanceEl.textContent = formatCurrencyPrivacy(balance);
       balanceEl.className = 'stats-value ' + (balance >= 0 ? 'positive' : 'negative');
 
-      document.getElementById('statsPromedio').textContent = formatCurrency(promedioDiario);
+      document.getElementById('statsPromedio').textContent = formatCurrencyPrivacyAbs(promedioDiario);
 
       let pmIdx = statsMonth - 1, pyIdx = statsYear;
       if (pmIdx < 0) { pmIdx = 11; pyIdx--; }
@@ -2613,10 +2644,10 @@
           compEl.innerHTML = '<i class="bi bi-dash-circle"></i> Gastaste prácticamente lo mismo que en <strong>' + prevMonthName + '</strong>.';
         } else if (diff > 0) {
           compEl.className = 'stats-comparison negative';
-          compEl.innerHTML = '<i class="bi bi-arrow-up-circle"></i> Gastaste <strong>' + absPct + '%</strong> más que en ' + prevMonthName + ' (' + formatCurrency(totalGastadoPrev) + ').';
+          compEl.innerHTML = '<i class="bi bi-arrow-up-circle"></i> Gastaste <strong>' + absPct + '%</strong> más que en ' + prevMonthName + ' (' + formatCurrencyPrivacyAbs(totalGastadoPrev) + ').';
         } else {
           compEl.className = 'stats-comparison positive';
-          compEl.innerHTML = '<i class="bi bi-arrow-down-circle"></i> Gastaste <strong>' + absPct + '%</strong> menos que en ' + prevMonthName + ' (' + formatCurrency(totalGastadoPrev) + ').';
+          compEl.innerHTML = '<i class="bi bi-arrow-down-circle"></i> Gastaste <strong>' + absPct + '%</strong> menos que en ' + prevMonthName + ' (' + formatCurrencyPrivacyAbs(totalGastadoPrev) + ').';
         }
       }
 
@@ -2632,34 +2663,45 @@
       });
       const catEntries = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
 
+      // Dona
       const donaCanvas = document.getElementById('statsChartDona');
+      const donaPrivacy = document.getElementById('statsChartDonaPrivacy');
       if (statsChartDonaInstance) { statsChartDonaInstance.destroy(); statsChartDonaInstance = null; }
-      if (catEntries.length === 0) {
-        statsChartDonaInstance = new Chart(donaCanvas, {
-          type: 'doughnut',
-          data: { labels: ['Sin datos'], datasets: [{ data: [1], backgroundColor: ['#e8e2d0'] }] },
-          options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { display: false } } }
-        });
+
+      if (privacyMode) {
+        if (donaCanvas) donaCanvas.style.display = 'none';
+        if (donaPrivacy) donaPrivacy.style.display = 'flex';
       } else {
-        const palette = daltonicMode 
-          ? ['#0072B2','#E69F00','#56B4E9','#009E73','#F0E442','#CC79A7','#999999'] 
-          : ['#e2781f','#FFB347','#FFD93D','#6BCB77','#4D96FF','#845EC2','#FF6B6B','#00C9A7','#FF9671','#C34A36','#A8E6CF','#DDA0DD','#87CEEB','#F0E68C','#E6A8D7'];
-        const labels = catEntries.map(e => e[0]);
-        const data = catEntries.map(e => e[1]);
-        const colors = labels.map((_, i) => palette[i % palette.length]);
-        statsChartDonaInstance = new Chart(donaCanvas, {
-          type: 'doughnut',
-          data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 2, borderColor: '#fff7e0', hoverOffset: 10 }] },
-          options: {
-            responsive: true, maintainAspectRatio: false, cutout: '60%',
-            plugins: {
-              legend: { position: 'bottom', labels: { color: '#201e1f', font: { family: 'Poppins', size: 11, weight: '600' }, boxWidth: 12, padding: 10, usePointStyle: true, pointStyle: 'circle' } },
-              tooltip: { callbacks: { label: (ctx) => ctx.label + ': ' + formatCurrency(ctx.parsed) } }
+        if (donaCanvas) donaCanvas.style.display = '';
+        if (donaPrivacy) donaPrivacy.style.display = 'none';
+        if (catEntries.length === 0) {
+          statsChartDonaInstance = new Chart(donaCanvas, {
+            type: 'doughnut',
+            data: { labels: ['Sin datos'], datasets: [{ data: [1], backgroundColor: ['#e8e2d0'] }] },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { display: false } } }
+          });
+        } else {
+          const palette = daltonicMode 
+            ? ['#0072B2','#E69F00','#56B4E9','#009E73','#F0E442','#CC79A7','#999999'] 
+            : ['#e2781f','#FFB347','#FFD93D','#6BCB77','#4D96FF','#845EC2','#FF6B6B','#00C9A7','#FF9671','#C34A36','#A8E6CF','#DDA0DD','#87CEEB','#F0E68C','#E6A8D7'];
+          const labels = catEntries.map(e => e[0]);
+          const data = catEntries.map(e => e[1]);
+          const colors = labels.map((_, i) => palette[i % palette.length]);
+          statsChartDonaInstance = new Chart(donaCanvas, {
+            type: 'doughnut',
+            data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 2, borderColor: '#fff7e0', hoverOffset: 10 }] },
+            options: {
+              responsive: true, maintainAspectRatio: false, cutout: '60%',
+              plugins: {
+                legend: { position: 'bottom', labels: { color: '#201e1f', font: { family: 'Poppins', size: 11, weight: '600' }, boxWidth: 12, padding: 10, usePointStyle: true, pointStyle: 'circle' } },
+                tooltip: { callbacks: { label: (ctx) => ctx.label + ': ' + formatCurrencyPrivacy(ctx.parsed) } }
+              }
             }
-          }
-        });
+          });
+        }
       }
 
+      // Barras de categorías
       const barsContainer = document.getElementById('statsCategoryBars');
       barsContainer.innerHTML = '';
       if (catEntries.length === 0) {
@@ -2672,16 +2714,19 @@
           const pctTotal = totalCat > 0 ? (val / totalCat) * 100 : 0;
           const row = document.createElement('div');
           row.className = 'stats-category-bar';
+          const amountDisplay = formatCurrencyPrivacyAbs(val);
+          const percentDisplay = privacyMode ? '•••' : pctTotal.toFixed(1).replace('.', ',') + '%';
           row.innerHTML = `
             <div class="bar-name">${escapeHtml(name)}</div>
             <div class="bar-track"><div class="bar-fill" style="width:${pctBar}%;"></div></div>
-            <div class="bar-amount">${formatCurrency(val)}</div>
-            <div class="bar-percent">${pctTotal.toFixed(1).replace('.', ',')}%</div>
+            <div class="bar-amount">${amountDisplay}</div>
+            <div class="bar-percent">${percentDisplay}</div>
           `;
           barsContainer.appendChild(row);
         });
       }
 
+      // Barras por día
       const diasEnMes = new Date(statsYear, statsMonth + 1, 0).getDate();
       const porDia = new Array(diasEnMes).fill(0);
       movsMes.forEach(m => {
@@ -2693,42 +2738,52 @@
         }
       });
       const diasCanvas = document.getElementById('statsChartDias');
+      const diasPrivacy = document.getElementById('statsChartDiasPrivacy');
       if (statsChartDiasInstance) { statsChartDiasInstance.destroy(); statsChartDiasInstance = null; }
-      const diasLabels = porDia.map((_, i) => String(i + 1));
-      statsChartDiasInstance = new Chart(diasCanvas, {
-        type: 'bar',
-        data: {
-          labels: diasLabels,
-          datasets: [{
-            label: 'Gasto del día',
-            data: porDia,
-            backgroundColor: daltonicMode ? '#0072B2' : '#e2781f',
-            hoverBackgroundColor: daltonicMode ? '#005A8E' : '#b3410e',
-            borderRadius: 4,
-            maxBarThickness: 24
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: { callbacks: { label: (ctx) => 'Gastado: ' + formatCurrency(ctx.parsed.y) } }
+
+      if (privacyMode) {
+        if (diasCanvas) diasCanvas.style.display = 'none';
+        if (diasPrivacy) diasPrivacy.style.display = 'flex';
+      } else {
+        if (diasCanvas) diasCanvas.style.display = '';
+        if (diasPrivacy) diasPrivacy.style.display = 'none';
+        const diasLabels = porDia.map((_, i) => String(i + 1));
+        statsChartDiasInstance = new Chart(diasCanvas, {
+          type: 'bar',
+          data: {
+            labels: diasLabels,
+            datasets: [{
+              label: 'Gasto del día',
+              data: porDia,
+              backgroundColor: daltonicMode ? '#0072B2' : '#e2781f',
+              hoverBackgroundColor: daltonicMode ? '#005A8E' : '#b3410e',
+              borderRadius: 4,
+              maxBarThickness: 24
+            }]
           },
-          scales: {
-            x: {
-              ticks: { color: '#6c6b5e', font: { family: 'Poppins', size: 9 }, maxRotation: 0, autoSkip: true },
-              grid: { display: false }
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: { callbacks: { label: (ctx) => 'Gastado: ' + formatCurrencyPrivacy(ctx.parsed.y) } }
             },
-            y: {
-              beginAtZero: true,
-              ticks: { color: '#6c6b5e', font: { family: 'Poppins', size: 10 }, callback: (val) => val + '$' },
-              grid: { color: 'rgba(0,0,0,0.06)' }
+            scales: {
+              x: {
+                ticks: { color: '#6c6b5e', font: { family: 'Poppins', size: 9 }, maxRotation: 0, autoSkip: true },
+                grid: { display: false }
+              },
+              y: {
+                beginAtZero: true,
+                ticks: { color: '#6c6b5e', font: { family: 'Poppins', size: 10 }, callback: (val) => val + '$' },
+                grid: { color: 'rgba(0,0,0,0.06)' }
+              }
             }
           }
-        }
-      });
+        });
+      }
 
+      // Top 5
       const topContainer = document.getElementById('statsTop5');
       topContainer.innerHTML = '';
       const gastos = movsMes
@@ -2752,7 +2807,7 @@
               <div class="top-cat">${escapeHtml(catName)}</div>
               <div class="top-desc">${escapeHtml(desc)}</div>
             </div>
-            <div class="top-amount">${formatCurrency(Math.abs(g.monto))}</div>
+            <div class="top-amount">${formatCurrencyPrivacyAbs(g.monto)}</div>
           `;
           topContainer.appendChild(row);
         });
@@ -2946,8 +3001,8 @@
       const netWorth = totalLiquido + totalPorCobrar - totalPorPagar;
       
       document.getElementById('liquidBalance').textContent = formatCurrencyPrivacy(totalLiquido);
-      document.getElementById('totalReceivable').textContent = formatCurrencyPrivacy(totalPorCobrar);
-      document.getElementById('totalPayable').textContent = formatCurrencyPrivacy(totalPorPagar);
+      document.getElementById('totalReceivable').textContent = formatCurrencyPrivacyAbs(totalPorCobrar);
+      document.getElementById('totalPayable').textContent = formatCurrencyPrivacyAbs(totalPorPagar);
       document.getElementById('netWorth').textContent = formatCurrencyPrivacy(netWorth);
       
       await renderAccountsWithVerification(movements);
@@ -2972,8 +3027,8 @@
         if (acc.saldoReal !== null && acc.saldoReal !== undefined) {
           diff = Math.round((acc.saldoReal - balance) * 100) / 100;
           if (diff === 0) { statusClass = 'igual'; statusText = '✅ Verificado'; statusTitle = 'El saldo real coincide con el calculado'; }
-          else if (diff < 0) { statusClass = 'falta'; statusText = `❌ Falta ${formatCurrency(Math.abs(diff))}`; statusTitle = 'El saldo real es menor al calculado'; }
-          else { statusClass = 'sobra'; statusText = `⚠️ Sobra ${formatCurrency(diff)}`; statusTitle = 'El saldo real es mayor al calculado'; }
+          else if (diff < 0) { statusClass = 'falta'; statusText = `❌ Falta ${formatCurrencyAbs(diff)}`; statusTitle = 'El saldo real es menor al calculado'; }
+          else { statusClass = 'sobra'; statusText = `⚠️ Sobra ${formatCurrencyAbs(diff)}`; statusTitle = 'El saldo real es mayor al calculado'; }
           totalReal += acc.saldoReal;
           totalVerificadas++;
         } else { totalReal += balance; }
@@ -2988,12 +3043,8 @@
         const statusTextFinal = privacyMode ? (statusClass === 'igual' ? '✅ Verificado' : '•••••') : statusText;
         const statusTitleFinal = privacyMode ? 'Estado oculto por privacidad' : statusTitle;
         
-        let pillAttrs = '';
-        let hiddenText = '';
-        if (daltonicMode) {
-          pillAttrs = `title="${statusTitleFinal}"`;
-          hiddenText = `<span class="visually-hidden">${statusTitleFinal}</span>`;
-        }
+        const pillAttrs = `title="${statusTitleFinal}"`;
+        const hiddenText = `<span class="visually-hidden">${statusTitleFinal}</span>`;
 
         card.innerHTML = `
           <div class="account-name">${acc.nombre}</div>
@@ -3014,26 +3065,32 @@
           e.stopPropagation();
           if (privacyMode) return;
           if (this.querySelector('input')) return;
-          const accountId = parseInt(this.dataset.accountId);
-          const currentValue = this.dataset.currentValue || '';
+          const parentEl = this;
+          const accountId = parseInt(parentEl.dataset.accountId);
+          const currentValue = parentEl.dataset.currentValue || '';
           const input = document.createElement('input');
           input.type = 'number'; input.step = '0.01'; input.value = currentValue; input.placeholder = '0,00';
-          this.innerHTML = ''; this.appendChild(input); input.focus(); input.select();
+          parentEl.innerHTML = ''; parentEl.appendChild(input); input.focus(); input.select();
+          let cancelSave = false;
           const save = () => {
             const val = parseFloat(input.value);
             const newVal = isNaN(val) ? null : val;
-            this.dataset.currentValue = newVal !== null ? newVal : '';
+            parentEl.dataset.currentValue = newVal !== null ? String(newVal) : '';
             saveRealBalance(accountId, newVal);
-            this.innerHTML = newVal !== null ? formatCurrency(newVal) : formatCurrency(0);
+            parentEl.innerHTML = newVal !== null ? formatCurrency(newVal) : formatCurrency(0);
             refreshDashboard(); scheduleSync();
           };
-          input.addEventListener('blur', save);
+          input.addEventListener('blur', () => {
+            if (cancelSave) return;
+            save();
+          });
           input.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') { e.preventDefault(); this.blur(); }
             if (e.key === 'Escape') {
-              const val = this.dataset.currentValue !== undefined ? this.dataset.currentValue : '';
-              const parent = this.parentElement;
-              parent.innerHTML = val !== '' ? formatCurrency(parseFloat(val)) : formatCurrency(0);
+              e.preventDefault();
+              cancelSave = true;
+              const val = parentEl.dataset.currentValue;
+              parentEl.innerHTML = (val !== '' && val !== undefined) ? formatCurrency(parseFloat(val)) : formatCurrency(0);
             }
           });
         });
@@ -3043,17 +3100,14 @@
         const diffTotal = Math.round((totalReal - totalCalculado) * 100) / 100;
         let diffClass = '', diffText = '', diffTitle = '';
         if (diffTotal === 0) { diffClass = 'igual'; diffText = '✅ Verificado'; diffTitle = 'El saldo real coincide con el calculado'; }
-        else if (diffTotal < 0) { diffClass = 'falta'; diffText = `❌ Falta ${formatCurrency(Math.abs(diffTotal))}`; diffTitle = 'El saldo real es menor al calculado'; }
-        else { diffClass = 'sobra'; diffText = `⚠️ Sobra ${formatCurrency(diffTotal)}`; diffTitle = 'El saldo real es mayor al calculado'; }
+        else if (diffTotal < 0) { diffClass = 'falta'; diffText = `❌ Falta ${formatCurrencyAbs(diffTotal)}`; diffTitle = 'El saldo real es menor al calculado'; }
+        else { diffClass = 'sobra'; diffText = `⚠️ Sobra ${formatCurrencyAbs(diffTotal)}`; diffTitle = 'El saldo real es mayor al calculado'; }
         
-        let totalAttrs = '';
-        let hiddenTotalText = '';
-        if (daltonicMode) {
-          totalAttrs = `title="${diffTitle}"`;
-          hiddenTotalText = `<span class="visually-hidden">${diffTitle}</span>`;
-        }
+        const totalAttrs = `title="${diffTitle}"`;
+        const hiddenTotalText = `<span class="visually-hidden">${diffTitle}</span>`;
 
         if (privacyMode) {
+          const privacyDiffText = (diffClass === 'igual') ? '✅ Verificado' : '•••••';
           totalContainer.innerHTML = `
             <div class="verification-total">
               <div style="display:flex; flex-direction:column; gap:6px;">
@@ -3061,7 +3115,7 @@
                 <div><span class="label">Total real</span><div class="value">•••••</div></div>
               </div>
               <div class="comparison ${diffClass}" title="Estado oculto por privacidad">
-                ${diffText}
+                ${privacyDiffText}
                 <span class="visually-hidden">Estado oculto por privacidad</span>
               </div>
               <div class="fecha-verif" style="margin-top:4px; font-size:11px; color:#6c6b5e;">${totalVerificadas} cuenta(s) verificada(s)</div>
@@ -3109,9 +3163,6 @@
           grupoBadge = `<span class="split-badge" style="background:#1fe21f;" title="Movimiento dividido"><i class="bi bi-distribute-horizontal"></i> Dividido</span>`;
         }
       }
-      
-      let ariaEdit = daltonicMode ? 'aria-label="Editar movimiento"' : '';
-      let ariaDelete = daltonicMode ? 'aria-label="Eliminar movimiento"' : '';
 
       pill.innerHTML = `
         <div class="movement-header">
@@ -3120,13 +3171,13 @@
             ${m.cuenta ? `<span class="account-badge" style="background:${accColor};">${m.cuenta}</span>` : ''}
             ${grupoBadge}
           </div>
-          <span class="amount ${sign}">${formatCurrency(m.monto)}</span>
+          <span class="amount ${sign}">${formatCurrencyPrivacy(m.monto)}</span>
         </div>
         ${m.descripcion ? `<div class="movement-desc">${m.descripcion}</div>` : ''}
         <div class="movement-footer">
           <div class="actions">
-            <button class="btn-icon" onclick="editMovement(${m.id})" title="Editar movimiento" ${ariaEdit}><i class="bi bi-pencil"></i></button>
-            <button class="btn-icon danger" onclick="deleteMovement(${m.id})" title="Eliminar movimiento" ${ariaDelete}><i class="bi bi-trash"></i></button>
+            <button class="btn-icon" onclick="editMovement(${m.id})" title="Editar movimiento" aria-label="Editar movimiento"><i class="bi bi-pencil"></i></button>
+            <button class="btn-icon danger" onclick="deleteMovement(${m.id})" title="Eliminar movimiento" aria-label="Eliminar movimiento"><i class="bi bi-trash"></i></button>
           </div>
         </div>
       `;
@@ -3162,21 +3213,17 @@
 
       let amountStr, amountClass;
       if (grupoId.startsWith('redondeo_') || grupoId.startsWith('intercambio_')) {
-        amountStr = formatCurrency(firstMov.monto);
+        amountStr = formatCurrencyPrivacy(firstMov.monto);
         amountClass = firstMov.monto >= 0 ? 'positive' : 'negative';
       } else {
         const total = movs.reduce((s, m) => s + m.monto, 0);
-        amountStr = formatCurrency(total);
+        amountStr = formatCurrencyPrivacy(total);
         amountClass = total >= 0 ? 'positive' : 'negative';
       }
 
       let tipoIcon = 'bi-distribute-horizontal';
       if (grupoId.startsWith('redondeo_')) tipoIcon = 'bi-arrow-left-right';
       else if (grupoId.startsWith('intercambio_')) tipoIcon = 'bi-shuffle';
-
-      let ariaEditG = daltonicMode ? 'aria-label="Editar descripción del grupo"' : '';
-      let ariaDeleteG = daltonicMode ? 'aria-label="Eliminar todo el grupo"' : '';
-      let ariaExpand = daltonicMode ? 'aria-label="Expandir detalles del grupo"' : '';
 
       const parent = document.createElement('div');
       parent.className = `movement-pill group-parent ${tipoClass}`;
@@ -3192,9 +3239,9 @@
         ${sameDesc && firstMov.descripcion ? `<div class="movement-desc">${firstMov.descripcion}</div>` : ''}
         <div class="movement-footer">
           <div class="actions">
-            <button class="btn-icon" onclick="editGroupDescription('${grupoId}')" title="Editar descripción del grupo" ${ariaEditG}><i class="bi bi-pencil"></i></button>
-            <button class="btn-icon danger" onclick="deleteGroup('${grupoId}')" title="Eliminar todo el grupo" ${ariaDeleteG}><i class="bi bi-trash"></i></button>
-            <button class="btn-icon group-chevron" onclick="toggleGroup('${grupoId}')" title="Ver detalles" ${ariaExpand}><i class="bi bi-chevron-down"></i></button>
+            <button class="btn-icon" onclick="editGroupDescription('${grupoId}')" title="Editar descripción del grupo" aria-label="Editar descripción del grupo"><i class="bi bi-pencil"></i></button>
+            <button class="btn-icon danger" onclick="deleteGroup('${grupoId}')" title="Eliminar todo el grupo" aria-label="Eliminar todo el grupo"><i class="bi bi-trash"></i></button>
+            <button class="btn-icon group-chevron" onclick="toggleGroup('${grupoId}')" title="Ver detalles" aria-label="Expandir detalles del grupo"><i class="bi bi-chevron-down"></i></button>
           </div>
         </div>
       `;
@@ -3427,11 +3474,10 @@
       const div = document.createElement('div');
       div.className = 'row align-items-center mb-2 split-line';
       div.dataset.lineId = id;
-      let ariaDel = daltonicMode ? 'aria-label="Eliminar línea"' : '';
       div.innerHTML = `
         <div class="col-6"><select class="form-select split-line-category" onchange="updateSplitTotals()"></select></div>
         <div class="col-5"><input type="number" class="form-control split-line-amount" step="0.01" placeholder="Monto" oninput="updateSplitTotals()" /></div>
-        <div class="col-1"><button type="button" class="btn-icon danger" onclick="removeSplitLine(${id})" ${ariaDel}><i class="bi bi-trash"></i></button></div>
+        <div class="col-1"><button type="button" class="btn-icon danger" onclick="removeSplitLine(${id})" aria-label="Eliminar línea"><i class="bi bi-trash"></i></button></div>
       `;
       container.appendChild(div);
       const categories = await db.categories.toArray();
@@ -3678,14 +3724,13 @@
         const info = byPerson[name];
         const col = document.createElement('div');
         col.className = 'col-md-6 col-lg-4';
-        const totalDisplay = privacyMode ? '•••••' : formatCurrency(info.total);
-        let ariaPdf = daltonicMode ? `aria-label="Compartir PDF de ${escapeHtml(name)}"` : '';
+        const totalDisplay = formatCurrencyPrivacyAbs(info.total);
         col.innerHTML = `
           <div class="person-total-card">
             <div class="person-name">${escapeHtml(name)}</div>
             <div class="person-total">${escapeHtml(totalDisplay)}</div>
             <div class="person-count">${info.count} préstamo${info.count !== 1 ? 's' : ''} pendiente${info.count !== 1 ? 's' : ''}</div>
-            <button class="btn-pdf" type="button" ${ariaPdf}>
+            <button class="btn-pdf" type="button" aria-label="Compartir PDF de ${escapeHtml(name)}">
               <i class="bi bi-whatsapp"></i> Compartir PDF
             </button>
           </div>
@@ -3818,7 +3863,7 @@
           doc.text(dateStr, colFecha, y + 4.5);
           doc.text(truncar(desc, 68), colDesc, y + 4.5);
           doc.text(truncar(cuenta, 20), colCta, y + 4.5);
-          doc.text(formatCurrency(loan.monto), colMonto, y + 4.5, { align: 'right' });
+          doc.text(formatCurrencyAbs(loan.monto), colMonto, y + 4.5, { align: 'right' });
           doc.setDrawColor(210, 210, 210);
           doc.setLineWidth(0.1);
           doc.line(margin, y + rowHeight, pageWidth - margin, y + rowHeight);
@@ -3834,7 +3879,7 @@
         doc.setFontSize(11);
         doc.setTextColor(32, 30, 31);
         doc.text('TOTAL PENDIENTE', colMonto - 32, y + 6.5, { align: 'right' });
-        doc.text(formatCurrency(total), colMonto, y + 6.5, { align: 'right' });
+        doc.text(formatCurrencyAbs(total), colMonto, y + 6.5, { align: 'right' });
         doc.setFont('helvetica', 'italic');
         doc.setFontSize(8);
         doc.setTextColor(150, 150, 150);
@@ -3914,11 +3959,6 @@
           let catName = 'Sin categoría';
           if (mov && mov.categoriaId && catMap[mov.categoriaId]) catName = catMap[mov.categoriaId];
 
-          let ariaEdit = daltonicMode ? 'aria-label="Editar préstamo"' : '';
-          let ariaDelete = daltonicMode ? 'aria-label="Eliminar préstamo"' : '';
-          let ariaPay = daltonicMode ? 'aria-label="Marcar como pagado"' : '';
-          let ariaRevert = daltonicMode ? 'aria-label="Revertir a pendiente"' : '';
-
           let tipoLabel = loan.tipo === 'deuda' ? 'Yo debo' : 'Me deben';
           let tipoBadgeClass = loan.tipo === 'deuda' ? 'background:#dc3545;' : 'background:#28a745;';
 
@@ -3929,16 +3969,16 @@
                 <span class="account-badge" title="Tipo de préstamo" style="color:#fff; ${tipoBadgeClass}">${tipoLabel}</span>
                 <span class="account-badge" title="Categoría de origen">${catName}</span>
               </div>
-              <span class="amount">${formatCurrency(loan.monto)}</span>
+              <span class="amount">${formatCurrencyPrivacyAbs(loan.monto)}</span>
             </div>
             ${loan.descripcion ? `<div class="loan-desc">${loan.descripcion}</div>` : ''}
             <div class="loan-footer">
               <span class="date">${dateStr}</span>
               <div class="actions">
-                <button class="btn-icon" onclick="editLoan(${loan.id})" title="Editar préstamo" ${ariaEdit}><i class="bi bi-pencil"></i></button>
-                <button class="btn-icon danger" onclick="deleteLoan(${loan.id})" title="Eliminar préstamo" ${ariaDelete}><i class="bi bi-trash"></i></button>
-                ${isPending ? `<button class="btn-icon success" onclick="openPayLoan(${loan.id})" title="Marcar como pagado" ${ariaPay}><i class="bi bi-check-lg"></i></button>` :
-                             `<button class="btn-icon primary" onclick="revertLoanPaid(${loan.id})" title="Revertir a pendiente" ${ariaRevert}><i class="bi bi-arrow-counterclockwise"></i></button>`}
+                <button class="btn-icon" onclick="editLoan(${loan.id})" title="Editar préstamo" aria-label="Editar préstamo"><i class="bi bi-pencil"></i></button>
+                <button class="btn-icon danger" onclick="deleteLoan(${loan.id})" title="Eliminar préstamo" aria-label="Eliminar préstamo"><i class="bi bi-trash"></i></button>
+                ${isPending ? `<button class="btn-icon success" onclick="openPayLoan(${loan.id})" title="Marcar como pagado" aria-label="Marcar como pagado"><i class="bi bi-check-lg"></i></button>` :
+                             `<button class="btn-icon primary" onclick="revertLoanPaid(${loan.id})" title="Revertir a pendiente" aria-label="Revertir a pendiente"><i class="bi bi-arrow-counterclockwise"></i></button>`}
               </div>
             </div>
           `;
@@ -4008,7 +4048,7 @@
       document.getElementById('editLoanPerson').value = loan.persona;
       document.getElementById('editLoanDate').value = loan.fecha;
       document.getElementById('editLoanDescription').value = loan.descripcion || '';
-      document.getElementById('editLoanAmountLabel').textContent = formatCurrency(loan.monto);
+      document.getElementById('editLoanAmountLabel').textContent = formatCurrencyAbs(loan.monto);
       document.getElementById('editLoanTipoLabel').textContent = loan.tipo === 'deuda' ? 'Yo debo' : 'Me deben';
       await refreshAccountsDropdown('editLoanAccount');
       document.getElementById('editLoanAccount').value = mov ? (mov.cuenta || '') : '';
@@ -4123,28 +4163,23 @@
         const col = document.createElement('div');
         col.className = 'col-md-6 col-lg-4';
 
-        let ariaEditG = daltonicMode ? 'aria-label="Editar meta"' : '';
-        let ariaDeleteG = daltonicMode ? 'aria-label="Eliminar meta"' : '';
-        let ariaMark = daltonicMode ? 'aria-label="Marcar meta como lograda"' : '';
-        let ariaRevert = daltonicMode ? 'aria-label="Reactivar meta"' : '';
-
         col.innerHTML = `
           <div class="goal-card">
             <div>
               <div class="title">${goal.nombre}</div>
               <div class="progress-row">
-                <span>Meta: ${formatCurrency(goal.costoTotal)}</span>
-                <span>${goal.lograda ? '<span class="badge-success">Lograda</span>' : `Restante: ${formatCurrency(remaining)}`}</span>
+                <span>Meta: ${formatCurrencyPrivacyAbs(goal.costoTotal)}</span>
+                <span>${goal.lograda ? '<span class="badge-success">Lograda</span>' : `Restante: ${formatCurrencyPrivacyAbs(remaining)}`}</span>
               </div>
               <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${Math.min(progress,100)}%;"></div></div>
             </div>
             <div class="footer">
               <span>${goal.lograda ? '100%' : Math.round(progress) + '%'}</span>
               <div>
-                <button class="btn-icon" onclick="editGoal(${goal.id})" ${ariaEditG}><i class="bi bi-pencil"></i></button>
-                <button class="btn-icon danger" onclick="deleteGoal(${goal.id})" ${ariaDeleteG}><i class="bi bi-trash"></i></button>
-                ${!goal.lograda ? `<button class="btn-icon success" onclick="markGoalAchieved(${goal.id})" ${ariaMark}><i class="bi bi-check-lg"></i></button>` :
-                                  `<button class="btn-icon primary" onclick="revertGoalAchieved(${goal.id})" ${ariaRevert}><i class="bi bi-arrow-counterclockwise"></i></button>`}
+                <button class="btn-icon" onclick="editGoal(${goal.id})" aria-label="Editar meta"><i class="bi bi-pencil"></i></button>
+                <button class="btn-icon danger" onclick="deleteGoal(${goal.id})" aria-label="Eliminar meta"><i class="bi bi-trash"></i></button>
+                ${!goal.lograda ? `<button class="btn-icon success" onclick="markGoalAchieved(${goal.id})" aria-label="Marcar meta como lograda"><i class="bi bi-check-lg"></i></button>` :
+                                  `<button class="btn-icon primary" onclick="revertGoalAchieved(${goal.id})" aria-label="Reactivar meta"><i class="bi bi-arrow-counterclockwise"></i></button>`}
               </div>
             </div>
           </div>
@@ -4207,20 +4242,16 @@
         const col = document.createElement('div');
         col.className = 'col-md-6 col-lg-4';
         const isHidden = cat.oculta ? true : false;
-        
-        let ariaToggle = daltonicMode ? `aria-label="${isHidden ? 'Mostrar categoría' : 'Ocultar categoría'}"` : '';
-        let ariaEditC = daltonicMode ? 'aria-label="Editar categoría"' : '';
-        let ariaDeleteC = daltonicMode ? 'aria-label="Eliminar categoría"' : '';
 
         col.innerHTML = `
           <div class="category-pill-small">
             <div class="left"><span>${cat.nombre}</span></div>
             <div class="actions">
-              <button class="vis-toggle ${isHidden ? 'hidden' : ''}" onclick="toggleCategoryVisibility(${cat.id})" title="${isHidden ? 'Mostrar' : 'Ocultar'}" ${ariaToggle}>
+              <button class="vis-toggle ${isHidden ? 'hidden' : ''}" onclick="toggleCategoryVisibility(${cat.id})" title="${isHidden ? 'Mostrar' : 'Ocultar'}" aria-label="${isHidden ? 'Mostrar categoría' : 'Ocultar categoría'}">
                 <i class="bi ${isHidden ? 'bi-eye-slash' : 'bi-eye'}"></i>
               </button>
-              <button class="btn-icon" onclick="editCategory(${cat.id})" ${ariaEditC}><i class="bi bi-pencil"></i></button>
-              <button class="btn-icon danger" onclick="deleteCategory(${cat.id})" ${ariaDeleteC}><i class="bi bi-trash"></i></button>
+              <button class="btn-icon" onclick="editCategory(${cat.id})" aria-label="Editar categoría"><i class="bi bi-pencil"></i></button>
+              <button class="btn-icon danger" onclick="deleteCategory(${cat.id})" aria-label="Eliminar categoría"><i class="bi bi-trash"></i></button>
             </div>
           </div>
         `;
@@ -4307,9 +4338,6 @@
         const color = acc.color || DEFAULT_ACCOUNT_COLOR;
         const col = document.createElement('div');
         col.className = 'col-md-6 col-lg-4';
-        
-        let ariaEditA = daltonicMode ? 'aria-label="Editar cuenta"' : '';
-        let ariaDeleteA = daltonicMode ? 'aria-label="Eliminar cuenta"' : '';
 
         col.innerHTML = `
           <div class="account-pill">
@@ -4318,8 +4346,8 @@
               <span>${acc.nombre}</span>
             </div>
             <div class="actions">
-              <button class="btn-icon" onclick="editAccount(${acc.id})" ${ariaEditA}><i class="bi bi-pencil"></i></button>
-              <button class="btn-icon danger" onclick="deleteAccount(${acc.id})" ${ariaDeleteA}><i class="bi bi-trash"></i></button>
+              <button class="btn-icon" onclick="editAccount(${acc.id})" aria-label="Editar cuenta"><i class="bi bi-pencil"></i></button>
+              <button class="btn-icon danger" onclick="deleteAccount(${acc.id})" aria-label="Eliminar cuenta"><i class="bi bi-trash"></i></button>
             </div>
           </div>
         `;
