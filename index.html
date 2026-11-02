@@ -41,8 +41,6 @@
       --color-negativo: #E69F00; 
     }
     body.daltonic .text-naranja { color: var(--color-naranja-texto) !important; }
-    body.daltonic .split-badge[style*="#1fe21f"] { background-color: #0072B2 !important; }
-    body.daltonic .split-badge[style*="#1f81e2"] { background-color: #E69F00 !important; }
     body.daltonic .stats-card.ingresado .stats-value { color: #0072B2 !important; }
     body.daltonic .stats-card.gastado .stats-value { color: #E69F00 !important; }
     body.daltonic .account-card .status-pill.igual { background: #cce5ff; color: #004085; }
@@ -332,9 +330,6 @@
     }
     .custom-dropdown-menu .dropdown-item:hover { background: #3a3a3a; }
     .custom-dropdown-menu .dropdown-item i { font-size: 18px; }
-    .icon-dividido { color: #1fe21f !important; }
-    .icon-redondeo { color: #1f81e2 !important; }
-    .icon-intercambio { color: #845ec2 !important; }
 
     .person-total-card {
       background: var(--color-crema); border-radius: 28px; padding: 18px 22px;
@@ -383,8 +378,8 @@
       color: var(--color-oscuro); font-weight: 600; margin-bottom: 10px;
       display: flex; flex-direction: column; gap: 6px;
     }
-    .movement-pill.ingreso { background: #e0ffe0; }
-    .movement-pill.egreso { background: #ffe0e0; }
+    .movement-pill.ingreso { background: #eeffee; }
+    .movement-pill.egreso { background: #ffeeee; }
     .movement-pill .movement-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
     .movement-pill .movement-who { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; min-width: 0; }
     .movement-pill .movement-who .cat { font-weight: 700; text-transform: uppercase; }
@@ -394,8 +389,8 @@
       white-space: nowrap; color: var(--color-oscuro);
     }
     .movement-pill .movement-who .split-badge {
-      border-radius: 30px; padding: 2px 10px; font-size: 11px; font-weight: 600;
-      display: inline-flex; align-items: center; gap: 4px; color: #fff;
+      background: #d4d0c0; border-radius: 30px; padding: 2px 10px; font-size: 11px; font-weight: 600;
+      display: inline-flex; align-items: center; gap: 4px; color: var(--color-oscuro);
     }
     .movement-pill .amount { font-weight: 700; font-size: 18px; white-space: nowrap; }
     .movement-pill .amount.positive { color: var(--color-oscuro); }
@@ -414,9 +409,6 @@
     .movement-group > .movement-pill.group-parent { margin-bottom: 0; cursor: default; }
     .movement-group:not(.expanded) > .movement-pill.group-parent { border-radius: 28px; margin-bottom: 10px; }
     .movement-group.expanded > .movement-pill.group-parent { border-bottom-left-radius: 4px; border-bottom-right-radius: 4px; }
-    .movement-pill.group-parent.tipo-dividido { background: #f0fce9; }
-    .movement-pill.group-parent.tipo-redondeo { background: #ebf2fb; }
-    .movement-pill.group-parent.tipo-intercambio { background: #f5ecfb; }
     .movement-pill.group-parent .group-chevron {
       background: transparent; border: none; padding: 4px 6px;
       font-size: 18px; color: #6c6b5e; cursor: pointer;
@@ -426,13 +418,10 @@
     .movement-pill.group-parent .group-chevron:hover { background: rgba(0,0,0,0.08); }
     .movement-group.expanded > .movement-pill.group-parent .group-chevron { transform: rotate(180deg); }
 
-    .movement-group-children { display: none; border-radius: 0 0 20px 20px; padding: 8px 10px 4px; margin-bottom: 10px; }
+    .movement-group-children { display: none; background: var(--color-crema); border-radius: 0 0 20px 20px; padding: 8px 10px 4px; margin-bottom: 10px; }
     .movement-group.expanded > .movement-group-children { display: block; }
     .movement-group-children .movement-pill { margin-bottom: 6px; border-radius: 20px; padding: 12px 20px; }
     .movement-group-children .movement-pill:last-child { margin-bottom: 4px; }
-    .movement-group.tipo-dividido .movement-group-children { background: #c8ebc0; }
-    .movement-group.tipo-redondeo .movement-group-children { background: #b8d4eb; }
-    .movement-group.tipo-intercambio .movement-group-children { background: #d4b8e0; }
 
     .loan-pill {
       background: var(--color-crema); border-radius: 28px; padding: 14px 28px;
@@ -917,17 +906,17 @@
             <ul class="dropdown-menu dropdown-menu-end custom-dropdown-menu">
               <li>
                 <button class="dropdown-item" onclick="openAddSplitMovement()">
-                  <i class="bi bi-distribute-horizontal icon-dividido"></i> Dividido
+                  <i class="bi bi-distribute-horizontal"></i> Dividido
                 </button>
               </li>
               <li>
                 <button class="dropdown-item" onclick="openAddRedondeo()">
-                  <i class="bi bi-arrow-left-right icon-redondeo"></i> Redondeo
+                  <i class="bi bi-arrow-left-right"></i> Redondeo
                 </button>
               </li>
               <li>
                 <button class="dropdown-item" onclick="openAddIntercambio()">
-                  <i class="bi bi-shuffle icon-intercambio"></i> Intercambiar
+                  <i class="bi bi-shuffle"></i> Intercambiar
                 </button>
               </li>
             </ul>
@@ -2930,18 +2919,23 @@
     function buildMovementCard(m, catMap) {
       const catName = catMap[m.categoriaId] || 'Sin categoría';
       const sign = m.monto >= 0 ? 'positive' : 'negative';
-      const tipoColor = m.monto >= 0 ? 'ingreso' : 'egreso';
+      const esGrupoEspecial = m.grupoId && (
+        m.grupoId.startsWith('split_') ||
+        m.grupoId.startsWith('redondeo_') ||
+        m.grupoId.startsWith('intercambio_')
+      );
+      const tipoColor = esGrupoEspecial ? '' : (m.monto >= 0 ? 'ingreso' : 'egreso');
 
       const pill = document.createElement('div');
-      pill.className = `movement-pill ${tipoColor}`;
+      pill.className = 'movement-pill' + (tipoColor ? ' ' + tipoColor : '');
       let grupoBadge = '';
       if (m.grupoId) {
         if (m.grupoId.startsWith('redondeo_')) {
-          grupoBadge = `<span class="split-badge" style="background:#1f81e2;" title="Redondeo entre categorías"><i class="bi bi-arrow-left-right"></i> Redondeo</span>`;
+          grupoBadge = `<span class="split-badge" title="Redondeo entre categorías"><i class="bi bi-arrow-left-right"></i> Redondeo</span>`;
         } else if (m.grupoId.startsWith('intercambio_')) {
-          grupoBadge = `<span class="split-badge" style="background:#845ec2;" title="Intercambio entre categorías y cuentas"><i class="bi bi-shuffle"></i> Intercambio</span>`;
+          grupoBadge = `<span class="split-badge" title="Intercambio entre categorías y cuentas"><i class="bi bi-shuffle"></i> Intercambio</span>`;
         } else {
-          grupoBadge = `<span class="split-badge" style="background:#1fe21f;" title="Movimiento dividido"><i class="bi bi-distribute-horizontal"></i> Dividido</span>`;
+          grupoBadge = `<span class="split-badge" title="Movimiento dividido"><i class="bi bi-distribute-horizontal"></i> Dividido</span>`;
         }
       }
 
@@ -2976,16 +2970,13 @@
       const sameDesc = movs.every(m => (m.descripcion || '') === (firstMov.descripcion || ''));
       const catName = catMap[firstMov.categoriaId] || 'Sin categoría';
 
-      let tipoLabel = 'Grupo', tipoClass = '', tipoBadgeStyle = '';
+      let tipoLabel = 'Grupo', tipoClass = '';
       if (grupoId.startsWith('split_')) {
         tipoLabel = 'Dividido'; tipoClass = 'tipo-dividido';
-        tipoBadgeStyle = 'background:#1fe21f;';
       } else if (grupoId.startsWith('redondeo_')) {
         tipoLabel = 'Redondeo'; tipoClass = 'tipo-redondeo';
-        tipoBadgeStyle = 'background:#1f81e2;';
       } else if (grupoId.startsWith('intercambio_')) {
         tipoLabel = 'Intercambio'; tipoClass = 'tipo-intercambio';
-        tipoBadgeStyle = 'background:#845ec2;';
       }
 
       wrapper.classList.add(tipoClass);
@@ -3011,7 +3002,7 @@
           <div class="movement-who">
             <span class="cat">${catName}</span>
             ${sameAccount && firstMov.cuenta ? `<span class="account-badge">${firstMov.cuenta}</span>` : ''}
-            <span class="split-badge" style="${tipoBadgeStyle}"><i class="bi ${tipoIcon}"></i> ${tipoLabel}</span>
+            <span class="split-badge"><i class="bi ${tipoIcon}"></i> ${tipoLabel}</span>
           </div>
           <span class="amount ${amountClass}">${amountStr}</span>
         </div>
