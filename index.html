@@ -383,6 +383,8 @@
       color: var(--color-oscuro); font-weight: 600; margin-bottom: 10px;
       display: flex; flex-direction: column; gap: 6px;
     }
+    .movement-pill.ingreso { background: #e0ffe0; }
+    .movement-pill.egreso { background: #ffe0e0; }
     .movement-pill .movement-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
     .movement-pill .movement-who { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; min-width: 0; }
     .movement-pill .movement-who .cat { font-weight: 700; text-transform: uppercase; }
@@ -519,7 +521,6 @@
       border-color: var(--color-naranja); box-shadow: 0 0 0 3px rgba(232,98,44,0.3);
       background: #fffdf6; color: var(--color-oscuro);
     }
-    .form-control-color { width: 60px; height: 42px; padding: 4px; border-radius: 30px; cursor: pointer; }
     .form-check-label { font-weight: 500; }
 
     .csel-wrap { position: relative; width: 100%; }
@@ -1481,7 +1482,6 @@
         <div class="modal-body">
           <form id="accountForm">
             <div class="mb-3"><label>Nombre</label><input type="text" id="accountName" class="form-control" required /></div>
-            <div class="mb-3"><label>Color</label><input type="color" id="accountColor" class="form-control form-control-color" value="#888888" /></div>
             <input type="hidden" id="accountEditId" />
           </form>
         </div>
@@ -1624,7 +1624,6 @@
     let currentIntercambioStep = 1;
 
     const defaultCategories = ['Ocio', 'Pasaje', 'Comida', 'Alquiler', 'Aseo personal'];
-    const DEFAULT_ACCOUNT_COLOR = '#888888';
 
     function parseLocalDate(dateStr) {
       const parts = dateStr.split('-');
@@ -2928,14 +2927,13 @@
       });
     }
 
-    function buildMovementCard(m, catMap, accountsMap) {
+    function buildMovementCard(m, catMap) {
       const catName = catMap[m.categoriaId] || 'Sin categoría';
       const sign = m.monto >= 0 ? 'positive' : 'negative';
-      const acc = accountsMap[m.cuenta];
-      const accColor = acc ? acc.color : '#d4d0c0';
+      const tipoColor = m.monto >= 0 ? 'ingreso' : 'egreso';
 
       const pill = document.createElement('div');
-      pill.className = 'movement-pill';
+      pill.className = `movement-pill ${tipoColor}`;
       let grupoBadge = '';
       if (m.grupoId) {
         if (m.grupoId.startsWith('redondeo_')) {
@@ -2951,7 +2949,7 @@
         <div class="movement-header">
           <div class="movement-who">
             <span class="cat">${catName}</span>
-            ${m.cuenta ? `<span class="account-badge" style="background:${accColor};">${m.cuenta}</span>` : ''}
+            ${m.cuenta ? `<span class="account-badge">${m.cuenta}</span>` : ''}
             ${grupoBadge}
           </div>
           <span class="amount ${sign}">${formatCurrencyPrivacy(m.monto)}</span>
@@ -2967,7 +2965,7 @@
       return pill;
     }
 
-    function buildMovementGroup(grupoId, movs, catMap, accountsMap) {
+    function buildMovementGroup(grupoId, movs, catMap) {
       const wrapper = document.createElement('div');
       wrapper.className = 'movement-group';
       wrapper.dataset.grupoId = grupoId;
@@ -2977,8 +2975,6 @@
       const sameAccount = movs.every(m => m.cuenta === firstMov.cuenta);
       const sameDesc = movs.every(m => (m.descripcion || '') === (firstMov.descripcion || ''));
       const catName = catMap[firstMov.categoriaId] || 'Sin categoría';
-      const acc = accountsMap[firstMov.cuenta];
-      const accColor = acc ? acc.color : '#d4d0c0';
 
       let tipoLabel = 'Grupo', tipoClass = '', tipoBadgeStyle = '';
       if (grupoId.startsWith('split_')) {
@@ -3014,7 +3010,7 @@
         <div class="movement-header">
           <div class="movement-who">
             <span class="cat">${catName}</span>
-            ${sameAccount && firstMov.cuenta ? `<span class="account-badge" style="background:${accColor};">${firstMov.cuenta}</span>` : ''}
+            ${sameAccount && firstMov.cuenta ? `<span class="account-badge">${firstMov.cuenta}</span>` : ''}
             <span class="split-badge" style="${tipoBadgeStyle}"><i class="bi ${tipoIcon}"></i> ${tipoLabel}</span>
           </div>
           <span class="amount ${amountClass}">${amountStr}</span>
@@ -3032,7 +3028,7 @@
 
       const children = document.createElement('div');
       children.className = 'movement-group-children';
-      for (const m of movs) children.appendChild(buildMovementCard(m, catMap, accountsMap));
+      for (const m of movs) children.appendChild(buildMovementCard(m, catMap));
       wrapper.appendChild(children);
       return wrapper;
     }
@@ -3105,10 +3101,6 @@
       const catMap = {};
       categories.forEach(c => catMap[c.id] = c.nombre);
 
-      const accounts = await db.accounts.toArray();
-      const accountsMap = {};
-      accounts.forEach(a => { accountsMap[a.nombre] = a; });
-
       const container = document.getElementById('movementsList');
       container.innerHTML = '';
       if (movements.length === 0) {
@@ -3140,13 +3132,13 @@
         });
         for (const entry of renderOrder) {
           if (entry.type === 'single') {
-            container.appendChild(buildMovementCard(entry.mov, catMap, accountsMap));
+            container.appendChild(buildMovementCard(entry.mov, catMap));
           } else {
             const movs = groupsMap[entry.id];
             if (movs.length === 1) {
-              container.appendChild(buildMovementCard(movs[0], catMap, accountsMap));
+              container.appendChild(buildMovementCard(movs[0], catMap));
             } else {
-              container.appendChild(buildMovementGroup(entry.id, movs, catMap, accountsMap));
+              container.appendChild(buildMovementGroup(entry.id, movs, catMap));
             }
           }
         }
@@ -3725,9 +3717,6 @@
       const categories = await db.categories.toArray();
       const catMap = {};
       categories.forEach(c => { catMap[c.id] = c.nombre; });
-      const accounts = await db.accounts.toArray();
-      const accountsMap = {};
-      accounts.forEach(a => { accountsMap[a.nombre] = a; });
 
       const renderList = (containerId, items, isPending) => {
         const container = document.getElementById(containerId);
@@ -4117,14 +4106,12 @@
       const container = document.getElementById('accountsList');
       container.innerHTML = '';
       for (const acc of accounts) {
-        const color = acc.color || DEFAULT_ACCOUNT_COLOR;
         const col = document.createElement('div');
         col.className = 'col-md-6 col-lg-4';
 
         col.innerHTML = `
           <div class="account-pill">
             <div class="left">
-              <span style="display:inline-block; width:14px; height:14px; border-radius:50%; background:${color}; border:1px solid rgba(0,0,0,0.25); flex-shrink:0;"></span>
               <span>${acc.nombre}</span>
             </div>
             <div class="actions">
@@ -4161,7 +4148,6 @@
     function openAddAccount() {
       document.getElementById('accountForm').reset();
       document.getElementById('accountEditId').value = '';
-      document.getElementById('accountColor').value = DEFAULT_ACCOUNT_COLOR;
       document.getElementById('accountModalTitle').textContent = 'Nueva Cuenta';
       checkFormValidity();
       new bootstrap.Modal(document.getElementById('accountModal')).show();
@@ -4170,7 +4156,6 @@
       const acc = await db.accounts.get(id);
       if (!acc) return;
       document.getElementById('accountName').value = acc.nombre;
-      document.getElementById('accountColor').value = acc.color || DEFAULT_ACCOUNT_COLOR;
       document.getElementById('accountEditId').value = acc.id;
       document.getElementById('accountModalTitle').textContent = 'Editar Cuenta';
       checkFormValidity();
@@ -4178,18 +4163,17 @@
     }
     async function saveAccount() {
       const name = document.getElementById('accountName').value.trim();
-      const color = document.getElementById('accountColor').value || DEFAULT_ACCOUNT_COLOR;
       const editId = document.getElementById('accountEditId').value;
       if (!name) { alert('El nombre es obligatorio.'); return; }
       if (editId) {
         const oldName = (await db.accounts.get(parseInt(editId))).nombre;
-        await db.accounts.update(parseInt(editId), { nombre: name, color });
+        await db.accounts.update(parseInt(editId), { nombre: name });
         if (oldName !== name) {
           await db.movements.where('cuenta').equals(oldName).modify({ cuenta: name });
           await db.loans.where('cuentaPago').equals(oldName).modify({ cuentaPago: name });
         }
       } else {
-        await db.accounts.add({ nombre: name, saldoReal: null, fechaVerificacion: null, color });
+        await db.accounts.add({ nombre: name, saldoReal: null, fechaVerificacion: null });
       }
       bootstrap.Modal.getInstance(document.getElementById('accountModal')).hide();
       await refreshAll(); scheduleSync();
