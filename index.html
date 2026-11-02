@@ -1625,7 +1625,6 @@
 
     const defaultCategories = ['Ocio', 'Pasaje', 'Comida', 'Alquiler', 'Aseo personal'];
     const DEFAULT_ACCOUNT_COLOR = '#888888';
-    const NO_ACCOUNT_COLOR = '#CCCCCC';
 
     function parseLocalDate(dateStr) {
       const parts = dateStr.split('-');
@@ -2679,48 +2678,10 @@
       });
     }
 
-    /* ==========================================================
-       FIX v45.5: El degradado ahora refleja el SALDO NETO real 
-       por cuenta, no el volumen absoluto de movimientos.
-       ========================================================== */
-    function buildCategoryGradient(movsCategoria, accountsMap) {
-      const netByCuenta = {};
-      movsCategoria.forEach(m => {
-        const key = (m.cuenta && m.cuenta.trim()) ? m.cuenta : 'sin_cuenta';
-        netByCuenta[key] = (netByCuenta[key] || 0) + m.monto;
-      });
-
-      // Convertimos el saldo neto a valor absoluto para calcular las proporciones
-      const byCuenta = {};
-      let total = 0;
-      Object.keys(netByCuenta).forEach(key => {
-        byCuenta[key] = Math.abs(netByCuenta[key]);
-        total += byCuenta[key];
-      });
-
-      if (total <= 0) return null;
-      const stops = [];
-      let acumulado = 0;
-      Object.entries(byCuenta).forEach(([key, amt]) => {
-        const pct = (amt / total) * 100;
-        const start = acumulado;
-        acumulado += pct;
-        let color;
-        if (key === 'sin_cuenta') color = NO_ACCOUNT_COLOR;
-        else color = accountsMap[key] ? accountsMap[key].color : DEFAULT_ACCOUNT_COLOR;
-        stops.push(`${color} ${start.toFixed(4)}%`);
-        stops.push(`${color} ${acumulado.toFixed(4)}%`);
-      });
-      return `linear-gradient(to right, ${stops.join(', ')})`;
-    }
-
     async function refreshDashboard() {
       const categories = await db.categories.toArray();
       const catMap = {};
       categories.forEach(c => catMap[c.id] = c.nombre);
-      const accounts = await db.accounts.toArray();
-      const accountsMap = {};
-      accounts.forEach(a => { accountsMap[a.nombre] = a; });
       
       const sortedCats = [...categories].sort((a, b) => (a.orden || 0) - (b.orden || 0));
       const visibleCats = sortedCats.filter(c => !c.oculta);
@@ -2749,12 +2710,6 @@
         const pill = document.createElement('div');
         pill.className = 'category-pill';
         pill.dataset.categoriaId = cat.id;
-        
-        if (val !== 0 && !privacyMode) {
-          const catMovs = movementsByCat[cat.id] || [];
-          const gradient = buildCategoryGradient(catMovs, accountsMap);
-          if (gradient) pill.style.background = gradient;
-        }
 
         const amountDisplay = privacyMode ? '•••••' : formatCurrency(val);
 
