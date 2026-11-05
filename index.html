@@ -313,13 +313,13 @@
     .warning-text { color: #fff7e0 !important; opacity: 0.85; }
 
     .btn-action-secondary {
-      background: var(--color-crema); color: var(--color-naranja); border: 1px solid var(--color-naranja); border-radius: 60px;
+      background: var(--color-crema); color: var(--color-naranja); border: none; border-radius: 60px;
       padding: 9px 16px; font-weight: 700; font-size: 16px; transition: 0.2s;
       display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
     }
     .btn-action-secondary i { color: var(--color-naranja); }
     .btn-action-secondary:hover,
-    .btn-action-secondary[aria-expanded="true"] { background: var(--color-naranja-hover); color: #fff; border-color: var(--color-naranja-hover); }
+    .btn-action-secondary[aria-expanded="true"] { background: var(--color-naranja-hover); color: #fff; }
 
     .custom-dropdown-menu {
       background: var(--color-crema); border: 1px solid var(--color-naranja); border-radius: 20px;
@@ -1631,12 +1631,14 @@
     }
     
     /* ================== FORMATEO DE MONEDA (v45.4) ================== */
-    // Con signo: '-' siempre para negativos. '+' SOLO en Modo Daltónico.
+    // Con signo: '-' siempre para negativos significativos. '+' SOLO en Modo Daltónico.
+    // Si el monto redondeado a 2 decimales es cero, no se muestra signo negativo (evita "-0,00$").
     function formatCurrency(value) {
       const num = Number(value) || 0;
       const abs = Math.abs(num);
+      const absRounded = Math.round(abs * 100) / 100;
       let sign = '';
-      if (num < 0) sign = '-';
+      if (num < 0 && absRounded > 0) sign = '-';
       else if (num > 0 && daltonicMode) sign = '+';
       return sign + abs.toFixed(2).replace('.', ',') + '$';
     }
@@ -2725,13 +2727,14 @@
             </div>`;
         }
 
+        const valRounded = Math.round(val * 100) / 100;
         pill.innerHTML = `
           <span class="drag-handle" title="Mantener presionado para mover"><i class="bi bi-chevron-expand"></i></span>
           <div style="display: flex; flex-direction: column; align-items: flex-start; flex: 1; min-width: 0;">
             <span class="name">${key}</span>
             ${budgetHtml}
           </div>
-          <span class="amount ${val >= 0 ? 'positive' : 'negative'}">${amountDisplay}</span>
+          <span class="amount ${valRounded >= 0 ? 'positive' : 'negative'}">${amountDisplay}</span>
         `;
         listContainer.appendChild(pill);
       }
@@ -2920,12 +2923,7 @@
     function buildMovementCard(m, catMap) {
       const catName = catMap[m.categoriaId] || 'Sin categoría';
       const sign = m.monto >= 0 ? 'positive' : 'negative';
-      const esGrupoEspecial = m.grupoId && (
-        m.grupoId.startsWith('split_') ||
-        m.grupoId.startsWith('redondeo_') ||
-        m.grupoId.startsWith('intercambio_')
-      );
-      const tipoColor = esGrupoEspecial ? '' : (m.monto >= 0 ? 'ingreso' : 'egreso');
+      const tipoColor = m.monto >= 0 ? 'ingreso' : 'egreso';
 
       const pill = document.createElement('div');
       pill.className = 'movement-pill' + (tipoColor ? ' ' + tipoColor : '');
