@@ -323,7 +323,7 @@
 
     .custom-dropdown-menu {
       background: var(--color-crema); border: none; border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5); padding: 8px; min-width: 200px; margin-top: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5); padding: 8px; min-width: 200px;
     }
     .custom-dropdown-menu .dropdown-item {
       border-radius: 12px; padding: 10px 16px; font-weight: 600; color: var(--color-oscuro);
@@ -901,7 +901,7 @@
           <button class="btn-primary-custom" onclick="openAddMovement()"><i class="bi bi-plus-lg"></i> Nuevo</button>
           
           <div class="dropdown">
-            <button class="btn-action-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Más opciones">
+            <button class="btn-action-secondary" type="button" data-bs-toggle="dropdown" data-bs-offset='[0, 10]' aria-expanded="false" aria-label="Más opciones">
               <i class="bi bi-three-dots-vertical"></i>
             </button>
             <ul class="dropdown-menu dropdown-menu-end custom-dropdown-menu">
