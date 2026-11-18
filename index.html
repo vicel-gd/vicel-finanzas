@@ -1951,7 +1951,7 @@
             scheduleTokenRefresh(resp.expires_in);
             showApp();
           },
-          error_callback: (err) => { console.error('Error en tokenClient:', err); logout(); }
+          error_callback: (err) => { console.error('Error en tokenClient:', err); alert('No se pudo iniciar sesión con Google. Intenta nuevamente o usa "Iniciar prueba" para continuar sin Drive.'); logout(); }
         });
       } catch (e) { console.error('Error al inicializar Google Auth:', e); }
     }
@@ -1967,9 +1967,10 @@
       tokenClient.requestAccessToken({ prompt: 'consent' });
     }
     function logout() {
+      const tokenToRevoke = accessToken;
       accessToken = null; tokenExpiry = null; driveFileId = null; isGoogleSession = false;
       updateAuthUI(false);
-      if (google.accounts && google.accounts.oauth2) { try { google.accounts.oauth2.revoke(accessToken); } catch (e) {} }
+      if (tokenToRevoke && google.accounts && google.accounts.oauth2) { try { google.accounts.oauth2.revoke(tokenToRevoke); } catch (e) {} }
       showLanding();
     }
     function updateAuthUI(loggedIn) {
