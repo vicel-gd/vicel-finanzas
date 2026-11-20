@@ -446,11 +446,11 @@
     }
     .loan-month-header {
       display: flex;
-      justify-content: space-between;
       align-items: center;
       padding: 14px 20px;
       cursor: pointer;
       user-select: none;
+      gap: 16px;
     }
     .loan-month-header .loan-month-label {
       font-weight: 700;
@@ -458,11 +458,14 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
       color: var(--color-naranja);
+      white-space: nowrap;
     }
     .loan-month-header .loan-month-total {
       font-weight: 800;
       font-size: 16px;
       color: var(--color-oscuro);
+      margin-left: auto;
+      white-space: nowrap;
     }
     .loan-month-header .loan-month-arrow {
       font-size: 14px;
