@@ -424,23 +424,7 @@
     .movement-group-children .movement-pill { margin-bottom: 6px; border-radius: 20px; padding: 12px 20px; }
     .movement-group-children .movement-pill:last-child { margin-bottom: 4px; }
 
-    .loan-pill {
-      background: var(--color-crema); border-radius: 28px; padding: 14px 28px;
-      color: var(--color-oscuro); font-weight: 600; margin-bottom: 10px;
-      display: flex; flex-direction: column; gap: 6px;
-    }
-    .loan-pill .loan-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
-    .loan-pill .loan-who { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; min-width: 0; }
-    .loan-pill .loan-who .person { font-weight: 700; text-transform: uppercase; }
-    .loan-pill .loan-who .account-badge {
-      background: #d4d0c0; border-radius: 30px; padding: 2px 14px;
-      font-size: 12px; font-weight: 600; text-transform: uppercase; white-space: nowrap;
-    }
-    .loan-pill .amount { font-weight: 700; font-size: 18px; white-space: nowrap; }
-    .loan-pill .loan-desc { color: #4a4a4a; font-weight: 400; word-break: break-word; overflow-wrap: break-word; line-height: 1.4; }
-    .loan-pill .loan-footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
-    .loan-pill .date { color: #4a4a4a; font-weight: 400; }
-    .loan-pill .actions { display: flex; align-items: center; gap: 8px; }
+    /* .loan-pill styles moved below (loan-month-card section) for grouped paid loans */
 
     .btn-icon {
       background: transparent; border: none; border-radius: 30px; padding: 4px 10px;
@@ -451,7 +435,7 @@
     .btn-icon.danger:hover { color: #dc3545; }
     .btn-icon.primary:hover { color: var(--color-naranja); }
 
-    /* Préstamos pagados agrupados por mes (tarjetas crema consistentes con la app) */
+    /* Préstamos pagados agrupados por mes (tarjetas crema redondeadas consistentes con la app) */
     .loan-month-card {
       background: var(--color-crema);
       border-radius: 28px;
@@ -492,9 +476,89 @@
     .loan-month-body .row.g-3 {
       display: flex;
       flex-direction: column;
+      gap: 10px;
+    }
+    .loan-month-card .loan-pill { margin-bottom: 0; }
+
+    /* Préstamo pagado individual: tarjeta con separación (estilo Movimientos) */
+    .loan-pill {
+      background: #fffdf6;
+      border: 1px solid rgba(0,0,0,0.06);
+      border-radius: 24px;
+      padding: 14px 20px;
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: transform 0.1s, box-shadow 0.1s, border-color 0.1s;
+    }
+    .loan-pill:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      border-color: rgba(0,0,0,0.12);
+    }
+    .loan-pill .loan-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .loan-pill .loan-who {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      min-width: 0;
+    }
+    .loan-pill .loan-who .person {
+      font-weight: 700;
+      font-size: 15px;
+      text-transform: uppercase;
+      color: var(--color-oscuro);
+    }
+    .loan-pill .loan-who .account-badge {
+      background: #d4d0c0;
+      border-radius: 30px;
+      padding: 2px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      white-space: nowrap;
+      color: var(--color-oscuro);
+    }
+    .loan-pill .amount {
+      font-weight: 800;
+      font-size: 17px;
+      white-space: nowrap;
+      color: var(--color-oscuro);
+    }
+    .loan-pill .loan-desc {
+      color: #6c6b5e;
+      font-weight: 500;
+      font-size: 14px;
+      word-break: break-word;
+      overflow-wrap: break-word;
+      line-height: 1.4;
+    }
+    .loan-pill .loan-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+    .loan-pill .date {
+      color: #6c6b5e;
+      font-weight: 500;
+      font-size: 13px;
+    }
+    .loan-pill .actions {
+      display: flex;
+      align-items: center;
       gap: 8px;
     }
-    .loan-month-body .loan-pill { margin-bottom: 0; }
 
     .goal-card {
       background: var(--color-crema); border-radius: 40px; padding: 20px 24px;
