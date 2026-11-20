@@ -451,6 +451,31 @@
     .btn-icon.danger:hover { color: #dc3545; }
     .btn-icon.primary:hover { color: var(--color-naranja); }
 
+    /* Préstamos pagados agrupados por mes (acordeón) */
+    .loan-month-item {
+      background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 0;
+    }
+    .loan-month-item .accordion-button {
+      background: rgba(255,255,255,0.04); color: var(--color-oscuro);
+      font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+      font-size: 15px; border: none; border-radius: 0;
+      padding: 12px 16px; text-align: left;
+    }
+    .loan-month-item .accordion-button:not(.collapsed) {
+      background: var(--color-naranja); color: #fff; box-shadow: none;
+    }
+    .loan-month-item .accordion-button:focus { box-shadow: none; border-color: transparent; }
+    .loan-month-item .accordion-button.collapsed:hover { background: rgba(255,255,255,0.08); }
+    .loan-month-title { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+    .loan-month-total { font-weight: 800; font-size: 16px; }
+    .loan-month-item .accordion-body {
+      background: var(--color-crema); padding: 14px 16px 16px;
+    }
+    .loan-month-item .accordion-body .row.g-3 {
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .loan-month-item .loan-pill { margin-bottom: 0; }
+
     .goal-card {
       background: var(--color-crema); border-radius: 40px; padding: 20px 24px;
       color: var(--color-oscuro); height: 100%; display: flex;
@@ -3709,23 +3734,18 @@
       const catMap = {};
       categories.forEach(c => { catMap[c.id] = c.nombre; });
 
-      const renderList = (containerId, items, isPending) => {
-        const container = document.getElementById(containerId);
-        container.innerHTML = '';
-        if (items.length === 0) { container.innerHTML = '<p class="text-light-50">No hay registros.</p>'; return; }
-        for (const loan of items) {
-          const pill = document.createElement('div');
-          pill.className = 'loan-pill';
-          const dateObj = parseLocalDate(loan.fecha);
-          const dateStr = dateObj.toLocaleDateString();
-          const mov = loan.movimientoCreacionId ? movMap[loan.movimientoCreacionId] : null;
-          let catName = 'Sin categoría';
-          if (mov && mov.categoriaId && catMap[mov.categoriaId]) catName = catMap[mov.categoriaId];
+      const buildLoanPillHtml = (loan, isPending) => {
+        const dateObj = parseLocalDate(loan.fecha);
+        const dateStr = dateObj.toLocaleDateString();
+        const mov = loan.movimientoCreacionId ? movMap[loan.movimientoCreacionId] : null;
+        let catName = 'Sin categoría';
+        if (mov && mov.categoriaId && catMap[mov.categoriaId]) catName = catMap[mov.categoriaId];
 
-          let tipoLabel = loan.tipo === 'deuda' ? 'Yo debo' : 'Me deben';
-          let tipoBadgeClass = loan.tipo === 'deuda' ? 'background:#dc3545;' : 'background:#28a745;';
+        let tipoLabel = loan.tipo === 'deuda' ? 'Yo debo' : 'Me deben';
+        let tipoBadgeClass = loan.tipo === 'deuda' ? 'background:#dc3545;' : 'background:#28a745;';
 
-          pill.innerHTML = `
+        return `
+          <div class="loan-pill">
             <div class="loan-header">
               <div class="loan-who">
                 <span class="person">${loan.persona}</span>
@@ -3744,12 +3764,64 @@
                              `<button class="btn-icon primary" onclick="revertLoanPaid(${loan.id})" title="Revertir a pendiente" aria-label="Revertir a pendiente"><i class="bi bi-arrow-counterclockwise"></i></button>`}
               </div>
             </div>
-          `;
-          container.appendChild(pill);
-        }
+          </div>
+        `;
       };
+
+      const renderList = (containerId, items, isPending) => {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+        if (items.length === 0) { container.innerHTML = '<p class="text-light-50">No hay registros.</p>'; return; }
+        container.innerHTML = items.map(loan => buildLoanPillHtml(loan, isPending)).join('');
+      };
+
+      const renderPaidByMonth = (containerId, items) => {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+        if (items.length === 0) { container.innerHTML = '<p class="text-light-50">No hay registros.</p>'; return; }
+
+        const groups = {};
+        for (const loan of items) {
+          const key = loan.fecha.slice(0, 7); // YYYY-MM
+          if (!groups[key]) groups[key] = [];
+          groups[key].push(loan);
+        }
+        const monthKeys = Object.keys(groups).sort((a, b) => b.localeCompare(a));
+
+        container.innerHTML = `<div class="accordion" id="paidLoansAccordion"></div>`;
+        const accordionEl = container.querySelector('#paidLoansAccordion');
+
+        monthKeys.forEach((key, idx) => {
+          const monthLoans = groups[key];
+          const firstDate = parseLocalDate(monthLoans[0].fecha);
+          const monthLabel = firstDate.toLocaleDateString('es-VE', { month: 'long', year: 'numeric' });
+          const total = monthLoans.reduce((s, l) => s + l.monto, 0);
+          const collapseId = `paidCollapse-${idx}`;
+          const isOpen = idx === 0;
+
+          const item = document.createElement('div');
+          item.className = 'accordion-item loan-month-item';
+          item.innerHTML = `
+            <h2 class="accordion-header" id="heading-${collapseId}">
+              <button class="accordion-button ${isOpen ? '' : 'collapsed'}" type="button" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="${isOpen}" aria-controls="${collapseId}">
+                <span class="loan-month-title">${monthLabel}</span>
+                <span class="loan-month-total">${formatCurrencyPrivacyAbs(total)}</span>
+              </button>
+            </h2>
+            <div id="${collapseId}" class="accordion-collapse collapse ${isOpen ? 'show' : ''}" aria-labelledby="heading-${collapseId}" data-bs-parent="#paidLoansAccordion">
+              <div class="accordion-body">
+                <div class="row g-3">
+                  ${monthLoans.map(loan => buildLoanPillHtml(loan, false)).join('')}
+                </div>
+              </div>
+            </div>
+          `;
+          accordionEl.appendChild(item);
+        });
+      };
+
       renderList('pendingLoansList', pending, true);
-      renderList('paidLoansList', paid, false);
+      renderPaidByMonth('paidLoansList', paid);
     }
     function openAddLoan() {
       document.getElementById('loanForm').reset();
