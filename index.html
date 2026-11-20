@@ -373,6 +373,19 @@
     }
     .filter-grid .filter-item .month-nav .btn-show-all:hover { background: var(--color-naranja-hover); }
     .filter-grid .filter-item .month-nav .btn-show-all.active { background: #28a745; }
+    .filter-grid .filter-item .month-nav .btn-calendar {
+      background: var(--color-naranja); border: none; color: #fff; border-radius: 30px;
+      padding: 4px 12px; font-size: 13px; cursor: pointer; transition: 0.2s;
+    }
+    .filter-grid .filter-item .month-nav .btn-calendar:hover { background: var(--color-naranja-hover); }
+    .filter-grid .filter-item .month-nav .btn-calendar:disabled { opacity: 0.5; cursor: not-allowed; }
+    .loans-month-nav { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+    .loans-month-nav span { min-width: 110px; text-align: center; font-weight: 600; }
+    .loans-month-nav .btn-calendar {
+      background: var(--color-naranja); border: none; color: #fff; border-radius: 30px;
+      padding: 4px 12px; font-size: 13px; cursor: pointer; transition: 0.2s;
+    }
+    .loans-month-nav .btn-calendar:hover { background: var(--color-naranja-hover); }
 
     .movement-pill {
       background: var(--color-crema); border-radius: 28px; padding: 14px 28px;
@@ -1067,6 +1080,7 @@
             <button class="btn btn-outline-light btn-sm" onclick="changeMonth(-1)" id="prevMonthBtn" aria-label="Mes anterior"><i class="bi bi-chevron-left"></i></button>
             <span id="currentMonthLabel" class="fw-bold">Enero 2026</span>
             <button class="btn btn-outline-light btn-sm" onclick="changeMonth(1)" id="nextMonthBtn" aria-label="Mes siguiente"><i class="bi bi-chevron-right"></i></button>
+            <button class="btn-calendar" id="btnCalendarMovements" onclick="openMovementsCalendar()" title="Ir a un mes específico"><i class="bi bi-calendar3"></i></button>
             <button class="btn-show-all" id="showAllBtn" onclick="toggleShowAll()">Ver todos</button>
           </div>
           <button class="btn btn-outline-light btn-sm" onclick="clearFilters()">Limpiar</button>
@@ -1099,6 +1113,12 @@
         </div>
         <div class="col-md-6">
           <h5 class="text-white-50 text-uppercase fw-bold mb-3">Pagados</h5>
+          <div class="month-nav loans-month-nav">
+            <button class="btn btn-outline-light btn-sm" onclick="changePaidMonth(-1)" id="prevPaidMonthBtn" aria-label="Mes anterior"><i class="bi bi-chevron-left"></i></button>
+            <span id="paidMonthLabel" class="fw-bold">Enero 2026</span>
+            <button class="btn btn-outline-light btn-sm" onclick="changePaidMonth(1)" id="nextPaidMonthBtn" aria-label="Mes siguiente"><i class="bi bi-chevron-right"></i></button>
+            <button class="btn-calendar" id="btnCalendarPaidLoans" onclick="openPaidLoansCalendar()" title="Ir a un mes específico"><i class="bi bi-calendar3"></i></button>
+          </div>
           <div id="paidLoansList"></div>
         </div>
       </div>
@@ -1709,6 +1729,8 @@
 
     let currentMonth = new Date().getMonth();
     let currentYear = new Date().getFullYear();
+    let paidMonth = new Date().getMonth();
+    let paidYear = new Date().getFullYear();
     let chartInstance = null;
     let showAllMovements = false;
     let sortableInstance = null;
@@ -3278,6 +3300,62 @@
       if (currentMonth > 11) { currentMonth = 0; currentYear++; }
       updateMonthLabel(); applyFilters();
     }
+
+    function updatePaidMonthLabel() {
+      const date = new Date(paidYear, paidMonth);
+      document.getElementById('paidMonthLabel').textContent = date.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+    }
+
+    function changePaidMonth(delta) {
+      paidMonth += delta;
+      if (paidMonth < 0) { paidMonth = 11; paidYear--; }
+      if (paidMonth > 11) { paidMonth = 0; paidYear++; }
+      updatePaidMonthLabel();
+      refreshLoans();
+    }
+
+    function openMovementsCalendar() {
+      const now = new Date();
+      const input = document.createElement('input');
+      input.type = 'month';
+      input.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      input.style.position = 'fixed';
+      input.style.left = '-9999px';
+      input.style.top = '-9999px';
+      document.body.appendChild(input);
+      input.focus();
+      input.onchange = () => {
+        const parts = input.value.split('-');
+        currentYear = parseInt(parts[0], 10);
+        currentMonth = parseInt(parts[1], 10) - 1;
+        updateMonthLabel(); applyFilters();
+        document.body.removeChild(input);
+      };
+      input.onblur = () => { document.body.removeChild(input); };
+      input.click();
+    }
+
+    function openPaidLoansCalendar() {
+      const now = new Date();
+      const input = document.createElement('input');
+      input.type = 'month';
+      input.value = `${paidYear}-${String(paidMonth + 1).padStart(2, '0')}`;
+      input.style.position = 'fixed';
+      input.style.left = '-9999px';
+      input.style.top = '-9999px';
+      document.body.appendChild(input);
+      input.focus();
+      input.onchange = () => {
+        const parts = input.value.split('-');
+        paidYear = parseInt(parts[0], 10);
+        paidMonth = parseInt(parts[1], 10) - 1;
+        updatePaidMonthLabel();
+        refreshLoans();
+        document.body.removeChild(input);
+      };
+      input.onblur = () => { document.body.removeChild(input); };
+      input.click();
+    }
     function applyFilters() { refreshMovements(); }
     function clearFilters() {
       document.getElementById('filterType').value = 'all';
@@ -3865,40 +3943,19 @@
       const renderPaidByMonth = (containerId, items) => {
         const container = document.getElementById(containerId);
         container.innerHTML = '';
-        if (items.length === 0) { container.innerHTML = '<p class="text-light-50">No hay registros.</p>'; return; }
-
-        const groups = {};
-        for (const loan of items) {
-          const key = loan.fecha.slice(0, 7); // YYYY-MM
-          if (!groups[key]) groups[key] = [];
-          groups[key].push(loan);
-        }
-        const monthKeys = Object.keys(groups).sort((a, b) => b.localeCompare(a));
-
-        monthKeys.forEach((key, idx) => {
-          const monthLoans = groups[key];
-          const firstDate = parseLocalDate(monthLoans[0].fecha);
-          const monthLabel = firstDate.toLocaleDateString('es-VE', { month: 'long', year: 'numeric' });
-          const total = monthLoans.reduce((s, l) => s + l.monto, 0);
-          const collapseId = `paidCollapse-${idx}`;
-          const isOpen = idx === 0;
-
-          const card = document.createElement('div');
-          card.className = 'loan-month-card';
-          card.innerHTML = `
-            <div class="loan-month-header ${isOpen ? '' : 'collapsed'}" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="${isOpen}" aria-controls="${collapseId}">
-              <span class="loan-month-label">${monthLabel}</span>
-              <span class="loan-month-total">${formatCurrencyPrivacyAbs(total)}</span>
-              <i class="bi bi-chevron-down loan-month-arrow"></i>
-            </div>
-            <div id="${collapseId}" class="loan-month-body collapse ${isOpen ? 'show' : ''}" aria-labelledby="${collapseId}">
-              <div class="row g-3">
-                ${monthLoans.map(loan => buildLoanPillHtml(loan, false)).join('')}
-              </div>
-            </div>
-          `;
-          container.appendChild(card);
-        });
+        const prefix = `${paidYear}-${String(paidMonth + 1).padStart(2, '0')}`;
+        const monthLoans = items.filter(l => l.fecha.startsWith(prefix));
+        if (monthLoans.length === 0) { container.innerHTML = '<p class="text-light-50">No hay registros en este mes.</p>'; return; }
+        const total = monthLoans.reduce((s, l) => s + l.monto, 0);
+        container.innerHTML = `
+          <div class="loan-month-total-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.1);">
+            <span style="font-weight:600;">Total ${new Date(paidYear, paidMonth).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}:</span>
+            <span style="font-weight:800; font-size:18px;">${formatCurrencyPrivacyAbs(total)}</span>
+          </div>
+          <div class="row g-3">
+            ${monthLoans.map(loan => buildLoanPillHtml(loan, false)).join('')}
+          </div>
+        `;
       };
 
       renderList('pendingLoansList', pending, true);
