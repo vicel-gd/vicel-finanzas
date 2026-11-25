@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vicel-finanzas-v45.12.2'; // <-- Actualizado a v45.12.2
+const CACHE_NAME = 'vicel-finanzas-v46'; // <-- Actualizado a v46 (separación CSS/JS)
 const urlsToCache = [
   './',
   './index.html',
@@ -8,6 +8,8 @@ const urlsToCache = [
   './apple-touch-icon.png',
   './favicon.png',
   './logo-vicel.png',
+  './styles.css',
+  './app.js',
   'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css',
   'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css',
   'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js',
