@@ -2820,25 +2820,34 @@
       }
       enterprises.forEach(emp => {
         const card = document.createElement('div');
-        card.className = 'enterprise-card card border-0 shadow-sm mb-3';
+        card.className = 'enterprise-card';
         card.innerHTML = `
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start">
-              <div>
-                <h5 class="card-title mb-1">${escapeHtml(emp.nombre)}</h5>
-                <div class="text-muted small">${escapeHtml(emp.producto || 'Sin producto')}</div>
-              </div>
-              <div class="d-flex gap-2">
-                <button class="btn btn-sm btn-outline-primary" onclick="openEnterpriseForm(${emp.id})" title="Editar"><i class="bi bi-pencil"></i></button>
-                <button class="btn btn-sm btn-outline-danger" onclick="deleteEnterprise(${emp.id})" title="Eliminar"><i class="bi bi-trash"></i></button>
-              </div>
+          <div class="enterprise-header">
+            <div class="enterprise-who">
+              <div class="enterprise-name">${escapeHtml(emp.nombre)}</div>
+              ${emp.producto ? `<span style="background: rgba(0,0,0,0.05); border-radius: 30px; padding: 2px 12px; font-size: 12px; font-weight: 600; text-transform: uppercase; color: var(--color-naranja);">${escapeHtml(emp.producto)}</span>` : ''}
             </div>
-            <hr class="my-2" style="border-color: #eee;">
-            <div class="row text-center">
-              <div class="col-3"><div class="fw-bold text-primary">${emp.cantidadLote || 0}</div><small class="text-muted">unidades/lote</small></div>
-              <div class="col-3"><div class="fw-bold text-success">$${parseFloat(emp.costoUnitarioDolar || 0).toFixed(2)}</div><small class="text-muted">costo unitario</small></div>
-              <div class="col-3"><div class="fw-bold">Bs ${parseFloat(emp.precioVentaBs || 0).toLocaleString('es-VE', {minimumFractionDigits:2})}</div><small class="text-muted">precio venta</small></div>
-              <div class="col-3"><div class="fw-bold">${parseFloat(emp.tasaBcv || 0).toLocaleString('es-VE', {minimumFractionDigits:2})}</div><small class="text-muted">BCV</small></div>
+            <div class="actions">
+              <button class="btn-debtor-action secondary" onclick="openEnterpriseForm(${emp.id})" title="Editar" style="padding: 4px 10px;"><i class="bi bi-pencil"></i></button>
+              <button class="btn-debtor-action danger" onclick="deleteEnterprise(${emp.id})" title="Eliminar" style="padding: 4px 10px;"><i class="bi bi-trash"></i></button>
+            </div>
+          </div>
+          <div class="enterprise-stats">
+            <div class="stat-item">
+              <div class="stat-label">unidades/lote</div>
+              <div class="stat-value">${emp.cantidadLote || 0}</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">costo unitario</div>
+              <div class="stat-value">$${parseFloat(emp.costoUnitarioDolar || 0).toFixed(2)}</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">precio venta</div>
+              <div class="stat-value">Bs ${parseFloat(emp.precioVentaBs || 0).toLocaleString('es-VE', {minimumFractionDigits:2})}</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">BCV</div>
+              <div class="stat-value">${parseFloat(emp.tasaBcv || 0).toLocaleString('es-VE', {minimumFractionDigits:2})}</div>
             </div>
           </div>
         `;
@@ -2855,25 +2864,25 @@
       if (!detail) return;
 
       const resultado = calcularEmprendimiento(emp);
-      const alertaClase = resultado.margenCosto >= (emp.margenObjetivo || 30) ? 'alert-success' :
-        resultado.margenCosto >= (emp.umbralAlerta || 20) ? 'alert-warning' : 'alert-danger';
+      const alertaClase = resultado.margenCosto >= (emp.margenObjetivo || 30) ? 'sana' :
+        resultado.margenCosto >= (emp.umbralAlerta || 20) ? 'atencion' : 'peligro';
       const alertaTexto = resultado.margenCosto >= (emp.margenObjetivo || 30) ? 'Zona sana' :
         resultado.margenCosto >= (emp.umbralAlerta || 20) ? 'Atención: margen bajo' : 'Peligro: margen bajo del umbral';
 
       let deudoresHtml = '';
       if (debtors.length === 0) {
-        deudoresHtml = '<div class="text-muted small">No hay deudores registrados.</div>';
+        deudoresHtml = '<div class="text-muted small text-center py-3">No hay deudores registrados.</div>';
       } else {
-        deudoresHtml = '<table class="table table-sm table-bordered mt-3"><thead><tr><th>Persona</th><th>Cantidad</th><th>Total a pagar</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>';
+        deudoresHtml = '<table class="debtor-table"><thead><tr><th>Persona</th><th>Cantidad</th><th>Total a pagar</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>';
         debtors.forEach(d => {
           deudoresHtml += `<tr>
             <td>${escapeHtml(d.nombrePersona)}</td>
             <td>${d.cantidadProductos}</td>
             <td>Bs ${parseFloat(d.totalAPagar || 0).toLocaleString('es-VE', {minimumFractionDigits:2})}</td>
-            <td><span class="badge ${d.pagado ? 'bg-success' : 'bg-warning'}">${d.pagado ? 'Pagado' : 'Pendiente'}</span></td>
+            <td><span class="debtor-badge ${d.pagado ? 'pagado' : 'pendiente'}">${d.pagado ? 'Pagado' : 'Pendiente'}</span></td>
             <td>
-              <button class="btn btn-sm btn-${d.pagado ? 'secondary' : 'success'}" onclick="markDebtorPaid(${d.id}, ${!d.pagado})">${d.pagado ? 'Desmarcar' : 'Pagar'}</button>
-              <button class="btn btn-sm btn-danger" onclick="deleteDebtor(${d.id})"><i class="bi bi-trash"></i></button>
+              <button class="btn-debtor-action ${d.pagado ? 'secondary' : 'success'}" onclick="markDebtorPaid(${d.id}, ${!d.pagado})" title="${d.pagado ? 'Desmarcar como pagado' : 'Marcar como pagado'}">${d.pagado ? 'Desmarcar' : 'Pagar'}</button>
+              <button class="btn-debtor-action danger" onclick="deleteDebtor(${d.id})" title="Eliminar deudor"><i class="bi bi-trash"></i></button>
             </td>
           </tr>`;
         });
@@ -2881,55 +2890,81 @@
       }
 
       detail.innerHTML = `
-        <div class="enterprise-detail card shadow-sm">
-          <div class="card-header bg-white d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">${escapeHtml(emp.nombre)}</h5>
-            <button class="btn btn-sm btn-outline-secondary" onclick="openEnterpriseForm(${emp.id})"><i class="bi bi-pencil"></i> Editar emprendimiento</button>
+        <div class="enterprise-detail">
+          <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="mb-0" style="font-size: 20px; font-weight: 700; text-transform: uppercase; color: var(--color-oscuro);">${escapeHtml(emp.nombre)}</h5>
+              <button class="btn-debtor-action secondary" onclick="openEnterpriseForm(${emp.id})" style="padding: 6px 14px; font-size: 13px;"><i class="bi bi-pencil"></i> Editar</button>
+            </div>
           </div>
           <div class="card-body">
-            <div class="row mb-4">
-              <div class="col-md-6 mb-3">
-                <h6>Producto / Lote</h6>
-                <p class="fw-bold">${escapeHtml(emp.producto || '—')}</p>
+            <div class="enterprise-alert ${alertaClase}">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.8;">Estado del margen</div>
+                  <div style="font-weight: 700; margin-top: 2px;">${alertaTexto}</div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.8;">Margen sobre costo</div>
+                  <div style="font-weight: 800; font-size: 16px; margin-top: 2px;">${resultado.margenCosto.toFixed(2)}%</div>
+                </div>
               </div>
-              <div class="col-md-6 mb-3">
-                <h6>Unidades por lote</h6>
-                <p class="fw-bold">${emp.cantidadLote || 0}</p>
+              <div style="margin-top: 8px; font-size: 13px; opacity: 0.85;">Margen bruto sobre venta: <strong>${resultado.margenBruto.toFixed(2)}%</strong></div>
+            </div>
+
+            <div class="enterprise-grid">
+              <div class="enterprise-stat-card">
+                <div class="stat-title">Costo unitario</div>
+                <div class="stat-value">Bs ${resultado.costoUnitarioBs.toLocaleString('es-VE', {minimumFractionDigits:2})}</div>
+                <div style="font-size: 12px; color: #6c6b5e;">${resultado.costoUnitarioDolar.toFixed(2)} $</div>
               </div>
-            </div>
-            <div class="${alertaClase} p-3 rounded mb-4">
-              <h6 class="mb-2">Estado del margen</h6>
-              <p class="mb-1"><strong>${alertaTexto}</strong></p>
-              <small class="text-muted">Margen sobre costo: <strong>${resultado.margenCosto.toFixed(2)}%</strong> · Margen bruto: <strong>${resultado.margenBruto.toFixed(2)}%</strong></small>
-            </div>
-            <div class="row mb-4">
-              <div class="col-md-4"><h6>Costo unitario</h6><p class="fw-bold">Bs ${resultado.costoUnitarioBs.toLocaleString('es-VE', {minimumFractionDigits:2})} (${resultado.costoUnitarioDolar.toFixed(2)} $)</p></div>
-              <div class="col-md-4"><h6>Costo total lote</h6><p class="fw-bold">Bs ${resultado.costoTotalBs.toLocaleString('es-VE', {minimumFractionDigits:2})} (${resultado.costoTotalDolar.toFixed(2)} $)</p></div>
-              <div class="col-md-4"><h6>Ingreso total</h6><p class="fw-bold">Bs ${resultado.ingresoTotalBs.toLocaleString('es-VE', {minimumFractionDigits:2})} (${resultado.ingresoTotalDolar.toFixed(2)} $)</p></div>
-            </div>
-            <div class="row mb-4">
-              <div class="col-md-4"><h6>Ganancia unitaria</h6><p class="fw-bold">Bs ${resultado.gananciaUnitariaBs.toLocaleString('es-VE', {minimumFractionDigits:2})}</p></div>
-              <div class="col-md-4"><h6>Ganancia total</h6><p class="fw-bold">Bs ${resultado.gananciaTotalBs.toLocaleString('es-VE', {minimumFractionDigits:2})}</p></div>
-              <div class="col-md-4"><h6>Punto de equilibrio</h6><p class="fw-bold">${resultado.puntoEquilibrioUnidades} unidades (Bs ${resultado.puntoEquilibrioBs.toLocaleString('es-VE', {minimumFractionDigits:2})})</p></div>
-            </div>
-            <div class="alert alert-info mb-4">
-              <h6>Precio sugerido según BCV y margen objetivo</h6>
-              <p class="fw-bold mb-1">Bs ${resultado.precioSugeridoBs.toLocaleString('es-VE', {minimumFractionDigits:2})}</p>
-              <small class="text-muted">Con redondeo comercial: <strong>Bs ${resultado.precioSugeridoRedondeado.toLocaleString('es-VE', {minimumFractionDigits:2})}</strong></small>
-              <div class="form-check form-switch mt-2">
-                <input class="form-check-input" type="checkbox" id="toggleRound${emp.id}" ${emp.redondeoComercial ? 'checked' : ''} onchange="toggleRound(${emp.id}, this.checked)">
-                <label class="form-check-label" for="toggleRound${emp.id}">Aplicar redondeo comercial al precio sugerido</label>
+              <div class="enterprise-stat-card">
+                <div class="stat-title">Costo total lote</div>
+                <div class="stat-value">Bs ${resultado.costoTotalBs.toLocaleString('es-VE', {minimumFractionDigits:2})}</div>
+                <div style="font-size: 12px; color: #6c6b5e;">${resultado.costoTotalDolar.toFixed(2)} $</div>
+              </div>
+              <div class="enterprise-stat-card">
+                <div class="stat-title">Ingreso total</div>
+                <div class="stat-value">Bs ${resultado.ingresoTotalBs.toLocaleString('es-VE', {minimumFractionDigits:2})}</div>
+                <div style="font-size: 12px; color: #6c6b5e;">${resultado.ingresoTotalDolar.toFixed(2)} $</div>
+              </div>
+              <div class="enterprise-stat-card">
+                <div class="stat-title">Ganancia total</div>
+                <div class="stat-value">Bs ${resultado.gananciaTotalBs.toLocaleString('es-VE', {minimumFractionDigits:2})}</div>
+                <div style="font-size: 12px; color: #6c6b5e;">${resultado.gananciaUnitariaBs.toLocaleString('es-VE', {minimumFractionDigits:2})} / unidad</div>
               </div>
             </div>
 
-            <h6 class="mt-4 mb-3 border-bottom pb-2">Personas con pago pendiente</h6>
-            <div class="debtor-input-row input-group mb-3">
-              <input type="text" id="debtorName${emp.id}" class="form-control" placeholder="Nombre de la persona">
-              <input type="number" id="debtorQty${emp.id}" class="form-control" placeholder="Cantidad" step="1" min="0">
-              <input type="number" id="debtorTotal${emp.id}" class="form-control" placeholder="Total Bs" step="0.01" min="0">
-              <button class="btn btn-primary" onclick="saveDebtor(${emp.id})"><i class="bi bi-plus-lg"></i></button>
+            <div style="margin-bottom: 20px;">
+              <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--color-naranja); letter-spacing: 1px; margin-bottom: 8px;">Punto de equilibrio</div>
+              <div style="display: flex; justify-content: space-between; align-items: center; background: #fffdf6; border: 1px solid rgba(0,0,0,0.06); border-radius: 20px; padding: 12px 18px;">
+                <span style="font-weight: 700; color: var(--color-oscuro);">${resultado.puntoEquilibrioUnidades} unidades</span>
+                <span style="font-weight: 800; color: var(--color-oscuro);">Bs ${resultado.puntoEquilibrioBs.toLocaleString('es-VE', {minimumFractionDigits:2})}</span>
+              </div>
             </div>
-            ${deudoresHtml}
+
+            <div style="margin-bottom: 20px;">
+              <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--color-naranja); letter-spacing: 1px; margin-bottom: 8px;">Precio sugerido según BCV y margen objetivo</div>
+              <div style="display: flex; justify-content: space-between; align-items: center; background: #fffdf6; border: 1px solid rgba(0,0,0,0.06); border-radius: 20px; padding: 12px 18px;">
+                <span style="font-weight: 700; color: var(--color-oscuro);">Bs ${resultado.precioSugeridoBs.toLocaleString('es-VE', {minimumFractionDigits:2})}</span>
+                <span style="font-weight: 800; color: var(--color-oscuro);">Con redondeo: Bs ${resultado.precioSugeridoRedondeado.toLocaleString('es-VE', {minimumFractionDigits:2})}</span>
+              </div>
+              <div class="form-check form-switch mt-3">
+                <input class="form-check-input" type="checkbox" id="toggleRound${emp.id}" ${emp.redondeoComercial ? 'checked' : ''} onchange="toggleRound(${emp.id}, this.checked)">
+                <label class="form-check-label" for="toggleRound${emp.id}" style="font-weight: 500;">Aplicar redondeo comercial al precio sugerido</label>
+              </div>
+            </div>
+
+            <div class="debtor-section">
+              <h6>Personas con pago pendiente</h6>
+              <div class="debtor-input-row">
+                <input type="text" id="debtorName${emp.id}" class="form-control" placeholder="Nombre de la persona">
+                <input type="number" id="debtorQty${emp.id}" class="form-control" placeholder="Cantidad" step="1" min="0">
+                <input type="number" id="debtorTotal${emp.id}" class="form-control" placeholder="Total Bs" step="0.01" min="0">
+                <button class="btn-primary-custom" onclick="saveDebtor(${emp.id})" style="padding: 10px 18px; font-size: 14px;"><i class="bi bi-plus-lg"></i></button>
+              </div>
+              ${deudoresHtml}
+            </div>
           </div>
         </div>
       `;
@@ -3129,6 +3164,17 @@
         });
       });
     }
+
+    // Exponer funciones de Emprendimientos al scope global para uso en onclick HTML
+    window.openEnterpriseForm = openEnterpriseForm;
+    window.deleteEnterprise = deleteEnterprise;
+    window.saveEnterprise = saveEnterprise;
+    window.openEnterpriseDetail = openEnterpriseDetail;
+    window.saveDebtor = saveDebtor;
+    window.deleteDebtor = deleteDebtor;
+    window.markDebtorPaid = markDebtorPaid;
+    window.toggleRound = toggleRound;
+
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./service-worker.js')

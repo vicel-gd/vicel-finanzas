@@ -906,42 +906,234 @@
 
     /* ================== EMPRENDIMIENTOS ================== */
     .enterprise-card {
-      background: #fff;
-      border: 1px solid #e0e0e0;
-      border-radius: 12px;
-      transition: transform 0.2s, box-shadow 0.2s;
+      background: var(--color-crema);
+      border: 1px solid rgba(0,0,0,0.06);
+      border-radius: 28px;
+      padding: 18px 22px;
+      margin-bottom: 14px;
+      color: var(--color-oscuro);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: transform 0.1s, box-shadow 0.1s, border-color 0.1s;
       cursor: pointer;
     }
     .enterprise-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-      border-color: var(--color-naranja);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      border-color: rgba(0,0,0,0.12);
     }
-    .enterprise-detail {
-      border: 1px solid #e0e0e0;
-      border-radius: 12px;
-      overflow: hidden;
+    .enterprise-card .enterprise-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
     }
-    .enterprise-detail .card-header {
-      background: #fff;
-      border-bottom: 1px solid #e0e0e0;
-    }
-    .enterprise-detail .card-body {
-      background: #fbfbfb;
-    }
-    .debtor-input-row .btn-primary {
-      height: 100%;
-      padding: 0 16px;
+    .enterprise-card .enterprise-who {
       display: flex;
       align-items: center;
-      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      min-width: 0;
+    }
+    .enterprise-card .enterprise-name {
+      font-weight: 700;
+      font-size: 17px;
+      text-transform: uppercase;
+      color: var(--color-oscuro);
+      letter-spacing: 0.5px;
+    }
+    .enterprise-card .enterprise-producto {
+      color: #6c6b5e;
+      font-weight: 500;
+      font-size: 14px;
+      word-break: break-word;
+      overflow-wrap: break-word;
+      line-height: 1.4;
+    }
+    .enterprise-card .enterprise-stats {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+    .enterprise-card .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 90px;
+    }
+    .enterprise-card .stat-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #6c6b5e;
+      letter-spacing: 0.5px;
+    }
+    .enterprise-card .stat-value {
+      font-weight: 800;
+      font-size: 16px;
+      color: var(--color-oscuro);
+      white-space: nowrap;
+    }
+    .enterprise-card .actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6px;
     }
 
+    .enterprise-detail {
+      background: var(--color-crema);
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+      border: 1px solid rgba(0,0,0,0.04);
+      margin-bottom: 20px;
+    }
+    .enterprise-detail .card-header {
+      background: var(--color-crema);
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      padding: 16px 24px;
+    }
+    .enterprise-detail .card-body {
+      background: var(--color-crema);
+      padding: 20px 24px;
+    }
+
+    .enterprise-alert {
+      border-radius: 20px;
+      padding: 14px 20px;
+      margin-bottom: 20px;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--color-oscuro);
+      border-left: 6px solid;
+    }
+    .enterprise-alert.sana { background: #e0ffe0; border-left-color: #28a745; color: #155724; }
+    .enterprise-alert.atencion { background: #fff4e0; border-left-color: var(--color-naranja); color: #856404; }
+    .enterprise-alert.peligro { background: #ffe0e0; border-left-color: #dc3545; color: #721c24; }
+
+    .enterprise-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .enterprise-stat-card {
+      background: #fffdf6;
+      border: 1px solid rgba(0,0,0,0.06);
+      border-radius: 24px;
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .enterprise-stat-card .stat-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--color-naranja);
+      letter-spacing: 1px;
+    }
+    .enterprise-stat-card .stat-value {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--color-oscuro);
+      word-break: break-word;
+    }
+
+    .debtor-section {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 2px solid rgba(0,0,0,0.05);
+    }
+    .debtor-section h6 {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--color-naranja);
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+    .debtor-input-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .debtor-input-row .form-control {
+      min-width: 110px;
+    }
+    .debtor-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      background: #fffdf6;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid rgba(0,0,0,0.06);
+    }
+    .debtor-table th {
+      background: var(--color-crema);
+      color: var(--color-oscuro);
+      font-weight: 700;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .debtor-table td {
+      padding: 12px 16px;
+      font-size: 14px;
+      color: var(--color-oscuro);
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .debtor-table tr:last-child td { border-bottom: none; }
+    .debtor-table tr:hover { background: rgba(226,120,31,0.05); }
+
+    .debtor-badge {
+      padding: 4px 14px;
+      border-radius: 30px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .debtor-badge.pendiente { background: #fff4e0; color: #856404; }
+    .debtor-badge.pagado { background: #e0ffe0; color: #155724; }
+
+    .btn-debtor-action {
+      background: transparent;
+      border: none;
+      border-radius: 30px;
+      padding: 4px 10px;
+      font-size: 16px;
+      transition: 0.2s;
+      cursor: pointer;
+    }
+    .btn-debtor-action.success { color: #28a745; }
+    .btn-debtor-action.success:hover { background: rgba(40,167,69,0.1); }
+    .btn-debtor-action.danger { color: #dc3545; }
+    .btn-debtor-action.danger:hover { background: rgba(220,53,69,0.1); }
+    .btn-debtor-action.secondary { color: #6c6b5e; }
+    .btn-debtor-action.secondary:hover { background: rgba(0,0,0,0.08); }
+
     /* ================== EMPRENDIMIENTOS - MODO DALTÓNICO ================== */
-    body.daltonic .enterprise-card:hover { border-color: #0072B2; }
+    body.daltonic .enterprise-alert.sana { background: #cce5ff; border-left-color: #0072B2; color: #004085; }
+    body.daltonic .enterprise-alert.atencion { background: #fff3cd; border-left-color: #E69F00; color: #856404; }
+    body.daltonic .enterprise-alert.peligro { background: #ffe0e0; border-left-color: #dc3545; color: #721c24; }
 
     /* ================== RESPONSIVE EMPRENDIMIENTOS ================== */
     @media (max-width: 576px) {
-      .enterprise-modal .modal-dialog { margin: 10px; }
-      .debtor-input-row .form-control { font-size: 14px; padding: 4px 8px; }
+      .enterprise-grid { grid-template-columns: 1fr 1fr; }
+      .enterprise-stat-card { padding: 12px 16px; }
+      .enterprise-stat-card .stat-value { font-size: 16px; }
+      .debtor-input-row { flex-direction: column; }
+      .debtor-input-row .form-control { min-width: 100%; }
+      .enterprise-detail .card-body { padding: 16px 20px; }
+      .enterprise-detail .card-header { padding: 14px 20px; }
     }
