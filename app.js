@@ -2828,8 +2828,8 @@
               ${emp.producto ? `<span style="background: rgba(0,0,0,0.05); border-radius: 30px; padding: 2px 12px; font-size: 12px; font-weight: 600; text-transform: uppercase; color: var(--color-naranja);">${escapeHtml(emp.producto)}</span>` : ''}
             </div>
             <div class="actions">
-              <button class="btn-debtor-action secondary" onclick="openEnterpriseForm(${emp.id})" title="Editar" style="padding: 4px 10px;"><i class="bi bi-pencil"></i></button>
-              <button class="btn-debtor-action danger" onclick="deleteEnterprise(${emp.id})" title="Eliminar" style="padding: 4px 10px;"><i class="bi bi-trash"></i></button>
+              <button class="btn-debtor-action secondary" onclick="event.stopPropagation(); openEnterpriseForm(${emp.id})" title="Editar" style="padding: 4px 10px;"><i class="bi bi-pencil"></i></button>
+              <button class="btn-debtor-action danger" onclick="event.stopPropagation(); deleteEnterprise(${emp.id})" title="Eliminar" style="padding: 4px 10px;"><i class="bi bi-trash"></i></button>
             </div>
           </div>
           <div class="enterprise-stats">
@@ -2971,12 +2971,12 @@
     }
 
     function calcularEmprendimiento(emp) {
-      const cantidad = parseFloat(emp.cantidadLote) || 0;
-      const costoUsd = parseFloat(emp.costoUnitarioDolar) || 0;
-      const precioBs = parseFloat(emp.precioVentaBs) || 0;
-      const tasa = parseFloat(emp.tasaBcv) || 0;
-      const margenObj = parseFloat(emp.margenObjetivo) || 30;
-      const aplicarRedondeo = emp.redondeoComercial === true;
+      const cantidad = parseFloat(emp?.cantidadLote) || 0;
+      const costoUsd = parseFloat(emp?.costoUnitarioDolar) || 0;
+      const precioBs = parseFloat(emp?.precioVentaBs) || 0;
+      const tasa = parseFloat(emp?.tasaBcv) || 0;
+      const margenObj = parseFloat(emp?.margenObjetivo) || 30;
+      const aplicarRedondeo = emp?.redondeoComercial === true;
 
       const costoUnitarioBs = costoUsd * tasa;
       const costoTotalUsd = costoUsd * cantidad;
@@ -2988,12 +2988,11 @@
       const gananciaTotalBs = ingresoTotalBs - costoTotalBs;
       const margenCosto = costoUnitarioBs > 0 ? (gananciaUnitariaBs / costoUnitarioBs) * 100 : 0;
       const margenBruto = ingresoTotalBs > 0 ? (gananciaTotalBs / ingresoTotalBs) * 100 : 0;
-      const puntoEqUnidades = costoUnitarioBs > 0 ? Math.ceil(costoTotalBs / precioBs) : 0;
+      const puntoEqUnidades = costoUnitarioBs > 0 && precioBs > 0 ? Math.ceil(costoTotalBs / precioBs) : 0;
       const puntoEqBs = puntoEqUnidades * precioBs;
 
-      // Precio sugerido para alcanzar margen objetivo
       let precioSugeridoBs = 0;
-      if (costoUnitarioBs > 0) {
+      if (costoUnitarioBs > 0 && margenObj < 100) {
         precioSugeridoBs = costoUnitarioBs / (1 - margenObj / 100);
       }
       let precioSugeridoRedondeado = precioSugeridoBs;
@@ -3002,12 +3001,20 @@
       }
 
       return {
-        costoUnitarioBs, costoTotalUsd, costoTotalBs,
-        ingresoUnitarioUsd, ingresoTotalBs, ingresoTotalUsd,
-        gananciaUnitariaBs, gananciaTotalBs,
-        margenCosto, margenBruto,
-        puntoEquilibrioUnidades: puntoEqUnidades, puntoEquilibrioBs: puntoEqBs,
-        precioSugeridoBs, precioSugeridoRedondeado
+        costoUnitarioBs: costoUnitarioBs || 0,
+        costoTotalUsd: costoTotalUsd || 0,
+        costoTotalBs: costoTotalBs || 0,
+        ingresoUnitarioUsd: ingresoUnitarioUsd || 0,
+        ingresoTotalBs: ingresoTotalBs || 0,
+        ingresoTotalUsd: ingresoTotalUsd || 0,
+        gananciaUnitariaBs: gananciaUnitariaBs || 0,
+        gananciaTotalBs: gananciaTotalBs || 0,
+        margenCosto: margenCosto || 0,
+        margenBruto: margenBruto || 0,
+        puntoEquilibrioUnidades: puntoEqUnidades || 0,
+        puntoEquilibrioBs: puntoEqBs || 0,
+        precioSugeridoBs: precioSugeridoBs || 0,
+        precioSugeridoRedondeado: precioSugeridoRedondeado || 0
       };
     }
 
