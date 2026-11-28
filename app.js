@@ -107,6 +107,11 @@
       }
     });
 
+    db.version(19).stores({
+      enterprises: '++id, nombre, producto, cantidadLote, costoUnitarioDolar, precioVentaBs, tasaBcv, margenObjetivo, umbralAlerta, redondeoComercial, fechaCreacion',
+      enterprise_debtors: '++id, enterpriseId, nombrePersona, cantidadProductos, totalAPagar, fechaRegistro, pagado'
+    });
+
     let currentMonth = new Date().getMonth();
     let currentYear = new Date().getFullYear();
     let paidMonth = new Date().getMonth();
@@ -551,14 +556,17 @@
         const resp = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, { headers: { Authorization: `Bearer ${token}` } });
         if (!resp.ok) throw new Error('Error al descargar archivo');
         const driveData = await resp.json();
-        await db.transaction('rw', db.categories, db.movements, db.loans, db.goals, db.accounts, async () => {
+        await db.transaction('rw', db.categories, db.movements, db.loans, db.goals, db.accounts, db.enterprises, db.enterprise_debtors, async () => {
           await db.categories.clear(); await db.movements.clear(); await db.loans.clear();
           await db.goals.clear(); await db.accounts.clear();
+          await db.enterprises.clear(); await db.enterprise_debtors.clear();
           if (driveData.categories) await db.categories.bulkAdd(driveData.categories);
           if (driveData.movements) await db.movements.bulkAdd(driveData.movements);
           if (driveData.loans) await db.loans.bulkAdd(driveData.loans);
           if (driveData.goals) await db.goals.bulkAdd(driveData.goals);
           if (driveData.accounts) await db.accounts.bulkAdd(driveData.accounts);
+          if (driveData.enterprises) await db.enterprises.bulkAdd(driveData.enterprises);
+          if (driveData.enterpriseDebtors) await db.enterprise_debtors.bulkAdd(driveData.enterpriseDebtors);
         });
         await refreshAll();
         syncPill.textContent = 'Datos cargados desde Drive';
@@ -574,7 +582,9 @@
       const loans = await db.loans.toArray();
       const goals = await db.goals.toArray();
       const accounts = await db.accounts.toArray();
-      return { version: 1, lastUpdated: new Date().toISOString(), categories, movements, loans, goals, accounts };
+      const enterprises = await db.enterprises.toArray();
+      const enterpriseDebtors = await db.enterprise_debtors.toArray();
+      return { version: 1, lastUpdated: new Date().toISOString(), categories, movements, loans, goals, accounts, enterprises, enterpriseDebtors };
     }
     function scheduleSync() {
       if (!accessToken || !driveFileId) return;
@@ -786,9 +796,10 @@
     }
     async function resetToTrialDefaults() {
       try {
-        await db.transaction('rw', db.categories, db.movements, db.loans, db.goals, db.accounts, async () => {
+        await db.transaction('rw', db.categories, db.movements, db.loans, db.goals, db.accounts, db.enterprises, db.enterprise_debtors, async () => {
           await db.categories.clear(); await db.movements.clear();
           await db.loans.clear(); await db.goals.clear(); await db.accounts.clear();
+          await db.enterprises.clear(); await db.enterprise_debtors.clear();
         });
         await loadDefaultData();
       } catch (e) { console.error('Error en resetToTrialDefaults:', e); throw e; }
@@ -815,14 +826,17 @@
           alert('El archivo no tiene el formato esperado.'); return;
         }
         if (!confirm('Esto reemplazará todos los datos actuales. ¿Continuar?')) return;
-        await db.transaction('rw', db.categories, db.movements, db.loans, db.goals, db.accounts, async () => {
+        await db.transaction('rw', db.categories, db.movements, db.loans, db.goals, db.accounts, db.enterprises, db.enterprise_debtors, async () => {
           await db.categories.clear(); await db.movements.clear();
           await db.loans.clear(); await db.goals.clear(); await db.accounts.clear();
+          await db.enterprises.clear(); await db.enterprise_debtors.clear();
           await db.categories.bulkAdd(data.categories);
           await db.movements.bulkAdd(data.movements);
           await db.loans.bulkAdd(data.loans);
           await db.goals.bulkAdd(data.goals);
           await db.accounts.bulkAdd(data.accounts);
+          if (data.enterprises) await db.enterprises.bulkAdd(data.enterprises);
+          if (data.enterpriseDebtors) await db.enterprise_debtors.bulkAdd(data.enterpriseDebtors);
         });
         await refreshAll();
         alert('Datos importados correctamente.');
@@ -833,9 +847,10 @@
     async function resetAllData() {
       if (!confirm('¿Estás seguro de reiniciar todos los datos? Esta acción no se puede deshacer.')) return;
       try {
-        await db.transaction('rw', db.categories, db.movements, db.loans, db.goals, db.accounts, async () => {
+        await db.transaction('rw', db.categories, db.movements, db.loans, db.goals, db.accounts, db.enterprises, db.enterprise_debtors, async () => {
           await db.categories.clear(); await db.movements.clear();
           await db.loans.clear(); await db.goals.clear(); await db.accounts.clear();
+          await db.enterprises.clear(); await db.enterprise_debtors.clear();
         });
         await loadDefaultData();
         await refreshAll();
@@ -2792,6 +2807,309 @@
         });
       }
     }
+    async function refreshEnterprises() {
+      const list = document.getElementById('enterprisesList');
+      const detail = document.getElementById('enterpriseDetail');
+      if (!list) return;
+      const enterprises = await db.enterprises.toArray();
+      list.innerHTML = '';
+      if (enterprises.length === 0) {
+        list.innerHTML = '<div class="text-muted text-center py-4">No hay emprendimientos creados. Haz clic en "Nuevo emprendimiento" para empezar.</div>';
+        if (detail) detail.innerHTML = '';
+        return;
+      }
+      enterprises.forEach(emp => {
+        const card = document.createElement('div');
+        card.className = 'enterprise-card card border-0 shadow-sm mb-3';
+        card.innerHTML = `
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <h5 class="card-title mb-1">${escapeHtml(emp.nombre)}</h5>
+                <div class="text-muted small">${escapeHtml(emp.producto || 'Sin producto')}</div>
+              </div>
+              <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-primary" onclick="openEnterpriseForm(${emp.id})" title="Editar"><i class="bi bi-pencil"></i></button>
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteEnterprise(${emp.id})" title="Eliminar"><i class="bi bi-trash"></i></button>
+              </div>
+            </div>
+            <hr class="my-2" style="border-color: #eee;">
+            <div class="row text-center">
+              <div class="col-3"><div class="fw-bold text-primary">${emp.cantidadLote || 0}</div><small class="text-muted">unidades/lote</small></div>
+              <div class="col-3"><div class="fw-bold text-success">$${parseFloat(emp.costoUnitarioDolar || 0).toFixed(2)}</div><small class="text-muted">costo unitario</small></div>
+              <div class="col-3"><div class="fw-bold">Bs ${parseFloat(emp.precioVentaBs || 0).toLocaleString('es-VE', {minimumFractionDigits:2})}</div><small class="text-muted">precio venta</small></div>
+              <div class="col-3"><div class="fw-bold">${parseFloat(emp.tasaBcv || 0).toLocaleString('es-VE', {minimumFractionDigits:2})}</div><small class="text-muted">BCV</small></div>
+            </div>
+          </div>
+        `;
+        card.onclick = () => openEnterpriseDetail(emp.id);
+        list.appendChild(card);
+      });
+    }
+
+    async function openEnterpriseDetail(enterpriseId) {
+      const emp = await db.enterprises.get(enterpriseId);
+      if (!emp) return;
+      const debtors = await db.enterprise_debtors.where('enterpriseId').equals(enterpriseId).toArray();
+      const detail = document.getElementById('enterpriseDetail');
+      if (!detail) return;
+
+      const resultado = calcularEmprendimiento(emp);
+      const alertaClase = resultado.margenCosto >= (emp.margenObjetivo || 30) ? 'alert-success' :
+        resultado.margenCosto >= (emp.umbralAlerta || 20) ? 'alert-warning' : 'alert-danger';
+      const alertaTexto = resultado.margenCosto >= (emp.margenObjetivo || 30) ? 'Zona sana' :
+        resultado.margenCosto >= (emp.umbralAlerta || 20) ? 'Atención: margen bajo' : 'Peligro: margen bajo del umbral';
+
+      let deudoresHtml = '';
+      if (debtors.length === 0) {
+        deudoresHtml = '<div class="text-muted small">No hay deudores registrados.</div>';
+      } else {
+        deudoresHtml = '<table class="table table-sm table-bordered mt-3"><thead><tr><th>Persona</th><th>Cantidad</th><th>Total a pagar</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>';
+        debtors.forEach(d => {
+          deudoresHtml += `<tr>
+            <td>${escapeHtml(d.nombrePersona)}</td>
+            <td>${d.cantidadProductos}</td>
+            <td>Bs ${parseFloat(d.totalAPagar || 0).toLocaleString('es-VE', {minimumFractionDigits:2})}</td>
+            <td><span class="badge ${d.pagado ? 'bg-success' : 'bg-warning'}">${d.pagado ? 'Pagado' : 'Pendiente'}</span></td>
+            <td>
+              <button class="btn btn-sm btn-${d.pagado ? 'secondary' : 'success'}" onclick="markDebtorPaid(${d.id}, ${!d.pagado})">${d.pagado ? 'Desmarcar' : 'Pagar'}</button>
+              <button class="btn btn-sm btn-danger" onclick="deleteDebtor(${d.id})"><i class="bi bi-trash"></i></button>
+            </td>
+          </tr>`;
+        });
+        deudoresHtml += '</tbody></table>';
+      }
+
+      detail.innerHTML = `
+        <div class="enterprise-detail card shadow-sm">
+          <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">${escapeHtml(emp.nombre)}</h5>
+            <button class="btn btn-sm btn-outline-secondary" onclick="openEnterpriseForm(${emp.id})"><i class="bi bi-pencil"></i> Editar emprendimiento</button>
+          </div>
+          <div class="card-body">
+            <div class="row mb-4">
+              <div class="col-md-6 mb-3">
+                <h6>Producto / Lote</h6>
+                <p class="fw-bold">${escapeHtml(emp.producto || '—')}</p>
+              </div>
+              <div class="col-md-6 mb-3">
+                <h6>Unidades por lote</h6>
+                <p class="fw-bold">${emp.cantidadLote || 0}</p>
+              </div>
+            </div>
+            <div class="${alertaClase} p-3 rounded mb-4">
+              <h6 class="mb-2">Estado del margen</h6>
+              <p class="mb-1"><strong>${alertaTexto}</strong></p>
+              <small class="text-muted">Margen sobre costo: <strong>${resultado.margenCosto.toFixed(2)}%</strong> · Margen bruto: <strong>${resultado.margenBruto.toFixed(2)}%</strong></small>
+            </div>
+            <div class="row mb-4">
+              <div class="col-md-4"><h6>Costo unitario</h6><p class="fw-bold">Bs ${resultado.costoUnitarioBs.toLocaleString('es-VE', {minimumFractionDigits:2})} (${resultado.costoUnitarioDolar.toFixed(2)} $)</p></div>
+              <div class="col-md-4"><h6>Costo total lote</h6><p class="fw-bold">Bs ${resultado.costoTotalBs.toLocaleString('es-VE', {minimumFractionDigits:2})} (${resultado.costoTotalDolar.toFixed(2)} $)</p></div>
+              <div class="col-md-4"><h6>Ingreso total</h6><p class="fw-bold">Bs ${resultado.ingresoTotalBs.toLocaleString('es-VE', {minimumFractionDigits:2})} (${resultado.ingresoTotalDolar.toFixed(2)} $)</p></div>
+            </div>
+            <div class="row mb-4">
+              <div class="col-md-4"><h6>Ganancia unitaria</h6><p class="fw-bold">Bs ${resultado.gananciaUnitariaBs.toLocaleString('es-VE', {minimumFractionDigits:2})}</p></div>
+              <div class="col-md-4"><h6>Ganancia total</h6><p class="fw-bold">Bs ${resultado.gananciaTotalBs.toLocaleString('es-VE', {minimumFractionDigits:2})}</p></div>
+              <div class="col-md-4"><h6>Punto de equilibrio</h6><p class="fw-bold">${resultado.puntoEquilibrioUnidades} unidades (Bs ${resultado.puntoEquilibrioBs.toLocaleString('es-VE', {minimumFractionDigits:2})})</p></div>
+            </div>
+            <div class="alert alert-info mb-4">
+              <h6>Precio sugerido según BCV y margen objetivo</h6>
+              <p class="fw-bold mb-1">Bs ${resultado.precioSugeridoBs.toLocaleString('es-VE', {minimumFractionDigits:2})}</p>
+              <small class="text-muted">Con redondeo comercial: <strong>Bs ${resultado.precioSugeridoRedondeado.toLocaleString('es-VE', {minimumFractionDigits:2})}</strong></small>
+              <div class="form-check form-switch mt-2">
+                <input class="form-check-input" type="checkbox" id="toggleRound${emp.id}" ${emp.redondeoComercial ? 'checked' : ''} onchange="toggleRound(${emp.id}, this.checked)">
+                <label class="form-check-label" for="toggleRound${emp.id}">Aplicar redondeo comercial al precio sugerido</label>
+              </div>
+            </div>
+
+            <h6 class="mt-4 mb-3 border-bottom pb-2">Personas con pago pendiente</h6>
+            <div class="debtor-input-row input-group mb-3">
+              <input type="text" id="debtorName${emp.id}" class="form-control" placeholder="Nombre de la persona">
+              <input type="number" id="debtorQty${emp.id}" class="form-control" placeholder="Cantidad" step="1" min="0">
+              <input type="number" id="debtorTotal${emp.id}" class="form-control" placeholder="Total Bs" step="0.01" min="0">
+              <button class="btn btn-primary" onclick="saveDebtor(${emp.id})"><i class="bi bi-plus-lg"></i></button>
+            </div>
+            ${deudoresHtml}
+          </div>
+        </div>
+      `;
+    }
+
+    function calcularEmprendimiento(emp) {
+      const cantidad = parseFloat(emp.cantidadLote) || 0;
+      const costoUsd = parseFloat(emp.costoUnitarioDolar) || 0;
+      const precioBs = parseFloat(emp.precioVentaBs) || 0;
+      const tasa = parseFloat(emp.tasaBcv) || 0;
+      const margenObj = parseFloat(emp.margenObjetivo) || 30;
+      const aplicarRedondeo = emp.redondeoComercial === true;
+
+      const costoUnitarioBs = costoUsd * tasa;
+      const costoTotalUsd = costoUsd * cantidad;
+      const costoTotalBs = costoUnitarioBs * cantidad;
+      const ingresoUnitarioUsd = tasa > 0 ? precioBs / tasa : 0;
+      const ingresoTotalBs = precioBs * cantidad;
+      const ingresoTotalUsd = ingresoUnitarioUsd * cantidad;
+      const gananciaUnitariaBs = precioBs - costoUnitarioBs;
+      const gananciaTotalBs = ingresoTotalBs - costoTotalBs;
+      const margenCosto = costoUnitarioBs > 0 ? (gananciaUnitariaBs / costoUnitarioBs) * 100 : 0;
+      const margenBruto = ingresoTotalBs > 0 ? (gananciaTotalBs / ingresoTotalBs) * 100 : 0;
+      const puntoEqUnidades = costoUnitarioBs > 0 ? Math.ceil(costoTotalBs / precioBs) : 0;
+      const puntoEqBs = puntoEqUnidades * precioBs;
+
+      // Precio sugerido para alcanzar margen objetivo
+      let precioSugeridoBs = 0;
+      if (costoUnitarioBs > 0) {
+        precioSugeridoBs = costoUnitarioBs / (1 - margenObj / 100);
+      }
+      let precioSugeridoRedondeado = precioSugeridoBs;
+      if (aplicarRedondeo) {
+        precioSugeridoRedondeado = Math.ceil(precioSugeridoBs / 10) * 10;
+      }
+
+      return {
+        costoUnitarioBs, costoTotalUsd, costoTotalBs,
+        ingresoUnitarioUsd, ingresoTotalBs, ingresoTotalUsd,
+        gananciaUnitariaBs, gananciaTotalBs,
+        margenCosto, margenBruto,
+        puntoEquilibrioUnidades: puntoEqUnidades, puntoEquilibrioBs: puntoEqBs,
+        precioSugeridoBs, precioSugeridoRedondeado
+      };
+    }
+
+    async function saveEnterprise() {
+      const id = document.getElementById('entId').value;
+      const nombre = document.getElementById('entNombre').value.trim();
+      const producto = document.getElementById('entProducto').value.trim();
+      const cantidadLote = document.getElementById('entCantidad').value;
+      const costoUnitarioDolar = document.getElementById('entCostoUsd').value;
+      const precioVentaBs = document.getElementById('entPrecioBs').value;
+      const tasaBcv = document.getElementById('entTasa').value;
+      const margenObjetivo = document.getElementById('entMargen').value;
+      const umbralAlerta = document.getElementById('entUmbral').value;
+      const redondeoComercial = document.getElementById('entRedondeo').checked;
+
+      if (!nombre) { alert('El nombre del emprendimiento es obligatorio.'); return; }
+      if (!cantidadLote || parseFloat(cantidadLote) <= 0) { alert('La cantidad del lote debe ser mayor a 0.'); return; }
+      if (!costoUnitarioDolar || parseFloat(costoUnitarioDolar) <= 0) { alert('El costo unitario debe ser mayor a 0.'); return; }
+      if (!precioVentaBs || parseFloat(precioVentaBs) <= 0) { alert('El precio de venta debe ser mayor a 0.'); return; }
+      if (!tasaBcv || parseFloat(tasaBcv) <= 0) { alert('La tasa BCV debe ser mayor a 0.'); return; }
+
+      const data = {
+        nombre, producto,
+        cantidadLote: parseFloat(cantidadLote),
+        costoUnitarioDolar: parseFloat(costoUnitarioDolar),
+        precioVentaBs: parseFloat(precioVentaBs),
+        tasaBcv: parseFloat(tasaBcv),
+        margenObjetivo: parseFloat(margenObjetivo),
+        umbralAlerta: parseFloat(umbralAlerta),
+        redondeoComercial,
+        fechaCreacion: new Date().toISOString().slice(0, 10)
+      };
+
+      if (id) {
+        await db.enterprises.update(parseInt(id), data);
+      } else {
+        await db.enterprises.add(data);
+      }
+
+      bootstrap.Modal.getInstance(document.getElementById('enterpriseModal')).hide();
+      await refreshEnterprises();
+      showToast('success');
+      scheduleSync();
+    }
+
+    async function deleteEnterprise(id) {
+      if (!confirm('¿Eliminar este emprendimiento? Se borrarán también sus deudores registrados.')) return;
+      await db.enterprises.delete(id);
+      await db.enterprise_debtors.where('enterpriseId').equals(id).delete();
+      await refreshEnterprises();
+      showToast('success');
+      scheduleSync();
+    }
+
+    async function openEnterpriseForm(id = null) {
+      const modal = new bootstrap.Modal(document.getElementById('enterpriseModal'));
+      const form = document.getElementById('enterpriseForm');
+      form.reset();
+      document.getElementById('entId').value = '';
+      document.getElementById('entRedondeo').checked = false;
+
+      if (id) {
+        const emp = await db.enterprises.get(id);
+        if (!emp) return;
+        document.getElementById('entId').value = emp.id;
+        document.getElementById('entNombre').value = emp.nombre;
+        document.getElementById('entProducto').value = emp.producto || '';
+        document.getElementById('entCantidad').value = emp.cantidadLote || '';
+        document.getElementById('entCostoUsd').value = emp.costoUnitarioDolar || '';
+        document.getElementById('entPrecioBs').value = emp.precioVentaBs || '';
+        document.getElementById('entTasa').value = emp.tasaBcv || '';
+        document.getElementById('entMargen').value = emp.margenObjetivo || '';
+        document.getElementById('entUmbral').value = emp.umbralAlerta || '';
+        document.getElementById('entRedondeo').checked = emp.redondeoComercial === true;
+      }
+
+      modal.show();
+    }
+
+    async function saveDebtor(enterpriseId) {
+      const nombre = document.getElementById(`debtorName${enterpriseId}`).value.trim();
+      const cantidad = document.getElementById(`debtorQty${enterpriseId}`).value;
+      const total = document.getElementById(`debtorTotal${enterpriseId}`).value;
+
+      if (!nombre) { alert('Ingresa el nombre de la persona.'); return; }
+      if (!cantidad || parseInt(cantidad) <= 0) { alert('La cantidad debe ser mayor a 0.'); return; }
+      if (!total || parseFloat(total) <= 0) { alert('El total debe ser mayor a 0.'); return; }
+
+      await db.enterprise_debtors.add({
+        enterpriseId,
+        nombrePersona: nombre,
+        cantidadProductos: parseInt(cantidad),
+        totalAPagar: parseFloat(total),
+        fechaRegistro: new Date().toISOString().slice(0, 10),
+        pagado: false
+      });
+
+      document.getElementById(`debtorName${enterpriseId}`).value = '';
+      document.getElementById(`debtorQty${enterpriseId}`).value = '';
+      document.getElementById(`debtorTotal${enterpriseId}`).value = '';
+
+      await openEnterpriseDetail(enterpriseId);
+      showToast('success');
+      scheduleSync();
+    }
+
+    async function deleteDebtor(id) {
+      if (!confirm('¿Eliminar este deudor?')) return;
+      const debtor = await db.enterprise_debtors.get(id);
+      if (!debtor) return;
+      await db.enterprise_debtors.delete(id);
+      await openEnterpriseDetail(debtor.enterpriseId);
+      showToast('success');
+      scheduleSync();
+    }
+
+    async function markDebtorPaid(id, pagado) {
+      await db.enterprise_debtors.update(id, { pagado });
+      const debtor = await db.enterprise_debtors.get(id);
+      if (debtor) await openEnterpriseDetail(debtor.enterpriseId);
+      showToast('success');
+      scheduleSync();
+    }
+
+    async function toggleRound(enterpriseId, checked) {
+      await db.enterprises.update(enterpriseId, { redondeoComercial: checked });
+      await openEnterpriseDetail(enterpriseId);
+      scheduleSync();
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
     function setupTabs() {
       document.querySelectorAll('.sidebar .nav .nav-item').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -2805,6 +3123,7 @@
           }
           if (tab === 'dashboard') refreshDashboard();
           else if (tab === 'stats') refreshStats();
+          else if (tab === 'enterprises') refreshEnterprises();
           document.getElementById('sidebar').classList.remove('open');
           document.getElementById('sidebarOverlay').classList.remove('active');
         });

@@ -63,6 +63,7 @@
       <button class="nav-item" data-tab="goals"><i class="bi bi-bullseye"></i> Metas</button>
       <button class="nav-item" data-tab="stats"><i class="bi bi-bar-chart-line"></i> Estadísticas</button>
       <button class="nav-item" data-tab="categories"><i class="bi bi-tags"></i> Categorías</button>
+      <button class="nav-item" data-tab="enterprises"><i class="bi bi-shop"></i> Emprendimientos</button>
       <button class="nav-item" data-tab="settings"><i class="bi bi-gear"></i> Configuración</button>
     </nav>
     <div class="logout-container" id="logoutContainer" style="display:none;">
@@ -327,6 +328,15 @@
         </div>
       </div>
       <div id="accountsList" class="row g-2"></div>
+    </div>
+
+    <div id="tab-enterprises" class="tab-content">
+      <div class="section-header">
+        <h2>Emprendimientos</h2>
+        <button class="btn-primary-custom" onclick="openEnterpriseForm()"><i class="bi bi-plus-lg"></i> Nuevo emprendimiento</button>
+      </div>
+      <div id="enterprisesList" class="row g-3"></div>
+      <div id="enterpriseDetail" class="mt-4"></div>
     </div>
 
     <div id="tab-settings" class="tab-content">
@@ -706,6 +716,66 @@
         <div class="modal-footer">
           <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
           <button class="btn btn-primary" id="btn-save-account" style="background:var(--color-naranja);border:none;" onclick="saveAccount()">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="enterpriseModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="enterpriseModalTitle">Nuevo Emprendimiento</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <form id="enterpriseForm">
+            <input type="hidden" id="entId" />
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Nombre del emprendimiento</label>
+                <input type="text" id="entNombre" class="form-control" placeholder="Ej: Galletas deliciosas" required />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Producto</label>
+                <input type="text" id="entProducto" class="form-control" placeholder="Ej: Galletas de chispas" />
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Unidades por lote</label>
+                <input type="number" id="entCantidad" class="form-control" placeholder="15" step="1" min="1" required />
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Costo unitario (USD)</label>
+                <input type="number" id="entCostoUsd" class="form-control" placeholder="0.50" step="0.01" min="0" required />
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Precio de venta (Bs)</label>
+                <input type="number" id="entPrecioBs" class="form-control" placeholder="600" step="0.01" min="0" required />
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Tasa BCV</label>
+                <input type="number" id="entTasa" class="form-control" placeholder="924.35" step="0.01" min="0" required />
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Margen objetivo (%)</label>
+                <input type="number" id="entMargen" class="form-control" placeholder="30" step="0.01" min="0" required />
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Umbral de alerta (%)</label>
+                <input type="number" id="entUmbral" class="form-control" placeholder="20" step="0.01" min="0" required />
+              </div>
+              <div class="col-12">
+                <div class="form-check form-switch mt-3">
+                  <input class="form-check-input" type="checkbox" id="entRedondeo">
+                  <label class="form-check-label" for="entRedondeo">Aplicar redondeo comercial al precio sugerido (múltiplos de 10 Bs)</label>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button class="btn btn-primary" onclick="saveEnterprise()">Guardar emprendimiento</button>
         </div>
       </div>
     </div>

@@ -903,3 +903,45 @@
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: var(--color-oscuro); }
     ::-webkit-scrollbar-thumb { background: var(--color-naranja); border-radius: 10px; }
+
+    /* ================== EMPRENDIMIENTOS ================== */
+    .enterprise-card {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+    }
+    .enterprise-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      border-color: var(--color-naranja);
+    }
+    .enterprise-detail {
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .enterprise-detail .card-header {
+      background: #fff;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .enterprise-detail .card-body {
+      background: #fbfbfb;
+    }
+    .debtor-input-row .btn-primary {
+      height: 100%;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ================== EMPRENDIMIENTOS - MODO DALTÓNICO ================== */
+    body.daltonic .enterprise-card:hover { border-color: #0072B2; }
+
+    /* ================== RESPONSIVE EMPRENDIMIENTOS ================== */
+    @media (max-width: 576px) {
+      .enterprise-modal .modal-dialog { margin: 10px; }
+      .debtor-input-row .form-control { font-size: 14px; padding: 4px 8px; }
+    }
